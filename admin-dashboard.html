@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Admin Dashboard | PristinePro Cleaning</title><link rel="stylesheet" href="assets/css/styles.css"></head>
+<body class="admin-shell" data-dashboard>
+  <header class="admin-bar"><div class="section-inner" style="display:flex;justify-content:space-between;gap:16px;align-items:center"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PristinePro Admin</span></a><button class="button small secondary" data-admin-logout>Log out</button></div></header>
+  <main><section><div class="section-inner"><p class="eyebrow">Dashboard</p><h1>Lead inbox and customer inquiries.</h1><div class="admin-stats"><div class="stat"><strong data-count="new">0</strong><span>New/unread</span></div><div class="stat"><strong data-count="contacts">0</strong><span>Contact submissions</span></div><div class="stat"><strong data-count="quotes">0</strong><span>Quote requests</span></div><div class="stat"><strong data-count="bookings">0</strong><span>Bookings</span></div></div>
+    <div class="grid"><section class="card"><h2>Contact submissions</h2><p>Customer inquiries, contact form messages, and urgent notes.</p><div data-admin-table="contact_submissions"></div></section><section class="card"><h2>Quote requests</h2><p>Estimate requests from the quote form.</p><div data-admin-table="quote_requests"></div></section><section class="card"><h2>Bookings</h2><p>Appointment and schedule-call requests.</p><div data-admin-table="bookings"></div></section></div>
+  </div></section></main>
+  <script src="assets/js/config.js"></script><script src="assets/js/admin.js"></script>
+</body></html>
+

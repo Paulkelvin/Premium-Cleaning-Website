@@ -1,0 +1,21 @@
+{
+  "name": "premium-cleaning-website",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "node local-server.js",
+    "studio": "sanity dev --host 127.0.0.1 --port 3333",
+    "studio:deploy": "sanity deploy",
+    "sanity:import": "sanity dataset import sanity/seed.ndjson production --replace"
+  },
+  "dependencies": {
+    "@sanity/vision": "^3.99.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sanity": "^3.99.0",
+    "styled-components": "^6.1.19"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
