@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "build": "node build.js",
     "serve": "node local-server.js",
     "studio": "sanity dev --host 127.0.0.1 --port 3333",
     "studio:deploy": "sanity deploy",
