@@ -1,11 +1,142 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Admin Dashboard | PristinePro Cleaning</title><link rel="stylesheet" href="assets/css/styles.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard | PristinePro Cleaning</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 <body class="admin-shell" data-dashboard>
-  <header class="admin-bar"><div class="section-inner" style="display:flex;justify-content:space-between;gap:16px;align-items:center"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PristinePro Admin</span></a><button class="button small secondary" data-admin-logout>Log out</button></div></header>
-  <main><section><div class="section-inner"><p class="eyebrow">Dashboard</p><h1>Lead inbox and customer inquiries.</h1><div class="admin-stats"><div class="stat"><strong data-count="new">0</strong><span>New/unread</span></div><div class="stat"><strong data-count="contacts">0</strong><span>Contact submissions</span></div><div class="stat"><strong data-count="quotes">0</strong><span>Quote requests</span></div><div class="stat"><strong data-count="bookings">0</strong><span>Bookings</span></div></div>
-    <div class="grid"><section class="card"><h2>Contact submissions</h2><p>Customer inquiries, contact form messages, and urgent notes.</p><div data-admin-table="contact_submissions"></div></section><section class="card"><h2>Quote requests</h2><p>Estimate requests from the quote form.</p><div data-admin-table="quote_requests"></div></section><section class="card"><h2>Bookings</h2><p>Appointment and schedule-call requests.</p><div data-admin-table="bookings"></div></section></div>
-  </div></section></main>
-  <script src="assets/js/config.js"></script><script src="assets/js/admin.js"></script>
-</body></html>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <a class="brand" href="index.html" style="color: var(--white);">
+          <span class="brand-mark">P</span>
+          <span>PristinePro</span>
+        </a>
+      </div>
+      <nav class="admin-sidebar-nav">
+        <a class="admin-nav-item active" href="#">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </a>
+        <a class="admin-nav-item" href="#">
+          <i data-lucide="mail"></i>
+          <span>Contact Inbox</span>
+        </a>
+        <a class="admin-nav-item" href="#">
+          <i data-lucide="file-text"></i>
+          <span>Quote Requests</span>
+        </a>
+        <a class="admin-nav-item" href="#">
+          <i data-lucide="calendar"></i>
+          <span>Bookings</span>
+        </a>
+        <a class="admin-nav-item" href="#">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="admin-sidebar-footer">
+        <button class="button small ghost" data-admin-logout style="width: 100%; color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.15);">
+          <i data-lucide="log-out"></i> Log out
+        </button>
+      </div>
+    </aside>
 
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div>
+          <h1 style="font-size: 1.6rem; margin-bottom: 4px;">Dashboard</h1>
+          <p style="color: var(--muted); font-size: 0.92rem; margin: 0;">Lead inbox and customer inquiries</p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+          <span style="font-size: 0.88rem; color: var(--muted);">Admin</span>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="admin-stats">
+        <div class="stat">
+          <div class="stat-icon" style="background: rgba(212, 163, 69, 0.12); color: var(--gold);">
+            <i data-lucide="bell"></i>
+          </div>
+          <div>
+            <strong data-count="new">0</strong>
+            <span>New / Unread</span>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon" style="background: rgba(21, 138, 112, 0.12); color: var(--mint);">
+            <i data-lucide="mail"></i>
+          </div>
+          <div>
+            <strong data-count="contacts">0</strong>
+            <span>Contact Submissions</span>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon" style="background: rgba(44, 89, 133, 0.12); color: var(--blue);">
+            <i data-lucide="file-text"></i>
+          </div>
+          <div>
+            <strong data-count="quotes">0</strong>
+            <span>Quote Requests</span>
+          </div>
+        </div>
+        <div class="stat">
+          <div class="stat-icon" style="background: rgba(232, 109, 81, 0.12); color: var(--coral);">
+            <i data-lucide="calendar-check"></i>
+          </div>
+          <div>
+            <strong data-count="bookings">0</strong>
+            <span>Bookings</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Sections -->
+      <div class="admin-grid">
+        <section class="card admin-section-card">
+          <div class="admin-section-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="mail" style="color: var(--mint);"></i>
+              <h2 style="font-size: 1.2rem; margin: 0;">Contact Submissions</h2>
+            </div>
+            <span style="font-size: 0.84rem; color: var(--muted);">Customer inquiries and messages</span>
+          </div>
+          <div data-admin-table="contact_submissions"></div>
+        </section>
+
+        <section class="card admin-section-card">
+          <div class="admin-section-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="file-text" style="color: var(--blue);"></i>
+              <h2 style="font-size: 1.2rem; margin: 0;">Quote Requests</h2>
+            </div>
+            <span style="font-size: 0.84rem; color: var(--muted);">Estimate requests from the quote form</span>
+          </div>
+          <div data-admin-table="quote_requests"></div>
+        </section>
+
+        <section class="card admin-section-card">
+          <div class="admin-section-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="calendar" style="color: var(--coral);"></i>
+              <h2 style="font-size: 1.2rem; margin: 0;">Bookings</h2>
+            </div>
+            <span style="font-size: 0.84rem; color: var(--muted);">Appointment and schedule-call requests</span>
+          </div>
+          <div data-admin-table="bookings"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin.js"></script>
+  <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>
+</body>
+</html>

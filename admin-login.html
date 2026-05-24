@@ -1,8 +1,39 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Admin Login | PristinePro Cleaning</title><link rel="stylesheet" href="assets/css/styles.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login | PristinePro Cleaning</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 <body class="admin-shell">
-  <header class="admin-bar"><div class="section-inner"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PristinePro Admin</span></a></div></header>
-  <main><section><div class="section-inner" style="max-width:560px"><form class="card form-grid" data-admin-login><div class="field full"><p class="eyebrow">Admin login</p><h1>Sign in to manage leads.</h1><p>Use the email and password for the admin user created in Supabase Auth.</p></div><label class="field full">Email<input type="email" name="email" required></label><label class="field full">Password<input type="password" name="password" required></label><div class="field full"><button class="button" type="submit">Sign in</button><div data-form-state class="form-state" role="status"></div></div></form></div></section></main>
-  <script src="assets/js/config.js"></script><script src="assets/js/admin.js"></script>
-</body></html>
+  <div class="admin-login-wrapper">
+    <form class="card form-grid admin-login-card" data-admin-login>
+      <div class="field full" style="text-align: center;">
+        <a class="brand" href="index.html" style="justify-content: center; margin-bottom: 20px;">
+          <span class="brand-mark">P</span>
+          <span>PristinePro</span>
+        </a>
+        <h1 style="font-size: 1.6rem;">Welcome back</h1>
+        <p style="font-size: 0.94rem;">Sign in to manage leads and bookings.</p>
+      </div>
+      <label class="field full">Email
+        <input type="email" name="email" required placeholder="admin@example.com">
+      </label>
+      <label class="field full">Password
+        <input type="password" name="password" required placeholder="••••••••">
+      </label>
+      <div class="field full">
+        <button class="button" type="submit" style="width: 100%;">
+          <i data-lucide="lock"></i> Sign in
+        </button>
+        <div data-form-state class="form-state" role="status"></div>
+      </div>
+    </form>
+  </div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/admin.js"></script>
+  <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>
+</body>
+</html>
