@@ -192,7 +192,16 @@ function initQuoteAssistant(formContainer = document) {
     try {
       // Try to use forms.js supabaseInsert if available
       if (typeof window.supabaseInsert === "function") {
-        const payload = Object.fromEntries(new FormData(form).entries());
+        const data = new FormData(form);
+        const payload = Object.fromEntries(data.entries());
+        
+        // Handle add_ons[] array - convert to comma-separated string
+        const addOnsCheckboxes = form.querySelectorAll('input[name="add_ons[]"]:checked');
+        if (addOnsCheckboxes.length > 0) {
+          payload.add_ons = Array.from(addOnsCheckboxes).map(cb => cb.value).join(", ");
+          delete payload["add_ons[]"];
+        }
+        
         payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
         await window.supabaseInsert(form.getAttribute("data-table") || "quote_requests", payload);
       } else {

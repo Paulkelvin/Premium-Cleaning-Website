@@ -30,7 +30,17 @@ async function supabaseInsert(table, payload) {
 
 function formPayload(form) {
   const data = new FormData(form);
-  return Object.fromEntries(data.entries());
+  const payload = Object.fromEntries(data.entries());
+  
+  // Handle add_ons[] array - convert to comma-separated string
+  const addOnsCheckboxes = form.querySelectorAll('input[name="add_ons[]"]:checked');
+  if (addOnsCheckboxes.length > 0) {
+    payload.add_ons = Array.from(addOnsCheckboxes).map(cb => cb.value).join(", ");
+    // Remove the add_ons[] key if it was created
+    delete payload["add_ons[]"];
+  }
+  
+  return payload;
 }
 
 function showState(form, type, message) {

@@ -28,243 +28,197 @@
     <div class="bg-blob bg-blob-blue"></div>
     <div class="bg-blob bg-blob-gold"></div>
     
-    <section class="compact-hero" style="padding: 16px 0 8px 0; text-align: center; position:relative; z-index:1;">
-      <div class="section-inner" style="max-width: 800px;">
-        <p class="eyebrow" style="justify-content:center; margin-bottom:8px;"><i data-lucide="calculator"></i>Instant estimate</p>
-        <h1 style="font-size: 2rem; margin-bottom: 4px;">Get a cleaning quote in minutes.</h1>
-        <p style="font-size: 0.95rem; color: var(--muted); margin:0 auto; max-width:600px;">Answer a few quick questions and we’ll help estimate the right cleaning scope.</p>
+    <section style="padding: 20px 0 12px 0; text-align: center; position:relative; z-index:1;">
+      <div class="section-inner" style="max-width: 900px;">
+        <p class="eyebrow" style="justify-content:center; margin-bottom:4px;"><i data-lucide="calculator"></i>Quick estimate</p>
+        <h1 style="font-size: 1.7rem; margin-bottom: 6px; line-height: 1.2;">Get your cleaning quote.</h1>
+        <p style="font-size: 0.9rem; color: var(--muted); margin:0 auto;">Quick questions, instant estimate.</p>
       </div>
     </section>
 
-    <section class="quote-app-section" style="padding: 12px 0 60px 0; position:relative; z-index:1;">
-      <div class="section-inner split quote-app-split" style="max-width: 1000px; gap:24px; align-items:start;">
+    <section style="padding: 18px 0 40px 0; position:relative; z-index:1;">
+      <div class="section-inner" style="max-width: 680px;">
         
-        <!-- Left: Quote Assistant -->
-        <div class="quote-assistant-card card fade-in-up" id="quoteAssistantCard" style="padding: 24px; flex: 1;">
+        <div class="card fade-in-up" id="quoteAssistantCard" style="padding: 24px;">
           
-          <div class="quote-progress" style="margin-bottom: 16px;">
+          <div class="quote-progress" style="margin-bottom: 18px;">
             <div class="quote-progress-bar">
               <div class="quote-progress-fill" id="quoteProgressFill" style="width: 20%;"></div>
             </div>
-            <div class="quote-progress-text" id="quoteProgressText" style="font-size: 0.85rem; color: var(--muted); margin-top: 8px; font-weight:600;">Step 1 of 5</div>
+            <div class="quote-progress-text" id="quoteProgressText" style="font-size: 0.8rem; color: var(--muted); margin-top: 6px; font-weight:600;">Step 1 of 5</div>
           </div>
 
           <form id="quoteAssistantForm" data-table="quote_requests">
             
             <!-- Step 1: About your space -->
             <div class="quote-step active" data-step="1">
-              <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Let’s understand the space first.</h2>
-              <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.95rem;">Select your property type and approximate size.</p>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Your space</h2>
+              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Property type and size</p>
 
-              <label class="field full">Property type</label>
-              <div class="chip-grid">
-                <label class="chip"><input type="radio" name="property_type" value="House" required><span><i data-lucide="home"></i> House</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Apartment"><span><i data-lucide="building"></i> Apartment</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Office"><span><i data-lucide="briefcase"></i> Office</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Rental"><span><i data-lucide="key"></i> Rental</span></label>
+              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Property type</label>
+              <div class="chip-grid" style="gap: 6px; margin-bottom: 12px;">
+                <label class="chip"><input type="radio" name="property_type" value="House" required><span style="font-size: 0.9rem;"><i data-lucide="home"></i> House</span></label>
+                <label class="chip"><input type="radio" name="property_type" value="Apartment"><span style="font-size: 0.9rem;"><i data-lucide="building"></i> Apartment</span></label>
+                <label class="chip"><input type="radio" name="property_type" value="Office"><span style="font-size: 0.9rem;"><i data-lucide="briefcase"></i> Office</span></label>
+                <label class="chip"><input type="radio" name="property_type" value="Rental"><span style="font-size: 0.9rem;"><i data-lucide="key"></i> Rental</span></label>
               </div>
 
-              <div class="grid two" style="margin-top: 20px;">
+              <div class="grid two" style="gap: 10px;">
                 <label class="field">Bedrooms
-                  <input type="number" name="bedrooms" min="0" placeholder="e.g. 3" required>
+                  <input type="number" name="bedrooms" min="0" placeholder="e.g. 3" required style="font-size: 0.9rem;">
                 </label>
                 <label class="field">Bathrooms
-                  <input type="number" name="bathrooms" min="0" step="0.5" placeholder="e.g. 2" required>
+                  <input type="number" name="bathrooms" min="0" step="0.5" placeholder="e.g. 2" required style="font-size: 0.9rem;">
                 </label>
               </div>
 
-              <label class="field full" style="margin-top: 16px;">Approximate square feet
-                <input type="number" name="square_feet" placeholder="e.g. 1800">
+              <label class="field full" style="margin-top: 10px;">Square feet
+                <input type="number" name="square_feet" placeholder="e.g. 1800" style="font-size: 0.9rem;">
               </label>
             </div>
 
             <!-- Step 2: Cleaning type -->
             <div class="quote-step" data-step="2">
-              <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Great — now choose the cleaning type.</h2>
-              <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.95rem;">What level of detail are you looking for?</p>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Service type</h2>
+              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">What level of cleaning do you need?</p>
               
-              <label class="field full">Service type</label>
-              <div class="card-grid">
-                <label class="select-card">
+              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Cleaning service</label>
+              <div class="card-grid" style="gap: 8px; margin-bottom: 12px;">
+                <label class="select-card" style="padding: 12px;">
                   <input type="radio" name="service_type" value="Standard cleaning" required>
                   <div class="select-card-inner">
-                    <strong>Standard cleaning</strong>
-                    <span>Regular upkeep & surface reset</span>
+                    <strong style="font-size: 0.95rem;">Standard</strong>
+                    <span style="font-size: 0.8rem;">Regular upkeep</span>
                   </div>
                 </label>
-                <label class="select-card">
+                <label class="select-card" style="padding: 12px;">
                   <input type="radio" name="service_type" value="Deep cleaning">
                   <div class="select-card-inner">
-                    <strong>Deep cleaning</strong>
-                    <span>Detailed top-to-bottom clean</span>
+                    <strong style="font-size: 0.95rem;">Deep</strong>
+                    <span style="font-size: 0.8rem;">Top-to-bottom</span>
                   </div>
                 </label>
-                <label class="select-card">
+                <label class="select-card" style="padding: 12px;">
                   <input type="radio" name="service_type" value="Move-in / Move-out">
                   <div class="select-card-inner">
-                    <strong>Move-in / Move-out</strong>
-                    <span>Empty home thorough reset</span>
+                    <strong style="font-size: 0.95rem;">Move</strong>
+                    <span style="font-size: 0.8rem;">Thorough reset</span>
                   </div>
                 </label>
-                <label class="select-card">
+                <label class="select-card" style="padding: 12px;">
                   <input type="radio" name="service_type" value="Office cleaning">
                   <div class="select-card-inner">
-                    <strong>Office cleaning</strong>
-                    <span>Commercial space upkeep</span>
+                    <strong style="font-size: 0.95rem;">Office</strong>
+                    <span style="font-size: 0.8rem;">Commercial</span>
                   </div>
                 </label>
               </div>
 
-              <label class="field full" style="margin-top: 16px;">Frequency</label>
-              <div class="chip-grid">
-                <label class="chip"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
+              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Frequency</label>
+              <div class="chip-grid" style="gap: 6px;">
+                <label class="chip"><input type="radio" name="frequency" value="One-time" required><span style="font-size: 0.9rem;">One-time</span></label>
+                <label class="chip"><input type="radio" name="frequency" value="Weekly"><span style="font-size: 0.9rem;">Weekly</span></label>
+                <label class="chip"><input type="radio" name="frequency" value="Bi-weekly"><span style="font-size: 0.9rem;">Bi-weekly</span></label>
+                <label class="chip"><input type="radio" name="frequency" value="Monthly"><span style="font-size: 0.9rem;">Monthly</span></label>
               </div>
             </div>
 
             <!-- Step 3: Add-ons -->
             <div class="quote-step" data-step="3">
-              <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Almost there. Any extras we should include?</h2>
-              <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.95rem;">Select any additional services you need.</p>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Add-ons</h2>
+              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Any additional services needed?</p>
               
-              <div class="chip-grid add-on-grid">
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span><i data-lucide="plus"></i> Carpet</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Laundry"><span><i data-lucide="plus"></i> Laundry</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Oven"><span><i data-lucide="plus"></i> Oven</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Fridge"><span><i data-lucide="plus"></i> Fridge</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside cabinets"><span><i data-lucide="plus"></i> Cabinets</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Windows"><span><i data-lucide="plus"></i> Windows</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Junk removal"><span><i data-lucide="plus"></i> Junk out</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Power washing"><span><i data-lucide="plus"></i> Power wash</span></label>
+              <div class="chip-grid add-on-grid" style="gap: 6px;">
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Carpet</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Laundry"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Laundry</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Oven"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Oven</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Fridge"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Fridge</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside cabinets"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Cabinets</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Windows"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Windows</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Junk removal"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Junk</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Power washing"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Power wash</span></label>
               </div>
             </div>
 
             <!-- Step 4: Contact details -->
             <div class="quote-step" data-step="4">
-              <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Where should we send your estimate?</h2>
-              <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.95rem;">We'll contact you with the details shortly.</p>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Contact info</h2>
+              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Where should we send the estimate?</p>
               
               <label class="field full">Full name
-                <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
+                <input name="full_name" required autocomplete="name" placeholder="Jane Doe" style="font-size: 0.9rem;">
               </label>
               
-              <div class="grid two" style="margin-top:16px;">
+              <div class="grid two" style="gap: 10px; margin-top: 10px;">
                 <label class="field">Phone
-                  <input name="phone" required autocomplete="tel" placeholder="(555) 000-0000">
+                  <input name="phone" required autocomplete="tel" placeholder="(555) 000-0000" style="font-size: 0.9rem;">
                 </label>
                 <label class="field">Email
-                  <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
+                  <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com" style="font-size: 0.9rem;">
                 </label>
               </div>
 
-              <label class="field full" style="margin-top: 16px;">Preferred contact method</label>
-              <div class="chip-grid">
-                <label class="chip"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
-                <label class="chip"><input type="radio" name="preferred_contact" value="Phone"><span>Phone Call</span></label>
-                <label class="chip"><input type="radio" name="preferred_contact" value="Text"><span>Text Message</span></label>
+              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; margin-top: 10px;">Reach you by</label>
+              <div class="chip-grid" style="gap: 6px;">
+                <label class="chip"><input type="radio" name="preferred_contact" value="Email" required><span style="font-size: 0.9rem;">Email</span></label>
+                <label class="chip"><input type="radio" name="preferred_contact" value="Phone"><span style="font-size: 0.9rem;">Phone</span></label>
+                <label class="chip"><input type="radio" name="preferred_contact" value="Text"><span style="font-size: 0.9rem;">Text</span></label>
               </div>
             </div>
 
             <!-- Step 5: Review and submit -->
             <div class="quote-step" data-step="5">
-              <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Review your cleaning request.</h2>
-              <p style="color: var(--muted); margin-bottom: 16px; font-size: 0.95rem;">Double check your details before submitting.</p>
+              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Review</h2>
+              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Verify before submitting</p>
               
-              <div class="review-summary card" style="background: var(--surface); padding: 20px; box-shadow:none; border: 1px solid var(--line); margin-bottom: 16px;">
-                <div class="review-item"><strong>Property:</strong> <span id="reviewProperty">-</span></div>
-                <div class="review-item"><strong>Service:</strong> <span id="reviewService">-</span> (<span id="reviewFrequency">-</span>)</div>
-                <div class="review-item"><strong>Size:</strong> <span id="reviewSize">-</span></div>
-                <div class="review-item"><strong>Add-ons:</strong> <span id="reviewAddons">None</span></div>
-                <div class="review-item"><strong>Contact:</strong> <span id="reviewContact">-</span> (<span id="reviewMethod">-</span>)</div>
+              <div style="background: var(--surface); padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Property:</strong> <span id="reviewProperty">-</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Service:</strong> <span id="reviewService">-</span> (<span id="reviewFrequency">-</span>)</div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Size:</strong> <span id="reviewSize">-</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Add-ons:</strong> <span id="reviewAddons">None</span></div>
               </div>
 
-              <label class="field full check" style="margin-bottom: 20px;">
+              <label class="field full check" style="margin-bottom: 12px;">
                 <input name="consent" type="checkbox" required>
-                <span>I agree to be contacted about my quote request.</span>
+                <span style="font-size: 0.9rem;">I agree to be contacted about my quote request.</span>
               </label>
 
               <div data-form-state class="form-state" role="status"></div>
             </div>
 
-            <div class="quote-actions" style="margin-top: 24px; display: flex; gap: 12px; justify-content: space-between;">
-              <button type="button" class="button ghost" id="btnQuoteBack" style="display:none;"><i data-lucide="arrow-left"></i> Back</button>
-              <div style="margin-left:auto;">
-                <button type="button" class="button secondary" id="btnQuoteNext">Next <i data-lucide="arrow-right"></i></button>
-                <button type="submit" class="button" id="btnQuoteSubmit" style="display:none;">Submit quote request <i data-lucide="check"></i></button>
+            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: space-between;">
+              <button type="button" class="button ghost" id="btnQuoteBack" style="display:none; font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="arrow-left"></i> Back</button>
+              <div style="margin-left:auto; display: flex; gap: 8px;">
+                <button type="button" class="button secondary" id="btnQuoteNext" style="font-size: 0.9rem; padding: 8px 14px;">Next <i data-lucide="arrow-right"></i></button>
+                <button type="submit" class="button" id="btnQuoteSubmit" style="display:none; font-size: 0.9rem; padding: 8px 14px;">Submit <i data-lucide="check"></i></button>
               </div>
             </div>
 
           </form>
 
           <!-- Success State (Hidden by default) -->
-          <div id="quoteSuccessState" class="quote-success-state" style="display:none; text-align:center; padding: 40px 20px;">
-            <div class="success-icon-wrap" style="width: 64px; height: 64px; background: var(--mint-light); color: var(--mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; box-shadow: 0 4px 12px rgba(15, 79, 207, 0.15);">
-              <i data-lucide="check" style="width: 32px; height: 32px;"></i>
+          <div id="quoteSuccessState" class="quote-success-state" style="display:none; text-align:center; padding: 24px 12px;">
+            <div style="width: 48px; height: 48px; background: var(--mint-light); color: var(--mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+              <i data-lucide="check" style="width: 24px; height: 24px;"></i>
             </div>
-            <h2 style="font-size: 1.8rem; margin-bottom: 12px;">Your request is sent!</h2>
-            <p style="color: var(--muted); font-size: 1rem; max-width: 400px; margin: 0 auto 24px;">Thank you for requesting an estimate. We'll review your details and be in touch shortly.</p>
+            <h2 style="font-size: 1.4rem; margin-bottom: 6px;">Request sent!</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; max-width: 400px; margin: 0 auto 12px;">We'll review your details and contact you shortly with an estimate.</p>
             
-            <div class="card flat-mint" style="text-align:left; margin-bottom: 32px; padding: 20px;">
-              <h4 style="font-size: 0.9rem; color: var(--mint-dark); margin-bottom: 8px; text-transform:uppercase; letter-spacing:0.05em;">Next Steps</h4>
-              <ul style="list-style:none; padding:0; margin:0; font-size: 0.9rem; color: var(--navy); display:flex; flex-direction:column; gap:8px;">
-                <li style="display:flex; align-items:flex-start; gap:8px;"><i data-lucide="clock" style="width:16px;height:16px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We will calculate a precise estimate based on your scope.</li>
-                <li style="display:flex; align-items:flex-start; gap:8px;"><i data-lucide="phone" style="width:16px;height:16px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We will contact you via your preferred method.</li>
+            <div style="text-align:left; margin-bottom: 12px; padding: 12px; background: var(--mint-light); border-radius: 8px; font-size: 0.8rem;">
+              <h4 style="color: var(--mint-dark); margin-bottom: 6px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size: 0.75rem;">Next Steps</h4>
+              <ul style="list-style:none; padding:0; margin:0; color: var(--navy); display:flex; flex-direction:column; gap:4px;">
+                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="clock" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We calculate your precise estimate.</li>
+                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="phone" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We contact you via your preferred method.</li>
               </ul>
             </div>
 
-            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap:wrap;">
-              <a href="index.html" class="button"><i data-lucide="home"></i> Return Home</a>
-              <button type="button" class="button ghost" id="btnRestartQuote">Start another quote</button>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap:wrap;">
+              <a href="index.html" class="button" style="font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="home"></i> Home</a>
+              <button type="button" class="button ghost" id="btnRestartQuote" style="font-size: 0.9rem; padding: 8px 14px;">Start another</button>
             </div>
           </div>
 
         </div>
-
-        <!-- Right: Live Estimate Summary -->
-        <aside class="quote-summary-panel card fade-in-up" style="padding: 24px; flex: 0 0 340px; background: linear-gradient(180deg, var(--white) 0%, #F8FAFC 100%); position: sticky; top: 100px;">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <img src="assets/images/customer-care.png" alt="Assistant" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-            <div>
-              <div style="font-size: 0.85rem; color: var(--muted); font-weight:600;">Your Assistant</div>
-              <div style="font-weight: 600; color: var(--navy);">Sarah</div>
-            </div>
-          </div>
-          <div class="assistant-chat-bubble" id="assistantBubble" style="background: var(--blue-light); color: var(--blue-dark); padding: 12px 16px; border-radius: 12px; border-top-left-radius: 4px; font-size: 0.9rem; margin-bottom: 16px; position:relative; box-shadow: 0 2px 8px rgba(0,87,255,0.05); transition: opacity 0.3s ease;">
-            Hi! Let's get your instant estimate started.
-          </div>
-
-          <h3 style="font-size: 1.1rem; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 16px;">Live Summary</h3>
-          
-          <ul class="live-summary-list" style="list-style:none; padding:0; margin:0; font-size: 0.95rem; color: var(--navy); display:flex; flex-direction:column; gap:12px;">
-            <li style="display:flex; justify-content:space-between;">
-              <span style="color:var(--muted);"><i data-lucide="home" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;"></i> Space:</span>
-              <strong id="liveSpace">Pending...</strong>
-            </li>
-            <li style="display:flex; justify-content:space-between;">
-              <span style="color:var(--muted);"><i data-lucide="sparkles" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;"></i> Service:</span>
-              <strong id="liveService">Pending...</strong>
-            </li>
-            <li style="display:flex; justify-content:space-between;">
-              <span style="color:var(--muted);"><i data-lucide="calendar" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;"></i> Frequency:</span>
-              <strong id="liveFrequency">-</strong>
-            </li>
-            <li style="display:flex; justify-content:space-between;">
-              <span style="color:var(--muted);"><i data-lucide="plus-circle" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;"></i> Add-ons:</span>
-              <strong id="liveAddons">0 selected</strong>
-            </li>
-            <li style="display:flex; justify-content:space-between; margin-top: 8px; padding-top: 12px; border-top: 1px dashed var(--line);">
-              <span style="color:var(--muted);"><i data-lucide="clipboard-check" style="width:14px;height:14px;margin-right:6px;vertical-align:-2px;"></i> Est. Scope:</span>
-              <strong id="liveScope" style="color: var(--blue);">Calculating...</strong>
-            </li>
-          </ul>
-
-          <div style="margin-top: 24px; background: var(--mint-light); border-radius: 12px; padding: 16px; font-size: 0.85rem; color: var(--mint-dark);">
-            <div style="font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:6px;"><i data-lucide="shield-check" style="width:16px;height:16px;"></i> Our Promise</div>
-            Final pricing is confirmed before service. No hidden fees without approval. We confirm timing and scope before arrival.
-          </div>
-        </aside>
       </div>
     </section>
   </main>

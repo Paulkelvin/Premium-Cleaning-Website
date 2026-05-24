@@ -25,33 +25,33 @@
   </header>
 
   <main>
-    <section class="page-hero" style="padding: 40px 0;">
+    <section style="padding: 20px 0 12px 0;">
       <div class="section-inner">
-        <p class="eyebrow"><i data-lucide="calendar"></i>Schedule a call or service</p>
-        <h1 style="max-width: 720px;">Request an appointment window.</h1>
-        <p>Tell us when you would like to meet or book. We will confirm availability before the appointment is finalized.</p>
+        <p class="eyebrow"><i data-lucide="calendar"></i>Schedule a service</p>
+        <h1 style="max-width: 720px; font-size: 1.7rem; line-height: 1.2;">Request an appointment.</h1>
+        <p style="font-size: 0.9rem; color: var(--muted); margin-top: 4px;">Tell us when you'd like to meet. We'll confirm availability shortly.</p>
       </div>
     </section>
 
-    <section>
-      <div class="section-inner split">
-        <form class="card form-grid fade-in-up" data-lead-form data-table="bookings" style="padding: 40px;">
-          <h2 class="field full" style="font-size:1.6rem; margin-bottom:12px;">Booking details</h2>
+    <section style="padding: 16px 0 40px 0;">
+      <div class="section-inner" style="max-width: 680px;">
+        <form class="card form-grid fade-in-up" data-lead-form data-table="bookings" style="padding: 24px;">
+          <h2 style="font-size: 1.3rem; margin-bottom: 16px; grid-column: 1 / -1;">Booking details</h2>
           
           <label class="field">Full name
-            <input name="full_name" required placeholder="John Doe">
+            <input name="full_name" required placeholder="John Doe" style="font-size: 0.9rem;">
           </label>
           
           <label class="field">Email
-            <input name="email" type="email" required placeholder="john@example.com">
+            <input name="email" type="email" required placeholder="john@example.com" style="font-size: 0.9rem;">
           </label>
           
           <label class="field">Phone
-            <input name="phone" required placeholder="(555) 000-0000">
+            <input name="phone" required placeholder="(555) 000-0000" style="font-size: 0.9rem;">
           </label>
           
-          <label class="field">Service type
-            <select name="service_type" required>
+          <label class="field">Service
+            <select name="service_type" required style="font-size: 0.9rem;">
               <option value="">Choose service</option>
               <option>Consultation call</option>
               <option>Standard cleaning</option>
@@ -61,60 +61,58 @@
             </select>
           </label>
           
-          <label class="field">Preferred date
-            <input name="preferred_date" type="date" required>
+          <label class="field">Date
+            <input name="preferred_date" type="date" required style="font-size: 0.9rem;">
           </label>
           
-          <label class="field">Preferred time
-            <select name="preferred_time">
+          <label class="field">Time
+            <select name="preferred_time" style="font-size: 0.9rem;">
               <option>Morning</option>
               <option>Afternoon</option>
               <option>Evening</option>
             </select>
           </label>
           
-          <label class="field full">Service address
-            <input name="address" autocomplete="street-address" placeholder="123 Main St, Austin, TX">
+          <label class="field full">Address
+            <input name="address" autocomplete="street-address" placeholder="123 Main St, Austin, TX" style="font-size: 0.9rem;">
           </label>
           
-          <label class="field full">Message
-            <textarea name="message" placeholder="Share parking, access, or scheduling notes."></textarea>
+          <label class="field full">Notes
+            <textarea name="message" placeholder="Parking info, access notes, or special requests" style="font-size: 0.9rem; min-height: 70px;"></textarea>
           </label>
           
           <label class="field full check" style="margin-top: 10px;">
             <input name="consent" type="checkbox" required>
-            <span>I agree to be contacted about scheduling this appointment.</span>
+            <span style="font-size: 0.9rem;">I agree to be contacted about this appointment.</span>
           </label>
           
           <div class="field full" style="margin-top: 10px;">
-            <button class="button" type="submit" style="width: 100%;">Request appointment <i data-lucide="check"></i></button>
+            <button class="button" type="submit" style="width: 100%; font-size: 0.9rem; padding: 10px;">Request appointment <i data-lucide="check"></i></button>
             <div data-form-state class="form-state" role="status"></div>
           </div>
         </form>
 
-        <aside class="card fade-in-up" style="padding: 40px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <h2 style="font-size:1.6rem; margin-bottom: 24px;">Scheduling notes</h2>
-            <p style="margin-bottom: 32px;">Appointment requests are reviewed by our team. If you need urgent help for a move-out deadline, lease turnover, or time-sensitive spill, please call us directly after submitting your booking request.</p>
-            
-            <ul class="contact-list">
-              <li>
-                <i data-lucide="phone"></i>
-                <div>
-                  <strong>Phone</strong><br>
-                  <a href="tel:+15550147820" style="font-weight:600; color:var(--mint);">(555) 014-7820</a>
-                </div>
-              </li>
-              <li>
-                <i data-lucide="clock"></i>
-                <div>
-                  <strong>Working hours</strong><br>
-                  <span style="color:var(--muted);">Monday to Saturday, 8am to 6pm</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </aside>
+        <div class="card fade-in-up" style="padding: 20px; margin-top: 16px;">
+          <h2 style="font-size: 1.3rem; margin-bottom: 12px;">Quick info</h2>
+          <p style="font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5;">Need urgent help for a move-out deadline or emergency? Give us a call directly after submitting your request.</p>
+          
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; font-size: 0.9rem;">
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <i data-lucide="phone" style="width: 16px; height: 16px; color: var(--mint); flex-shrink: 0; margin-top: 2px;"></i>
+              <div>
+                <strong>Phone</strong><br>
+                <a href="tel:+15550147820" style="font-weight: 600; color: var(--mint); text-decoration: none;">(555) 014-7820</a>
+              </div>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 10px;">
+              <i data-lucide="clock" style="width: 16px; height: 16px; color: var(--mint); flex-shrink: 0; margin-top: 2px;"></i>
+              <div>
+                <strong>Hours</strong><br>
+                <span style="color: var(--muted);">Mon-Sat, 8am to 6pm</span>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
   </main>
