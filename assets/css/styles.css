@@ -3179,18 +3179,18 @@ textarea {
 .initial-bubble {
   position: absolute;
   bottom: -50px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 60%, rgba(15, 79, 207, 0.1) 100%);
-  border: 1px solid rgba(15, 79, 207, 0.3);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.4) 60%, rgba(15, 79, 207, 0.15) 100%);
+  border: 1px solid rgba(15, 79, 207, 0.4);
   border-radius: 50%;
-  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(15, 79, 207, 0.08);
+  box-shadow: inset 4px 4px 8px rgba(255, 255, 255, 0.9), 0 6px 16px rgba(15, 79, 207, 0.15);
   animation: floatUp 1.5s ease-out forwards;
   opacity: 0;
 }
 @keyframes floatUp {
   0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0; }
-  10% { opacity: 0.5; }
-  50% { transform: translateY(-50vh) translateX(20px) scale(1.1); opacity: 0.4; }
-  100% { transform: translateY(-100vh) translateX(-10px) scale(1.2); opacity: 0; }
+  10% { opacity: 0.7; }
+  50% { transform: translateY(-45vh) translateX(30px) scale(1.1); opacity: 0.5; }
+  100% { transform: translateY(-90vh) translateX(-20px) scale(1.2); opacity: 0; }
 }
 
 /* Background floating bubbles */
@@ -3420,24 +3420,27 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: 1px solid var(--line);
   border-radius: 99px;
   background: var(--surface);
   color: var(--muted);
   font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .chip:hover span {
   border-color: var(--mint);
   color: var(--mint);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 .chip input:checked + span {
   background: var(--mint);
   color: var(--white);
   border-color: var(--mint);
-  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.2);
+  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.25);
+  transform: translateY(-1px);
 }
 
 /* Card Selection Grid */
@@ -3464,28 +3467,31 @@ textarea {
 .select-card-inner {
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .select-card-inner strong {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--navy);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .select-card-inner span {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 .select-card:hover .select-card-inner {
   border-color: var(--mint);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
 }
 .select-card input:checked + .select-card-inner {
   background: var(--mint-light);
   border-color: var(--mint);
-  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.1);
+  box-shadow: 0 6px 16px rgba(15, 79, 207, 0.12);
+  transform: translateY(-2px);
 }
 .select-card input:checked + .select-card-inner strong {
   color: var(--mint-dark);
@@ -3514,14 +3520,14 @@ textarea {
 .quote-modal-overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(11, 17, 15, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(11, 19, 36, 0.5);
+  backdrop-filter: blur(2px);
 }
 .quote-modal-content {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  max-height: 90vh;
+  max-width: 900px;
+  max-height: 85vh;
   background: var(--surface);
   border-radius: 24px;
   box-shadow: 0 30px 60px rgba(0,0,0,0.15);

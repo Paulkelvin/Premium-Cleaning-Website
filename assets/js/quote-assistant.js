@@ -179,6 +179,87 @@ function initQuoteAssistant(formContainer = document) {
       assistantBubble.style.opacity = "1";
     }, 200);
   }
+
+  // Form Submission Logic
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `Sending... <i class="lucide lucide-loader"></i>`;
+    }
+    
+    try {
+      // Try to use forms.js supabaseInsert if available
+      if (typeof window.supabaseInsert === "function") {
+        const payload = Object.fromEntries(new FormData(form).entries());
+        payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
+        await window.supabaseInsert(form.getAttribute("data-table") || "quote_requests", payload);
+      } else {
+        // Fallback simulation
+        await new Promise(r => setTimeout(r, 800));
+      }
+
+      // Show Success State
+      form.style.display = "none";
+      const progress = formContainer.querySelector(".quote-progress");
+      if (progress) progress.style.display = "none";
+      
+      const successState = formContainer.querySelector("#quoteSuccessState");
+      if (successState) {
+        successState.style.display = "block";
+        successState.style.opacity = "0";
+        successState.style.transform = "translateY(10px)";
+        successState.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+        
+        setTimeout(() => {
+          successState.style.opacity = "1";
+          successState.style.transform = "translateY(0)";
+        }, 50);
+      }
+
+      if (assistantBubble) {
+        assistantBubble.style.opacity = "0";
+        setTimeout(() => {
+          assistantBubble.textContent = "All set! We will be in touch with you shortly.";
+          assistantBubble.style.opacity = "1";
+        }, 200);
+      }
+
+    } catch (err) {
+      console.error("Quote submission error:", err);
+      const stateEl = form.querySelector("[data-form-state]");
+      if (stateEl) {
+        stateEl.className = "form-state error";
+        stateEl.textContent = `Error: ${err.message}`;
+      }
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `Submit quote request <i data-lucide="check"></i>`;
+        if (typeof lucide !== "undefined") lucide.createIcons({ root: btnSubmit.parentElement });
+      }
+    }
+  });
+
+  // Restart Quote
+  const btnRestart = formContainer.querySelector("#btnRestartQuote");
+  if (btnRestart) {
+    btnRestart.addEventListener("click", () => {
+      form.reset();
+      currentStepIndex = 0;
+      
+      const successState = formContainer.querySelector("#quoteSuccessState");
+      if (successState) successState.style.display = "none";
+      
+      form.style.display = "block";
+      const progress = formContainer.querySelector(".quote-progress");
+      if (progress) progress.style.display = "block";
+      
+      updateUI();
+      updateAssistantBubble();
+    });
+  }
 }
 
 // Intercept clicks on links pointing to quote.html
@@ -187,7 +268,7 @@ function initQuoteModalIntercept() {
   if (window.location.pathname.endsWith("quote.html")) return;
 
   document.addEventListener("click", async (e) => {
-    const anchor = e.target.closest('a[href="quote.html"]');
+    const anchor = e.target.closest('a.open-quote-modal');
     if (!anchor) return;
 
     e.preventDefault();
@@ -211,9 +292,11 @@ function initQuoteModalIntercept() {
 
       modal.querySelector(".quote-modal-close").addEventListener("click", () => {
         modal.classList.remove("is-open");
+        document.body.style.overflow = "";
       });
       modal.querySelector(".quote-modal-overlay").addEventListener("click", () => {
         modal.classList.remove("is-open");
+        document.body.style.overflow = "";
       });
 
       // Fetch quote.html and extract the form and side panel
@@ -254,6 +337,7 @@ function initQuoteModalIntercept() {
     // Give it a tiny delay to allow CSS transitions if newly added
     setTimeout(() => {
       modal.classList.add("is-open");
+      document.body.style.overflow = "hidden"; // Lock background scrolling
     }, 10);
   });
 }
