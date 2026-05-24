@@ -55,7 +55,8 @@
 
     <section class="band why-choose-us-band">
       <div class="section-inner split why-choose-us-split">
-        <div class="why-choose-us-image-wrap fade-in-up">
+        <div class="why-choose-us-image-wrap fade-in-up wipe-reveal">
+          <div class="floating-bubble" style="width:40px; height:40px; top:-20px; left:-10px;"></div>
           <div class="image-glow-accent"></div>
           <div class="corner-bracket top-left"></div>
           <div class="corner-bracket bottom-right"></div>
@@ -231,7 +232,8 @@
           <h2>Real transformations.</h2>
         </div>
         <div class="grid" data-gallery-list>
-          <article class="card gallery-card fade-in-up" style="--delay: 0.1s;">
+          <article class="card gallery-card fade-in-up wipe-reveal" style="--delay: 0.1s;">
+            <div class="sparkle-accent" style="top:-15px; left:-15px;"><i data-lucide="sparkles" style="width:20px; height:20px;"></i></div>
             <div class="gallery-slider">
               <div class="slider-container">
                 <span class="case-badge">Standard Clean</span>
@@ -413,7 +415,11 @@
 
     <section class="band">
       <div class="section-inner split about-split">
-        <div class="image-frame-premium">
+        <div class="image-frame-premium" style="position:relative;">
+          <div class="orb" style="width: 30px; height: 30px; top: 10%; left: -10px;"></div>
+          <div class="orb" style="width: 20px; height: 20px; top: -10px; right: 20%;"></div>
+          <div class="orb" style="width: 45px; height: 45px; bottom: 5%; right: -20px;"></div>
+          <div class="orb" style="width: 15px; height: 15px; bottom: -5px; left: 15%;"></div>
           <img class="image-organic fade-in-up" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1200&q=85" alt="Friendly professional business owner">
         </div>
         <div class="fade-in-up">
@@ -441,7 +447,23 @@
       </div>
     </section>
 
-    <section class="faq-section-wrapper">
+    <section style="background: var(--white); padding: 60px 0; border-top: 1px solid var(--line);">
+      <div class="section-inner">
+        <div class="heading-centered fade-in-up" style="margin-bottom: 24px;">
+          <p class="eyebrow"><i data-lucide="map-pin"></i> Areas Served</p>
+          <h2>Local to the Austin area.</h2>
+        </div>
+        <div class="grid five fade-in-up" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; text-align: center;">
+          <div style="background: var(--mint-light); padding: 16px; border-radius: 12px; font-weight: 700; color: var(--mint-dark);">Austin</div>
+          <div style="background: var(--mint-light); padding: 16px; border-radius: 12px; font-weight: 700; color: var(--mint-dark);">Round Rock</div>
+          <div style="background: var(--mint-light); padding: 16px; border-radius: 12px; font-weight: 700; color: var(--mint-dark);">Cedar Park</div>
+          <div style="background: var(--mint-light); padding: 16px; border-radius: 12px; font-weight: 700; color: var(--mint-dark);">Pflugerville</div>
+          <div style="background: var(--mint-light); padding: 16px; border-radius: 12px; font-weight: 700; color: var(--mint-dark);">Lakeway</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq-section-wrapper band">
       <div class="section-inner">
         <div class="faq-two-col-split">
           <div class="faq-left-col fade-in-up">

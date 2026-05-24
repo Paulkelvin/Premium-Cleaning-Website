@@ -28,118 +28,95 @@
   <main>
     <section style="padding: 60px 0;">
       <div class="section-inner">
-        <div class="contact-split">
+        <div class="contact-split-premium fade-in-up">
           <!-- LEFT: Form -->
-          <div class="contact-form-side">
-            <div class="heading-accent-left" style="margin-bottom: 32px;">
-              <p class="eyebrow">Get in touch</p>
-              <h1 style="font-size: clamp(1.8rem, 4vw, 2.8rem);">We'd love to hear from you.</h1>
+          <div class="contact-form-side premium-glass-panel">
+            <div style="margin-bottom: 24px;">
+              <p class="eyebrow"><i data-lucide="mail"></i> Get in touch</p>
+              <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin-bottom: 8px;">We'd love to hear from you.</h1>
+              <p style="font-size: 0.95rem;">Send us a message and we'll reply promptly.</p>
             </div>
-            <form class="form-grid" data-lead-form data-table="contact_submissions">
-              <label class="field">Full name
-                <input name="full_name" required autocomplete="name" placeholder="John Doe">
-              </label>
+            <form class="form-grid compact-form" data-lead-form data-table="contact_submissions">
+              <div class="form-row-2">
+                <label class="field">Full name
+                  <input name="full_name" required autocomplete="name" placeholder="John Doe">
+                </label>
+                <label class="field">Email
+                  <input name="email" type="email" required autocomplete="email" placeholder="john@example.com">
+                </label>
+              </div>
               
-              <label class="field">Email
-                <input name="email" type="email" required autocomplete="email" placeholder="john@example.com">
-              </label>
-              
-              <label class="field">Phone
-                <input name="phone" autocomplete="tel" placeholder="(555) 000-0000">
-              </label>
-              
-              <label class="field">Inquiry type
-                <select name="inquiry_type" required>
-                  <option value="">Choose inquiry</option>
-                  <option>General question</option>
-                  <option>Quote help</option>
-                  <option>Booking help</option>
-                  <option>Recurring cleaning</option>
-                  <option>Urgent request</option>
-                  <option>Commercial cleaning</option>
-                </select>
-              </label>
+              <div class="form-row-2">
+                <label class="field">Phone
+                  <input name="phone" autocomplete="tel" placeholder="(555) 000-0000">
+                </label>
+                <label class="field">Inquiry type
+                  <select name="inquiry_type" required>
+                    <option value="">Choose inquiry</option>
+                    <option>General question</option>
+                    <option>Quote help</option>
+                    <option>Booking help</option>
+                    <option>Recurring cleaning</option>
+                    <option>Urgent request</option>
+                  </select>
+                </label>
+              </div>
               
               <label class="field full">Message
-                <textarea name="message" required placeholder="Tell us how we can help with your space..."></textarea>
+                <textarea name="message" required placeholder="Tell us how we can help with your space..." style="min-height: 100px;"></textarea>
               </label>
               
-              <label class="field">Preferred contact method
-                <select name="preferred_contact_method">
-                  <option>Email</option>
-                  <option>Phone</option>
-                  <option>Text message</option>
-                </select>
-              </label>
-              
-              <label class="field check full" style="margin-top: 10px;">
-                <input name="consent" type="checkbox" required>
-                <span>I consent to being contacted about this inquiry.</span>
-              </label>
-              
-              <div class="field full" style="margin-top: 10px;">
-                <button class="button" type="submit" style="width: 100%;">Send message <i data-lucide="send"></i></button>
-                <div data-form-state class="form-state" role="status"></div>
+              <div class="form-actions-row">
+                <label class="field check compact-check">
+                  <input name="consent" type="checkbox" required>
+                  <span style="font-size: 0.85rem;">I consent to being contacted.</span>
+                </label>
+                <button class="button" type="submit">Send message <i data-lucide="send" style="width:16px;height:16px;"></i></button>
               </div>
+              <div data-form-state class="form-state" role="status"></div>
             </form>
           </div>
           
-          <!-- RIGHT: Illustration + Contact Info -->
-          <div class="contact-info-side">
-            <div class="contact-info-card fade-in-up">
-              <img src="assets/images/contact-illustration.png" alt="Contact support illustration" style="width: 100%; max-height: 240px; object-fit: contain; margin-bottom: 28px; border-radius: 16px;">
-              
-              <h3 style="font-size: 1.3rem; margin-bottom: 20px;">Contact Details</h3>
-              
-              <div class="contact-method">
-                <div class="contact-method-icon"><i data-lucide="phone"></i></div>
-                <div>
-                  <strong>Phone</strong>
-                  <a href="tel:+15550147820">(555) 014-7820</a>
-                </div>
+          <!-- RIGHT: Compact Info Panel -->
+          <div class="contact-info-side premium-info-panel">
+            <div class="sparkle-accent" style="top:20px; right:20px;"><i data-lucide="sparkles"></i></div>
+            <h3 style="font-size: 1.25rem; margin-bottom: 24px; color: var(--white);">Direct Contact</h3>
+            
+            <div class="contact-method compact">
+              <div class="contact-method-icon"><i data-lucide="phone"></i></div>
+              <div>
+                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Phone</strong>
+                <a href="tel:+15550147820" style="color: var(--white); font-weight: 600; display: block; font-size: 1.1rem;">(555) 014-7820</a>
               </div>
-              
-              <div class="contact-method">
-                <div class="contact-method-icon"><i data-lucide="mail"></i></div>
-                <div>
-                  <strong>Email</strong>
-                  <a href="mailto:hello@pristineprocleaning.com">hello@pristineprocleaning.com</a>
-                </div>
+            </div>
+            
+            <div class="contact-method compact">
+              <div class="contact-method-icon"><i data-lucide="mail"></i></div>
+              <div>
+                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Email</strong>
+                <a href="mailto:hello@pristineprocleaning.com" style="color: var(--white); font-weight: 500; display: block;">hello@pristineprocleaning.com</a>
               </div>
-              
-              <div class="contact-method">
-                <div class="contact-method-icon"><i data-lucide="map-pin"></i></div>
-                <div>
-                  <strong>Service Area</strong>
-                  <span>Austin, TX and nearby communities</span>
-                </div>
+            </div>
+            
+            <div class="contact-method compact">
+              <div class="contact-method-icon"><i data-lucide="map-pin"></i></div>
+              <div>
+                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Service Area</strong>
+                <span style="color: var(--white); display: block;">Austin, TX & surrounding areas</span>
               </div>
-              
-              <div class="contact-method">
-                <div class="contact-method-icon"><i data-lucide="clock"></i></div>
-                <div>
-                  <strong>Hours</strong>
-                  <span>Mon - Sat, 8am - 6pm</span>
-                </div>
+            </div>
+            
+            <div class="contact-method compact" style="margin-bottom: 32px;">
+              <div class="contact-method-icon"><i data-lucide="clock"></i></div>
+              <div>
+                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Hours</strong>
+                <span style="color: var(--white); display: block;">Mon - Sat, 8am - 6pm</span>
               </div>
-              
-              <div class="contact-method">
-                <div class="contact-method-icon"><i data-lucide="share-2"></i></div>
-                <div>
-                  <strong>Social</strong>
-                  <span><a href="#" style="color: var(--mint); font-weight: 600;">Instagram</a> · <a href="#" style="color: var(--mint); font-weight: 600;">Facebook</a></span>
-                </div>
-              </div>
-              
-              <div style="margin-top: 24px; background: var(--gold-light); padding: 16px; border-radius: 12px; border-left: 4px solid var(--gold);">
-                <strong style="color: var(--gold-dark); display: block; margin-bottom: 4px; font-size: 0.9rem;">Urgent?</strong>
-                <p style="font-size: 0.88rem; margin: 0; color: var(--gold-dark);">Call us directly for tight deadlines, turnovers, or emergency cleanups.</p>
-              </div>
-              
-              <div class="cta-row" style="margin-top: 20px;">
-                <a class="button secondary" href="quote.html" style="flex: 1;">Request quote</a>
-                <a class="button ghost" href="book.html" style="flex: 1;">Book now</a>
-              </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; border-left: 3px solid var(--gold);">
+              <strong style="color: var(--gold); display: block; margin-bottom: 4px; font-size: 0.9rem;">Urgent or tight deadline?</strong>
+              <p style="font-size: 0.85rem; margin: 0; color: rgba(255,255,255,0.85);">Call us directly. We prioritize emergency turnovers and deep cleans when possible.</p>
             </div>
           </div>
         </div>

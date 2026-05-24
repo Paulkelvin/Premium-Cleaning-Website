@@ -41,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 6. Scroll Animations (Scroll Reveal)
   initScrollReveal();
 
+  // 7. Cleaning Theme Microanimations
+  initHomepageBubbles();
+  initGalleryFilters();
+
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
     const key = node.getAttribute("data-copy-config");
@@ -323,3 +327,65 @@ window.refreshInteractiveFeatures = () => {
   initMagnifiers();
   initOnPageSliders();
 };
+
+// 7. Cleaning-themed Homepage Bubbles
+function initHomepageBubbles() {
+  if (document.body.dataset.sanityPage !== "home") return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const overlay = document.createElement("div");
+  overlay.className = "bubbles-overlay";
+  document.body.appendChild(overlay);
+
+  for (let i = 0; i < 16; i++) {
+    const bubble = document.createElement("div");
+    bubble.className = "initial-bubble";
+    const size = Math.random() * 25 + 10;
+    const left = Math.random() * 100;
+    const delay = Math.random() * 0.4;
+    const duration = Math.random() * 0.6 + 0.8;
+    
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.left = `${left}%`;
+    bubble.style.animationDelay = `${delay}s`;
+    bubble.style.animationDuration = `${duration}s`;
+    
+    overlay.appendChild(bubble);
+  }
+
+  setTimeout(() => overlay.remove(), 2000);
+}
+
+// 8. Gallery Filtering
+function initGalleryFilters() {
+  const tabs = document.querySelectorAll('.gallery-filter-btn');
+  const cards = document.querySelectorAll('.gallery-card');
+  if (!tabs.length || !cards.length) return;
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const filter = tab.dataset.filter;
+      
+      cards.forEach(card => {
+        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.style.display = 'block';
+          // Trigger reflow
+          void card.offsetWidth;
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        } else {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(10px)';
+          setTimeout(() => {
+            if (card.style.opacity === '0') card.style.display = 'none';
+          }, 300);
+        }
+      });
+    });
+  });
+}

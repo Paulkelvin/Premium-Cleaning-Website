@@ -18,23 +18,23 @@
         </a>
       </div>
       <nav class="admin-sidebar-nav">
-        <a class="admin-nav-item active" href="#">
+        <a class="admin-nav-item active" href="#" data-view-target="dashboard">
           <i data-lucide="layout-dashboard"></i>
           <span>Dashboard</span>
         </a>
-        <a class="admin-nav-item" href="#">
+        <a class="admin-nav-item" href="#" data-view-target="inbox">
           <i data-lucide="mail"></i>
           <span>Contact Inbox</span>
         </a>
-        <a class="admin-nav-item" href="#">
+        <a class="admin-nav-item" href="#" data-view-target="quotes">
           <i data-lucide="file-text"></i>
           <span>Quote Requests</span>
         </a>
-        <a class="admin-nav-item" href="#">
+        <a class="admin-nav-item" href="#" data-view-target="bookings">
           <i data-lucide="calendar"></i>
           <span>Bookings</span>
         </a>
-        <a class="admin-nav-item" href="#">
+        <a class="admin-nav-item" href="#" data-view-target="settings">
           <i data-lucide="settings"></i>
           <span>Settings</span>
         </a>
@@ -58,8 +58,8 @@
         </div>
       </div>
 
-      <!-- Stats -->
-      <div class="admin-stats">
+      <!-- Stats Overview -->
+      <div class="admin-stats fade-in-up" data-view-content="dashboard">
         <div class="stat">
           <div class="stat-icon" style="background: rgba(212, 163, 69, 0.12); color: var(--gold);">
             <i data-lucide="bell"></i>
@@ -100,7 +100,7 @@
 
       <!-- Data Sections -->
       <div class="admin-grid">
-        <section class="card admin-section-card">
+        <section class="card admin-section-card fade-in-up" data-view-content="inbox" style="display: none;">
           <div class="admin-section-header">
             <div style="display: flex; align-items: center; gap: 10px;">
               <i data-lucide="mail" style="color: var(--mint);"></i>
@@ -111,7 +111,7 @@
           <div data-admin-table="contact_submissions"></div>
         </section>
 
-        <section class="card admin-section-card">
+        <section class="card admin-section-card fade-in-up" data-view-content="quotes" style="display: none;">
           <div class="admin-section-header">
             <div style="display: flex; align-items: center; gap: 10px;">
               <i data-lucide="file-text" style="color: var(--blue);"></i>
@@ -122,7 +122,7 @@
           <div data-admin-table="quote_requests"></div>
         </section>
 
-        <section class="card admin-section-card">
+        <section class="card admin-section-card fade-in-up" data-view-content="bookings" style="display: none;">
           <div class="admin-section-header">
             <div style="display: flex; align-items: center; gap: 10px;">
               <i data-lucide="calendar" style="color: var(--coral);"></i>
@@ -131,6 +131,18 @@
             <span style="font-size: 0.84rem; color: var(--muted);">Appointment and schedule-call requests</span>
           </div>
           <div data-admin-table="bookings"></div>
+        </section>
+        
+        <section class="card admin-section-card fade-in-up" data-view-content="settings" style="display: none;">
+          <div class="admin-section-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="settings" style="color: var(--muted);"></i>
+              <h2 style="font-size: 1.2rem; margin: 0;">Settings</h2>
+            </div>
+          </div>
+          <div style="padding: 24px;">
+            <p>System configuration and notification preferences will appear here.</p>
+          </div>
         </section>
       </div>
     </main>

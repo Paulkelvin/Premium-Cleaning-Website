@@ -219,3 +219,35 @@ document.querySelector("[data-admin-logout]")?.addEventListener("click", () => {
 });
 
 initDashboard();
+
+// SPA Navigation Logic
+function initAdminNavigation() {
+  const navItems = document.querySelectorAll("[data-view-target]");
+  const viewContents = document.querySelectorAll("[data-view-content]");
+
+  if (!navItems.length || !viewContents.length) return;
+
+  navItems.forEach(item => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      navItems.forEach(nav => nav.classList.remove("active"));
+      item.classList.add("active");
+
+      const targetView = item.getAttribute("data-view-target");
+      viewContents.forEach(content => {
+        if (content.getAttribute("data-view-content") === targetView) {
+          content.style.display = "block";
+          // Trigger reflow
+          void content.offsetWidth;
+          content.classList.add("appeared");
+        } else {
+          content.style.display = "none";
+          content.classList.remove("appeared");
+        }
+      });
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", initAdminNavigation);
