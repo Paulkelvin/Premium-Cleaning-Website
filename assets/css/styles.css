@@ -484,15 +484,16 @@ section,
 
 /* Style 4: Gradient underline bar below heading */
 .heading-underline-gradient {
-  margin-bottom: 36px;
+  margin-bottom: 24px;
   max-width: 800px;
 }
 
 .heading-underline-gradient h2 {
-  margin: 0 0 12px;
+  font-size: clamp(1.6rem, 3.8vw, 2.3rem);
+  margin: 0 0 10px;
   display: inline-block;
   position: relative;
-  padding-bottom: 14px;
+  padding-bottom: 10px;
 }
 
 .heading-underline-gradient h2::after {
@@ -502,28 +503,30 @@ section,
   left: 0;
   width: 100%;
   max-width: 200px;
-  height: 4px;
+  height: 3px;
   border-radius: 4px;
   background: linear-gradient(90deg, var(--mint), var(--gold));
 }
 
 .heading-underline-gradient p {
   margin: 0;
+  font-size: 0.96rem;
+  color: var(--muted);
 }
 
-/* Style 5: Eyebrow in colored pill, h2 right, flex side-by-side */
+/* Style 5: Eyebrow in colored pill, h2 below it, stacked vertically */
 .heading-tag-split {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .heading-tag-split .eyebrow {
-  background: var(--gold-light);
-  color: var(--gold-dark);
-  padding: 8px 20px;
+  background: var(--mint-light);
+  color: var(--mint);
+  padding: 6px 16px;
   border-radius: 999px;
   font-size: 0.76rem;
   font-weight: 800;
@@ -534,8 +537,6 @@ section,
 
 .heading-tag-split h2 {
   margin: 0;
-  flex: 1;
-  min-width: 200px;
 }
 
 /* Section heading utility */
@@ -608,7 +609,7 @@ section,
 
 .service-card img {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 2.2 / 1;
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 12px;
@@ -629,6 +630,10 @@ section,
   grid-template-columns: 1.1fr 0.9fr;
   gap: 40px;
   align-items: center;
+}
+
+.why-choose-us-split {
+  grid-template-columns: 0.75fr 1.25fr;
 }
 
 /* ================================================================
@@ -1822,6 +1827,7 @@ textarea {
   .grid,
   .grid.two,
   .split,
+  .why-choose-us-split,
   .contact-split,
   .quote-section-split,
   .hero-split {
