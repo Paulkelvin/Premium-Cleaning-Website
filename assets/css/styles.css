@@ -489,7 +489,7 @@ section,
 }
 
 .heading-underline-gradient h2 {
-  font-size: clamp(1.6rem, 3.8vw, 2.3rem);
+  font-size: clamp(1.4rem, 3vw, 1.95rem);
   margin: 0 0 10px;
   display: inline-block;
   position: relative;
@@ -609,7 +609,7 @@ section,
 
 .service-card img {
   width: 100%;
-  aspect-ratio: 2.2 / 1;
+  aspect-ratio: 2.4 / 1;
   object-fit: cover;
   border-radius: 12px;
   margin-bottom: 12px;
@@ -633,7 +633,13 @@ section,
 }
 
 .why-choose-us-split {
-  grid-template-columns: 0.75fr 1.25fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+
+.about-split {
+  grid-template-columns: 1fr 1.1fr;
+  gap: 60px;
 }
 
 /* ================================================================
@@ -678,7 +684,7 @@ section,
 }
 
 .step {
-  padding: 36px 28px 28px;
+  padding: 48px 28px 28px;
 }
 
 .step::before {
@@ -704,8 +710,8 @@ section,
    ================================================================ */
 
 .feature-list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 14px;
   margin: 20px 0;
   list-style: none;
@@ -957,76 +963,124 @@ section,
    TESTIMONIALS — cards with avatars, stars, quote marks
    ================================================================ */
 
-.testimonial {
+.review-card {
   position: relative;
-  padding-top: 20px;
-}
-
-.testimonial::before {
-  content: '\201C';
-  position: absolute;
-  top: -8px;
-  left: 24px;
-  font-size: 5rem;
-  font-family: 'Outfit', serif;
-  color: var(--mint);
-  opacity: 0.12;
-  line-height: 1;
-  pointer-events: none;
-}
-
-.testimonial blockquote {
-  margin-bottom: 18px;
-  color: var(--ink);
-  font-size: 1.05rem;
-  font-weight: 400;
-  font-style: italic;
-  line-height: 1.55;
-}
-
-.testimonial-stars {
   display: flex;
-  gap: 3px;
-  margin-bottom: 14px;
+  flex-direction: column;
 }
 
-.testimonial-stars svg,
-.testimonial-stars span {
-  color: var(--gold);
-  font-size: 1rem;
-}
-
-.testimonial-author {
+.review-header {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.testimonial-avatar {
+.review-avatar {
   width: 56px;
   height: 56px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--mint-light);
   flex-shrink: 0;
+  border: 1px solid var(--line);
 }
 
-.testimonial-author div {
+.review-meta {
   display: flex;
   flex-direction: column;
 }
 
-.testimonial-author strong {
+.review-meta strong {
   font-size: 1rem;
   font-weight: 700;
   color: var(--ink);
   font-family: 'Outfit', sans-serif;
 }
 
-.testimonial-author span {
+.review-meta span {
   font-size: 0.88rem;
   color: var(--muted);
   font-weight: 500;
+}
+
+.review-text {
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.review-footer-bar {
+  background: var(--mint);
+  margin: 18px -28px -28px;
+  padding: 16px 28px;
+  border-radius: 0 0 var(--radius) var(--radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-stars {
+  display: flex;
+  gap: 4px;
+  color: var(--white);
+}
+
+.review-stars svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.review-quote-bubble {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: grid;
+  place-items: center;
+  color: var(--white);
+}
+
+.review-quote-bubble svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.reviews-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.pag-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pag-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pag-btn.active {
+  background: var(--mint); /* Replaced with primary blue theme variable */
+  border-color: var(--mint);
+  color: var(--white);
+}
+
+.pag-btn:hover {
+  transform: scale(1.05);
 }
 
 /* ================================================================
@@ -1828,6 +1882,7 @@ textarea {
   .grid.two,
   .split,
   .why-choose-us-split,
+  .about-split,
   .contact-split,
   .quote-section-split,
   .hero-split {
@@ -1939,8 +1994,7 @@ textarea {
   .footer-grid,
   .admin-stats,
   .form-grid,
-  .values-grid,
-  .feature-list {
+  .values-grid {
     grid-template-columns: 1fr;
   }
 
