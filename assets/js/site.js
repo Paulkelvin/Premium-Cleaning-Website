@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // 4. Smooth FAQ Accordion Toggle
   initAccordions();
 
-  // 5. Before & After Magnifier & Lightbox Setup
-  initMagnifiers();
+  // 5. Before & After Slider & Lightbox Setup
+  initOnPageSliders();
   initLightboxTriggers();
 
   // 6. Scroll Animations (Scroll Reveal)
@@ -122,6 +122,104 @@ function initLightboxTriggers() {
     const title = card.querySelector("h3")?.textContent || "Before & After Reset";
 
     openLightbox(imgs[0].src, imgs[1].src, title);
+  });
+}
+
+function initOnPageSliders() {
+  document.querySelectorAll(".slider-container").forEach((container) => {
+    if (container.dataset.sliderInitialized) return;
+    container.dataset.sliderInitialized = "true";
+
+    const afterImg = container.querySelector(".img-after");
+    const bar = container.querySelector(".slider-bar");
+    const button = container.querySelector(".slider-button");
+    const expandBtn = container.querySelector(".slider-expand-btn");
+
+    if (!afterImg || !bar || !button) return;
+
+    let isDragging = false;
+    let hasDragged = false;
+    let startX = 0;
+
+    const moveSlider = (clientX) => {
+      const rect = container.getBoundingClientRect();
+      let x = clientX - rect.left;
+      if (x < 0) x = 0;
+      if (x > rect.width) x = rect.width;
+      const percent = (x / rect.width) * 100;
+
+      afterImg.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+      bar.style.left = `${percent}%`;
+      button.style.left = `${percent}%`;
+    };
+
+    const startDrag = (e) => {
+      isDragging = true;
+      hasDragged = false;
+      startX = e.clientX || (e.touches && e.touches[0].clientX);
+    };
+
+    const stopDrag = () => {
+      isDragging = false;
+    };
+
+    container.querySelectorAll("img").forEach(img => {
+      img.addEventListener("dragstart", (e) => e.preventDefault());
+    });
+
+    bar.addEventListener("mousedown", startDrag);
+    container.addEventListener("mousedown", startDrag);
+
+    bar.addEventListener("touchstart", startDrag, { passive: true });
+    container.addEventListener("touchstart", startDrag, { passive: true });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const clientX = e.clientX;
+      if (Math.abs(clientX - startX) > 4) {
+        hasDragged = true;
+      }
+      moveSlider(clientX);
+    });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      const clientX = e.touches[0].clientX;
+      if (Math.abs(clientX - startX) > 4) {
+        hasDragged = true;
+      }
+      moveSlider(clientX);
+    }, { passive: true });
+
+    window.addEventListener("mouseup", stopDrag);
+    window.addEventListener("touchend", stopDrag);
+
+    if (expandBtn) {
+      expandBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const card = container.closest(".gallery-card") || container.parentElement;
+        const title = card.querySelector("h3")?.textContent || "Before & After Reset";
+        const imgBefore = container.querySelector(".img-before")?.src || "";
+        const imgAfter = container.querySelector(".img-after")?.src || "";
+        openLightbox(imgBefore, imgAfter, title);
+      });
+    }
+
+    container.addEventListener("click", (e) => {
+      if (hasDragged) {
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+      }
+      if (e.target.closest(".slider-expand-btn")) return;
+      
+      const card = container.closest(".gallery-card") || container.parentElement;
+      const title = card.querySelector("h3")?.textContent || "Before & After Reset";
+      const imgBefore = container.querySelector(".img-before")?.src || "";
+      const imgAfter = container.querySelector(".img-after")?.src || "";
+      openLightbox(imgBefore, imgAfter, title);
+    });
   });
 }
 
@@ -223,4 +321,5 @@ function initScrollReveal() {
 window.refreshInteractiveFeatures = () => {
   initAccordions();
   initMagnifiers();
+  initOnPageSliders();
 };
