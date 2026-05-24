@@ -25,7 +25,9 @@
     </div>
   </header>
 
-  <main>
+  <main style="position: relative; overflow: hidden;">
+    <div class="bg-blob bg-blob-blue"></div>
+    <div class="bg-blob bg-blob-gold"></div>
     <section class="hero">
       <div class="section-inner hero-split">
         <div class="hero-content">
@@ -68,13 +70,6 @@
             <li class="feature-row">
               <span class="icon-wrap"><i data-lucide="check-circle-2"></i></span>
               <div class="feature-text">
-                <strong>Attention to Detail</strong>
-                <span>Careful cleaning of kitchens, bathrooms, surfaces, and detail zones.</span>
-              </div>
-            </li>
-            <li class="feature-row">
-              <span class="icon-wrap"><i data-lucide="check-circle-2"></i></span>
-              <div class="feature-text">
                 <strong>Effortless Booking</strong>
                 <span>Easy online quotes and quick appointment requests.</span>
               </div>
@@ -99,58 +94,73 @@
       </div>
     </section>
 
-    <section>
-      <div class="section-inner">
-        <div class="heading-underline-gradient fade-in-up">
-          <p class="eyebrow">Services</p>
-          <h2>Cleaning plans for the way people actually live and work.</h2>
-          <p>Carefully designed standard routines, heavy deep-cleans, and custom workspace setups.</p>
+    <section class="services-editorial-section">
+      <div class="section-inner split services-editorial-split">
+        <div class="services-left-col fade-in-up">
+          <div class="heading-underline-gradient">
+            <p class="eyebrow">Services</p>
+            <h2>Cleaning plans for the way people actually live and work.</h2>
+            <p>Carefully designed standard routines, heavy deep-cleans, and custom workspace setups built around real homes and workspaces.</p>
+          </div>
+          <div class="services-editorial-quote">
+            <blockquote>"The detail-oriented cleaning methods we develop keep Austin spaces immaculate and calm."</blockquote>
+            <span class="quote-author">— Vetted Crew Leaders</span>
+          </div>
+          <a class="button secondary" href="quote.html" style="margin-top: 24px;">Build a custom clean <i data-lucide="arrow-right"></i></a>
         </div>
-        <div class="grid">
-          <article class="card service-card fade-in-up">
-            <div class="service-card-image-wrap">
+        <div class="services-right-col">
+          <article class="card service-card-horizontal fade-in-up" style="--delay: 0.1s;">
+            <div class="service-image-wrap">
               <span class="service-badge gold">Most Booked</span>
               <img src="https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?auto=format&fit=crop&w=900&q=80" alt="Clean bright living room">
             </div>
-            <h3 style="margin-top: 16px;">Standard Cleaning</h3>
-            <p>Recurring upkeep for kitchens, bathrooms, floors, dusting, and high-touch surfaces.</p>
-            <ul class="service-inclusions">
-              <li><i data-lucide="check"></i> Kitchen surfaces & sinks</li>
-              <li><i data-lucide="check"></i> Bathroom cleaning & sanitizing</li>
-              <li><i data-lucide="check"></i> Floors vacuumed & mopped</li>
-              <li><i data-lucide="check"></i> High-touch zones dusted</li>
-            </ul>
-            <a class="tag" href="services/standard-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            <div class="service-info-wrap">
+              <h3>Standard Cleaning</h3>
+              <p>Recurring upkeep for kitchens, bathrooms, floors, dusting, and high-touch surfaces.</p>
+              <ul class="service-inclusions">
+                <li><i data-lucide="check"></i> Kitchen surfaces & sinks</li>
+                <li><i data-lucide="check"></i> Bathroom cleaning & sanitizing</li>
+                <li><i data-lucide="check"></i> Floors vacuumed & mopped</li>
+                <li><i data-lucide="check"></i> High-touch zones dusted</li>
+              </ul>
+              <a class="tag" href="services/standard-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            </div>
           </article>
-          <article class="card service-card fade-in-up">
-            <div class="service-card-image-wrap">
+          
+          <article class="card service-card-horizontal fade-in-up" style="--delay: 0.2s;">
+            <div class="service-image-wrap">
               <span class="service-badge">Best for Resets</span>
               <img src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=80" alt="Freshly cleaned bathroom">
             </div>
-            <h3 style="margin-top: 16px;">Deep Cleaning</h3>
-            <p>Detailed top-to-bottom resets for neglected areas, buildup, baseboards, and fixtures.</p>
-            <ul class="service-inclusions">
-              <li><i data-lucide="check"></i> Kitchen buildup removal</li>
-              <li><i data-lucide="check"></i> Bathroom grout & detail reset</li>
-              <li><i data-lucide="check"></i> Baseboard & fixture wash</li>
-              <li><i data-lucide="check"></i> In-depth floor scrub</li>
-            </ul>
-            <a class="tag" href="services/deep-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            <div class="service-info-wrap">
+              <h3>Deep Cleaning</h3>
+              <p>Detailed top-to-bottom resets for neglected areas, buildup, baseboards, and fixtures.</p>
+              <ul class="service-inclusions">
+                <li><i data-lucide="check"></i> Kitchen buildup removal</li>
+                <li><i data-lucide="check"></i> Bathroom grout & detail reset</li>
+                <li><i data-lucide="check"></i> Baseboard & fixture wash</li>
+                <li><i data-lucide="check"></i> In-depth floor scrub</li>
+              </ul>
+              <a class="tag" href="services/deep-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            </div>
           </article>
-          <article class="card service-card fade-in-up">
-            <div class="service-card-image-wrap">
+          
+          <article class="card service-card-horizontal fade-in-up" style="--delay: 0.3s;">
+            <div class="service-image-wrap">
               <span class="service-badge">Move-in Ready</span>
               <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80" alt="Modern clean home interior">
             </div>
-            <h3 style="margin-top: 16px;">Move-In and Move-Out</h3>
-            <p>Make handoffs easier with empty-home cleaning for apartments, homes, and rentals.</p>
-            <ul class="service-inclusions">
-              <li><i data-lucide="check"></i> Inside cabinets & drawers</li>
-              <li><i data-lucide="check"></i> Appliances inside & out</li>
-              <li><i data-lucide="check"></i> Full dust & sanitization</li>
-              <li><i data-lucide="check"></i> Baseboards & detail cleaning</li>
-            </ul>
-            <a class="tag" href="services/move-in-out-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            <div class="service-info-wrap">
+              <h3>Move-In and Move-Out</h3>
+              <p>Make handoffs easier with empty-home cleaning for apartments, homes, and rentals.</p>
+              <ul class="service-inclusions">
+                <li><i data-lucide="check"></i> Inside cabinets & drawers</li>
+                <li><i data-lucide="check"></i> Appliances inside & out</li>
+                <li><i data-lucide="check"></i> Full dust & sanitization</li>
+                <li><i data-lucide="check"></i> Baseboards & detail cleaning</li>
+              </ul>
+              <a class="tag" href="services/move-in-out-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+            </div>
           </article>
         </div>
       </div>
@@ -196,34 +206,34 @@
           <h2>A simple path to a cleaner space.</h2>
         </div>
         <div class="grid four steps">
-          <article class="card step fade-in-up">
+          <article class="card step fade-in-up" style="--delay: 0.1s;">
+            <div class="step-watermark">1</div>
             <div class="step-icon-wrap">
               <i data-lucide="home"></i>
-              <span class="step-number">1</span>
             </div>
             <h3>Tell us about your space</h3>
             <p>Choose your service and share the essentials.</p>
           </article>
-          <article class="card step fade-in-up">
+          <article class="card step fade-in-up" style="--delay: 0.2s;">
+            <div class="step-watermark">2</div>
             <div class="step-icon-wrap">
               <i data-lucide="clipboard-list"></i>
-              <span class="step-number">2</span>
             </div>
             <h3>Get your estimate</h3>
             <p>Receive a clear starting price and scope confirmation.</p>
           </article>
-          <article class="card step fade-in-up">
+          <article class="card step fade-in-up" style="--delay: 0.3s;">
+            <div class="step-watermark">3</div>
             <div class="step-icon-wrap">
               <i data-lucide="calendar"></i>
-              <span class="step-number">3</span>
             </div>
             <h3>Schedule service</h3>
             <p>Pick a time that works for your household or business.</p>
           </article>
-          <article class="card step fade-in-up">
+          <article class="card step fade-in-up" style="--delay: 0.4s;">
+            <div class="step-watermark">4</div>
             <div class="step-icon-wrap">
               <i data-lucide="sparkles"></i>
-              <span class="step-number">4</span>
             </div>
             <h3>Enjoy the reset</h3>
             <p>Walk into a cleaner, calmer space with less friction.</p>
@@ -239,9 +249,10 @@
           <h2>Real transformations.</h2>
         </div>
         <div class="grid" data-gallery-list>
-          <article class="card gallery-card fade-in-up">
+          <article class="card gallery-card fade-in-up" style="--delay: 0.1s;">
             <div class="gallery-slider">
               <div class="slider-container">
+                <span class="case-badge">Standard Clean</span>
                 <img class="slider-img img-before" src="https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=700&q=80" alt="Kitchen before cleaning">
                 <img class="slider-img img-after" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=700&q=80" alt="Kitchen after cleaning">
                 <div class="slider-bar"></div>
@@ -252,12 +263,17 @@
                 <button class="slider-expand-btn" aria-label="Expand image comparison"><i data-lucide="maximize-2"></i></button>
               </div>
             </div>
-            <h3 style="margin-top: 16px;">Kitchen reset</h3>
-            <p class="gallery-outcome">Surfaces refreshed · Details restored</p>
+            <div class="case-meta" style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(226, 232, 240, 0.6); padding-bottom: 10px; margin-bottom: 10px;">
+              <h3 style="margin: 0; font-size: 1.2rem;">Kitchen reset</h3>
+              <span class="case-metric" style="font-size: 0.82rem; font-weight: 700; color: var(--gold); background: var(--gold-light); padding: 3px 10px; border-radius: 999px;">Duration: 2.5 hrs</span>
+            </div>
+            <p class="gallery-outcome" style="margin: 0;">Surfaces refreshed · Details restored</p>
           </article>
-          <article class="card gallery-card fade-in-up">
+          
+          <article class="card gallery-card fade-in-up" style="--delay: 0.2s;">
             <div class="gallery-slider">
               <div class="slider-container">
+                <span class="case-badge">Deep Reset</span>
                 <img class="slider-img img-before" src="https://images.unsplash.com/photo-1584622781564-1d987f7333c1?auto=format&fit=crop&w=700&q=80" alt="Bathroom before detail cleaning">
                 <img class="slider-img img-after" src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=700&q=80" alt="Bathroom after detail cleaning">
                 <div class="slider-bar"></div>
@@ -268,12 +284,17 @@
                 <button class="slider-expand-btn" aria-label="Expand image comparison"><i data-lucide="maximize-2"></i></button>
               </div>
             </div>
-            <h3 style="margin-top: 16px;">Bathroom detail</h3>
-            <p class="gallery-outcome">Glass, fixtures, and corners cleaned</p>
+            <div class="case-meta" style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(226, 232, 240, 0.6); padding-bottom: 10px; margin-bottom: 10px;">
+              <h3 style="margin: 0; font-size: 1.2rem;">Bathroom detail</h3>
+              <span class="case-metric" style="font-size: 0.82rem; font-weight: 700; color: var(--gold); background: var(--gold-light); padding: 3px 10px; border-radius: 999px;">Duration: 3.5 hrs</span>
+            </div>
+            <p class="gallery-outcome" style="margin: 0;">Glass, fixtures, and corners cleaned</p>
           </article>
-          <article class="card gallery-card fade-in-up">
+          
+          <article class="card gallery-card fade-in-up" style="--delay: 0.3s;">
             <div class="gallery-slider">
               <div class="slider-container">
+                <span class="case-badge">Regular Care</span>
                 <img class="slider-img img-before" src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=700&q=80" alt="Living room before cleaning">
                 <img class="slider-img img-after" src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=700&q=80" alt="Living room after cleaning">
                 <div class="slider-bar"></div>
@@ -284,8 +305,11 @@
                 <button class="slider-expand-btn" aria-label="Expand image comparison"><i data-lucide="maximize-2"></i></button>
               </div>
             </div>
-            <h3 style="margin-top: 16px;">Living space refresh</h3>
-            <p class="gallery-outcome">Living area reset for a calmer feel</p>
+            <div class="case-meta" style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(226, 232, 240, 0.6); padding-bottom: 10px; margin-bottom: 10px;">
+              <h3 style="margin: 0; font-size: 1.2rem;">Living space refresh</h3>
+              <span class="case-metric" style="font-size: 0.82rem; font-weight: 700; color: var(--gold); background: var(--gold-light); padding: 3px 10px; border-radius: 999px;">Duration: 2.0 hrs</span>
+            </div>
+            <p class="gallery-outcome" style="margin: 0;">Living area reset for a calmer feel</p>
           </article>
         </div>
       </div>
@@ -403,44 +427,48 @@
       </div>
     </section>
 
-    <section>
+    <section class="faq-section-wrapper">
       <div class="section-inner">
-        <div class="heading-centered fade-in-up">
-          <p class="eyebrow">FAQs</p>
-          <h2>Quick answers before you book.</h2>
-        </div>
-        
-        <div class="faq-item fade-in-up">
-          <button class="faq-trigger" type="button">
-            <span>How does pricing work?</span>
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <div class="faq-panel">
-            <p>Pricing depends on the service type, property size, current condition, frequency, and add-ons. Your quote is confirmed before service.</p>
+        <div class="faq-two-col-split">
+          <div class="faq-left-col fade-in-up">
+            <div class="heading-accent-left">
+              <p class="eyebrow">FAQs</p>
+              <h2>Quick answers before you book.</h2>
+            </div>
+            <p style="margin-top: 16px; margin-bottom: 24px;">Find answers to common questions about our services, pricing, supplies, and scheduling policies.</p>
+            <p style="margin-top: 12px;">Have more questions? <a href="faq.html" class="tag" style="display: inline-flex; align-items: center; gap: 4px; color: var(--mint); font-weight: 700;">View all FAQs <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i></a></p>
           </div>
-        </div>
-        
-        <div class="faq-item fade-in-up">
-          <button class="faq-trigger" type="button">
-            <span>Do you bring supplies?</span>
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <div class="faq-panel">
-            <p>Yes. We can bring professional supplies and equipment, or use client-provided products on request.</p>
+          <div class="faq-right-col" data-faq-list>
+            <div class="faq-item fade-in-up" style="--delay: 0.1s;">
+              <button class="faq-trigger" type="button">
+                <span>How does pricing work?</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div class="faq-panel">
+                <p>Pricing depends on the service type, property size, current condition, frequency, and add-ons. Your quote is confirmed before service.</p>
+              </div>
+            </div>
+            
+            <div class="faq-item fade-in-up" style="--delay: 0.2s;">
+              <button class="faq-trigger" type="button">
+                <span>Do you bring supplies?</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div class="faq-panel">
+                <p>Yes. We can bring professional supplies and equipment, or use client-provided products on request.</p>
+              </div>
+            </div>
+            
+            <div class="faq-item fade-in-up" style="--delay: 0.3s;">
+              <button class="faq-trigger" type="button">
+                <span>Can I reschedule?</span>
+                <i data-lucide="chevron-down"></i>
+              </button>
+              <div class="faq-panel">
+                <p>Yes. Please contact us as early as possible so we can adjust the appointment window.</p>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div class="faq-item fade-in-up">
-          <button class="faq-trigger" type="button">
-            <span>Can I reschedule?</span>
-            <i data-lucide="chevron-down"></i>
-          </button>
-          <div class="faq-panel">
-            <p>Yes. Please contact us as early as possible so we can adjust the appointment window.</p>
-          </div>
-        </div>
-        <div style="text-align: center; margin-top: 32px;" class="fade-in-up">
-          <p>Have more questions? <a href="faq.html" class="tag" style="display: inline-flex; align-items: center; gap: 4px;">View all FAQs <i data-lucide="arrow-right" style="width: 14px; height: 14px;"></i></a></p>
         </div>
       </div>
     </section>

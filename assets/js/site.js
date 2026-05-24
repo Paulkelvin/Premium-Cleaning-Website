@@ -314,7 +314,7 @@ function initScrollReveal() {
     });
   }, { threshold: 0.1 });
 
-  document.querySelectorAll(".fade-in-up").forEach((el) => observer.observe(el));
+  document.querySelectorAll(".fade-in-up, .steps").forEach((el) => observer.observe(el));
 }
 
 // Expose accordion and magnifier updates for dynamically rendered items
