@@ -337,13 +337,13 @@ function initHomepageBubbles() {
   overlay.className = "bubbles-overlay";
   document.body.appendChild(overlay);
 
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 20; i++) {
     const bubble = document.createElement("div");
     bubble.className = "initial-bubble";
-    const size = Math.random() * 25 + 10;
+    const size = Math.random() * 30 + 15;
     const left = Math.random() * 100;
-    const delay = Math.random() * 0.4;
-    const duration = Math.random() * 0.6 + 0.8;
+    const delay = Math.random() * 0.5;
+    const duration = Math.random() * 0.6 + 1.2;
     
     bubble.style.width = `${size}px`;
     bubble.style.height = `${size}px`;
@@ -354,7 +354,7 @@ function initHomepageBubbles() {
     overlay.appendChild(bubble);
   }
 
-  setTimeout(() => overlay.remove(), 2000);
+  setTimeout(() => overlay.remove(), 2500);
 }
 
 // 8. Gallery Filtering

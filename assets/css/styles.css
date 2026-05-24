@@ -3179,17 +3179,18 @@ textarea {
 .initial-bubble {
   position: absolute;
   bottom: -50px;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
-  border: 1px solid rgba(255,255,255,0.4);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.3) 60%, rgba(15, 79, 207, 0.1) 100%);
+  border: 1px solid rgba(15, 79, 207, 0.3);
   border-radius: 50%;
-  animation: floatUp 1.2s ease-out forwards;
-  box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+  box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(15, 79, 207, 0.08);
+  animation: floatUp 1.5s ease-out forwards;
   opacity: 0;
 }
 @keyframes floatUp {
-  0% { transform: translateY(0) scale(0.8); opacity: 0; }
-  20% { opacity: 0.7; }
-  100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+  0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0; }
+  10% { opacity: 0.5; }
+  50% { transform: translateY(-50vh) translateX(20px) scale(1.1); opacity: 0.4; }
+  100% { transform: translateY(-100vh) translateX(-10px) scale(1.2); opacity: 0; }
 }
 
 /* Background floating bubbles */
@@ -3365,3 +3366,192 @@ textarea {
   box-shadow: 0 4px 10px rgba(15, 79, 207, 0.2);
 }
 
+/* ================================================================
+   QUOTE ASSISTANT & MODAL STYLES
+   ================================================================ */
+
+/* Quote Layout */
+.quote-app-split {
+  display: flex;
+  flex-direction: column;
+}
+@media(min-width: 900px) {
+  .quote-app-split {
+    flex-direction: row;
+  }
+}
+
+.quote-assistant-card {
+  box-shadow: 0 20px 50px rgba(11, 17, 15, 0.05);
+  border-radius: 24px;
+}
+
+/* Progress Bar */
+.quote-progress-bar {
+  background: var(--line);
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.quote-progress-fill {
+  background: var(--mint);
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+/* Chips */
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.chip {
+  cursor: pointer;
+  position: relative;
+}
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.chip span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+.chip:hover span {
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.chip input:checked + span {
+  background: var(--mint);
+  color: var(--white);
+  border-color: var(--mint);
+  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.2);
+}
+
+/* Card Selection Grid */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media(min-width: 600px) {
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.select-card {
+  cursor: pointer;
+  position: relative;
+}
+.select-card input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.select-card-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: all 0.2s ease;
+}
+.select-card-inner strong {
+  font-size: 1.05rem;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.select-card-inner span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.select-card:hover .select-card-inner {
+  border-color: var(--mint);
+}
+.select-card input:checked + .select-card-inner {
+  background: var(--mint-light);
+  border-color: var(--mint);
+  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.1);
+}
+.select-card input:checked + .select-card-inner strong {
+  color: var(--mint-dark);
+}
+.select-card input:checked + .select-card-inner span {
+  color: var(--navy);
+}
+
+/* Quote Modal */
+.quote-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.quote-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+.quote-modal-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(11, 17, 15, 0.6);
+  backdrop-filter: blur(4px);
+}
+.quote-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  background: var(--surface);
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+  overflow-y: auto;
+  z-index: 10001;
+}
+.quote-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+.quote-modal-close:hover {
+  color: var(--red);
+  border-color: var(--red);
+  transform: scale(1.05);
+}
+.quote-modal-body {
+  padding: 32px 20px;
+}
+@media(min-width: 768px) {
+  .quote-modal-body {
+    padding: 40px 60px;
+  }
+}
