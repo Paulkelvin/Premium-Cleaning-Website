@@ -71,6 +71,12 @@
     applyTestimonials(result.testimonials || []);
     applyGallery(result.galleryItems || []);
     applyServiceAreas(result.serviceAreas || []);
+    if (typeof window.refreshInteractiveFeatures === "function") {
+      window.refreshInteractiveFeatures();
+    }
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons();
+    }
   } catch (error) {
     console.warn("Sanity content unavailable; using page fallback content.", error);
   }
@@ -166,10 +172,15 @@ function applyFaqs(faqs) {
   const list = document.querySelector("[data-faq-list]");
   if (!list || !faqs.length) return;
   list.innerHTML = faqs.map((item, index) => `
-    <details class="faq-item" ${index === 0 ? "open" : ""}>
-      <summary>${item.question}</summary>
-      <p>${item.answer}</p>
-    </details>
+    <div class="faq-item ${index === 0 ? "is-open" : ""}">
+      <button class="faq-trigger" type="button">
+        <span>${item.question}</span>
+        <i data-lucide="chevron-down"></i>
+      </button>
+      <div class="faq-panel" ${index === 0 ? 'style="max-height: 800px;"' : ''}>
+        <p>${item.answer}</p>
+      </div>
+    </div>
   `).join("");
 }
 
@@ -189,10 +200,14 @@ function applyGallery(items) {
   const list = document.querySelector("[data-gallery-list]");
   if (!list || !items.length) return;
   list.innerHTML = items.map((item) => `
-    <article class="card gallery-card">
+    <article class="card gallery-card fade-in-up">
       <div class="gallery-pair">
-        <img src="${item.beforeImageUrl}" alt="${item.title} before">
-        <img src="${item.afterImageUrl}" alt="${item.title} after">
+        <div class="gallery-zoom-container">
+          <img src="${item.beforeImageUrl}" alt="${item.title} before">
+        </div>
+        <div class="gallery-zoom-container">
+          <img src="${item.afterImageUrl}" alt="${item.title} after">
+        </div>
       </div>
       <h3>${item.title}</h3>
       <p>${item.description || ""}</p>

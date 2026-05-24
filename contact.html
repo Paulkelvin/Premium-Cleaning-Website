@@ -1,14 +1,159 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Contact | PristinePro Cleaning</title><link rel="stylesheet" href="assets/css/styles.css"></head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact | PristinePro Cleaning</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 <body data-sanity-page="contact">
-  <header class="site-header"><div class="nav-wrap"><a class="brand" href="index.html"><span class="brand-mark">P</span><span>PristinePro</span></a><button class="nav-toggle" aria-expanded="false" aria-label="Open navigation">☰</button><nav class="site-nav"><a href="about.html">About</a><a href="services.html">Services</a><a href="service-areas.html">Areas</a><a href="gallery.html">Gallery</a><a href="faq.html">FAQs</a><a href="contact.html">Contact</a><a class="button small" href="quote.html">Get a Quote</a></nav></div></header>
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><span class="brand-mark">P</span><span>PristinePro</span></a>
+      <button class="nav-toggle" aria-expanded="false" aria-label="Open navigation">☰</button>
+      <nav class="site-nav">
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="service-areas.html">Areas</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="faq.html">FAQs</a>
+        <a href="contact.html">Contact</a>
+        <a class="button small" href="quote.html">Get a Quote</a>
+      </nav>
+    </div>
+  </header>
+
   <main>
-    <section class="page-hero"><div class="section-inner"><p class="eyebrow">Contact</p><h1>Questions, special requests, and urgent cleaning needs start here.</h1><p>Send us a message and we will respond as quickly as possible during business hours.</p></div></section>
-    <section><div class="section-inner split"><form class="card form-grid" data-lead-form data-table="contact_submissions">
-      <label class="field">Full name<input name="full_name" required autocomplete="name"></label><label class="field">Email<input name="email" type="email" required autocomplete="email"></label><label class="field">Phone<input name="phone" autocomplete="tel"></label><label class="field">Inquiry type<select name="inquiry_type" required><option value="">Choose inquiry</option><option>General question</option><option>Quote help</option><option>Booking help</option><option>Recurring cleaning</option><option>Urgent cleaning request</option><option>Commercial cleaning</option></select></label><label class="field full">Message<textarea name="message" required placeholder="Tell us how we can help."></textarea></label><label class="field">Preferred contact method<select name="preferred_contact_method"><option>Email</option><option>Phone</option><option>Text message</option></select></label><label class="field check"><input name="consent" type="checkbox" required><span>I consent to being contacted about this inquiry.</span></label><div class="field full"><button class="button" type="submit">Send message</button><div data-form-state class="form-state" role="status"></div></div>
-    </form><aside class="card"><h2>Contact details</h2><ul class="contact-list"><li><strong>Phone</strong><br><a href="tel:+15550147820">(555) 014-7820</a></li><li><strong>Email</strong><br><a href="mailto:hello@pristineprocleaning.com">hello@pristineprocleaning.com</a></li><li><strong>Service area</strong><br>Austin, TX and nearby communities</li><li><strong>Operating hours</strong><br>Monday to Saturday, 8am to 6pm</li><li><strong>Social</strong><br><a href="#">Instagram</a> · <a href="#">Facebook</a> · <a href="#">LinkedIn</a></li></ul><p><strong>Urgent note:</strong> For move-out deadlines, rental turnovers, or time-sensitive spills, call after submitting the form.</p><div class="cta-row"><a class="button secondary" href="quote.html">Request quote</a><a class="button ghost" href="book.html">Book appointment</a></div></aside></div></section>
-    <section class="band"><div class="section-inner"><div class="section-heading"><div><p class="eyebrow">Location</p><h2>Based in the Austin area.</h2><p>Replace this visual with a live Google Map embed if the client has a public storefront or verified business location.</p></div></div><div class="map-placeholder">Map area for public business location</div></div></section>
+    <section class="page-hero" style="padding: 40px 0;">
+      <div class="section-inner">
+        <p class="eyebrow"><i data-lucide="mail"></i>Contact</p>
+        <h1 style="max-width: 720px;">Questions, special requests, and urgent needs start here.</h1>
+        <p>Send us a message and we will respond as quickly as possible during business hours.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-inner split">
+        <form class="card form-grid fade-in-up" data-lead-form data-table="contact_submissions" style="padding: 40px;">
+          <h2 class="field full" style="font-size:1.6rem; margin-bottom:12px;">Send a message</h2>
+          
+          <label class="field">Full name
+            <input name="full_name" required autocomplete="name" placeholder="John Doe">
+          </label>
+          
+          <label class="field">Email
+            <input name="email" type="email" required autocomplete="email" placeholder="john@example.com">
+          </label>
+          
+          <label class="field">Phone
+            <input name="phone" autocomplete="tel" placeholder="(555) 000-0000">
+          </label>
+          
+          <label class="field">Inquiry type
+            <select name="inquiry_type" required>
+              <option value="">Choose inquiry</option>
+              <option>General question</option>
+              <option>Quote help</option>
+              <option>Booking help</option>
+              <option>Recurring cleaning</option>
+              <option>Urgent request</option>
+              <option>Commercial cleaning</option>
+            </select>
+          </label>
+          
+          <label class="field full">Message
+            <textarea name="message" required placeholder="Tell us how we can help with your space..."></textarea>
+          </label>
+          
+          <label class="field">Preferred contact method
+            <select name="preferred_contact_method">
+              <option>Email</option>
+              <option>Phone</option>
+              <option>Text message</option>
+            </select>
+          </label>
+          
+          <label class="field check full" style="margin-top: 10px;">
+            <input name="consent" type="checkbox" required>
+            <span>I consent to being contacted about this inquiry.</span>
+          </label>
+          
+          <div class="field full" style="margin-top: 10px;">
+            <button class="button" type="submit" style="width: 100%;">Send message <i data-lucide="send"></i></button>
+            <div data-form-state class="form-state" role="status"></div>
+          </div>
+        </form>
+
+        <aside class="card fade-in-up" style="padding: 40px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h2 style="font-size:1.6rem; margin-bottom: 24px;">Contact details</h2>
+            <ul class="contact-list">
+              <li>
+                <i data-lucide="phone"></i>
+                <div>
+                  <strong>Phone</strong><br>
+                  <a href="tel:+15550147820" style="font-weight:600; color:var(--mint);">(555) 014-7820</a>
+                </div>
+              </li>
+              <li>
+                <i data-lucide="mail"></i>
+                <div>
+                  <strong>Email</strong><br>
+                  <a href="mailto:hello@pristineprocleaning.com" style="font-weight:600; color:var(--mint);">hello@pristineprocleaning.com</a>
+                </div>
+              </li>
+              <li>
+                <i data-lucide="map-pin"></i>
+                <div>
+                  <strong>Service area</strong><br>
+                  <span style="color: var(--muted);">Austin, TX and nearby communities</span>
+                </div>
+              </li>
+              <li>
+                <i data-lucide="clock"></i>
+                <div>
+                  <strong>Operating hours</strong><br>
+                  <span style="color: var(--muted);">Monday to Saturday, 8am to 6pm</span>
+                </div>
+              </li>
+              <li>
+                <i data-lucide="share-2"></i>
+                <div>
+                  <strong>Social media</strong><br>
+                  <a href="#" style="color:var(--mint); font-weight:600;">Instagram</a> · <a href="#" style="color:var(--mint); font-weight:600;">Facebook</a>
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+          <div style="margin-top: 32px; background: var(--gold-light); padding: 20px; border-radius: 12px; border-left: 4px solid var(--gold);">
+            <strong style="color:var(--gold-dark); display:block; margin-bottom:4px;">Urgent note:</strong>
+            <p style="font-size: 0.94rem; margin: 0; color: var(--gold-dark);">For tight deadlines, turnovers, or emergency spill cleanups, please call us directly after submitting the form.</p>
+          </div>
+          
+          <div class="cta-row" style="margin-top: 24px;">
+            <a class="button secondary" href="quote.html" style="flex:1;">Request quote</a>
+            <a class="button ghost" href="book.html" style="flex:1;">Book appointment</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="band">
+      <div class="section-inner">
+        <div class="heading-centered fade-in-up">
+          <p class="eyebrow">Location</p>
+          <h2>Based in the Austin area.</h2>
+        </div>
+        <div class="map-placeholder fade-in-up">Austin Metro Area Coverage Map</div>
+      </div>
+    </section>
   </main>
-  <script src="assets/js/config.js"></script><script src="assets/js/site.js"></script><script src="assets/js/sanity-content.js"></script><script src="assets/js/forms.js"></script>
-</body></html>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/sanity-content.js"></script>
+  <script src="assets/js/forms.js"></script>
+</body>
+</html>

@@ -1,46 +1,226 @@
-const yearNode = document.querySelector("[data-year]");
-if (yearNode) yearNode.textContent = new Date().getFullYear();
+// site.js - Premium Interactive Interactions and UI Polish
 
-if (!document.querySelector(".site-footer") && !document.body.classList.contains("admin-shell")) {
-  const prefix = location.pathname.includes("/services/") ? "../" : "";
-  const footer = document.createElement("footer");
-  footer.className = "site-footer";
-  footer.innerHTML = `
-    <div class="section-inner footer-grid">
-      <div><a class="brand" href="${prefix}index.html"><span class="brand-mark">P</span><span>PristinePro</span></a><p>Premium local cleaning for homes, rentals, and workplaces.</p><a class="button secondary" href="${prefix}quote.html">Request quote</a></div>
-      <div><h3>Quick links</h3><ul><li><a href="${prefix}about.html">About</a></li><li><a href="${prefix}services.html">Services</a></li><li><a href="${prefix}gallery.html">Gallery</a></li><li><a href="${prefix}contact.html">Contact</a></li></ul></div>
-      <div><h3>Services</h3><ul><li><a href="${prefix}services/standard-cleaning.html">Standard cleaning</a></li><li><a href="${prefix}services/deep-cleaning.html">Deep cleaning</a></li><li><a href="${prefix}services/move-in-out-cleaning.html">Move-in/out</a></li><li><a href="${prefix}services/office-cleaning.html">Office cleaning</a></li></ul></div>
-      <div><h3>Contact</h3><ul><li><a href="tel:+15550147820">(555) 014-7820</a></li><li><a href="mailto:hello@pristineprocleaning.com">hello@pristineprocleaning.com</a></li><li>Austin, TX</li><li>Mon-Sat, 8am-6pm</li></ul></div>
-      <div><h3>Areas</h3><ul><li>Austin</li><li>Round Rock</li><li>Cedar Park</li><li>Pflugerville</li><li>Lakeway</li><li><a href="#">Instagram</a> · <a href="#">Facebook</a></li></ul></div>
-    </div>
-    <div class="section-inner footer-bottom"><span>© <span data-year></span> PristinePro Cleaning.</span><span><a href="${prefix}privacy.html">Privacy Policy</a> · <a href="${prefix}terms.html">Terms of Service</a> · <a href="${prefix}admin-login.html">Admin</a></span></div>
-  `;
-  document.body.appendChild(footer);
-}
-
-document.querySelectorAll("[data-year]").forEach((node) => {
-  node.textContent = new Date().getFullYear();
-});
-
-const navToggle = document.querySelector(".nav-toggle");
-const siteNav = document.querySelector(".site-nav");
-if (navToggle && siteNav) {
-  navToggle.addEventListener("click", () => {
-    const isOpen = siteNav.classList.toggle("is-open");
-    navToggle.setAttribute("aria-expanded", String(isOpen));
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Current Year Footer
+  document.querySelectorAll("[data-year]").forEach((node) => {
+    node.textContent = new Date().getFullYear();
   });
-}
 
-document.querySelectorAll("[data-copy-config]").forEach((node) => {
-  const key = node.getAttribute("data-copy-config");
-  if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
+  // 2. Lucide Icons Setup
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+
+  // 3. Smooth Mobile Hamburger Menu
+  const navToggle = document.querySelector(".nav-toggle");
+  const siteNav = document.querySelector(".site-nav");
+  if (navToggle && siteNav) {
+    navToggle.addEventListener("click", () => {
+      const isOpen = siteNav.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+      navToggle.innerHTML = isOpen ? "✕" : "☰";
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!navToggle.contains(e.target) && !siteNav.contains(e.target) && siteNav.classList.contains("is-open")) {
+        siteNav.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.innerHTML = "☰";
+      }
+    });
+  }
+
+  // 4. Smooth FAQ Accordion Toggle
+  initAccordions();
+
+  // 5. Before & After Magnifier & Lightbox Setup
+  initMagnifiers();
+  initLightboxTriggers();
+
+  // 6. Scroll Animations (Scroll Reveal)
+  initScrollReveal();
+
+  // 7. Config Copy Bindings
+  document.querySelectorAll("[data-copy-config]").forEach((node) => {
+    const key = node.getAttribute("data-copy-config");
+    if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
+  });
 });
 
-document.querySelectorAll("details.faq-item").forEach((detail) => {
-  detail.addEventListener("toggle", () => {
-    if (!detail.open) return;
-    document.querySelectorAll("details.faq-item[open]").forEach((other) => {
-      if (other !== detail) other.open = false;
+// Accordions logic
+function initAccordions() {
+  document.querySelectorAll(".faq-item").forEach((item) => {
+    const trigger = item.querySelector(".faq-trigger");
+    const panel = item.querySelector(".faq-panel");
+    if (!trigger || !panel) return;
+
+    trigger.addEventListener("click", () => {
+      const isOpen = item.classList.contains("is-open");
+      
+      // Close other FAQs
+      document.querySelectorAll(".faq-item.is-open").forEach((other) => {
+        if (other !== item) {
+          other.classList.remove("is-open");
+          other.querySelector(".faq-panel").style.maxHeight = null;
+        }
+      });
+
+      if (isOpen) {
+        item.classList.remove("is-open");
+        panel.style.maxHeight = null;
+      } else {
+        item.classList.add("is-open");
+        panel.style.maxHeight = panel.scrollHeight + "px";
+      }
     });
   });
-});
+}
+
+// Magnifier logic
+function initMagnifiers() {
+  document.querySelectorAll(".gallery-zoom-container").forEach((container) => {
+    if (container.querySelector(".zoom-lens")) return;
+
+    const img = container.querySelector("img");
+    if (!img) return;
+
+    const lens = document.createElement("div");
+    lens.className = "zoom-lens";
+    lens.style.backgroundImage = `url('${img.src}')`;
+    container.appendChild(lens);
+
+    container.addEventListener("mousemove", (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Keep lens inside container
+      lens.style.left = `${x - 70}px`;
+      lens.style.top = `${y - 70}px`;
+
+      // Zoom calculations
+      const percentX = (x / rect.width) * 100;
+      const percentY = (y / rect.height) * 100;
+
+      lens.style.backgroundPosition = `${percentX}% ${percentY}%`;
+      lens.style.backgroundSize = `${rect.width * 2.2}px ${rect.height * 2.2}px`;
+    });
+  });
+}
+
+// Open comparison Lightbox when clicking on gallery items
+function initLightboxTriggers() {
+  document.addEventListener("click", (e) => {
+    const pair = e.target.closest(".gallery-pair");
+    if (!pair) return;
+
+    const imgs = pair.querySelectorAll("img");
+    if (imgs.length < 2) return;
+
+    const card = pair.closest(".gallery-card") || pair.parentElement;
+    const title = card.querySelector("h3")?.textContent || "Before & After Reset";
+
+    openLightbox(imgs[0].src, imgs[1].src, title);
+  });
+}
+
+function openLightbox(beforeSrc, afterSrc, title) {
+  let modal = document.querySelector("#gallery-lightbox");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "gallery-lightbox";
+    modal.className = "lightbox-modal";
+    modal.innerHTML = `
+      <div class="lightbox-content">
+        <button class="lightbox-close" type="button" aria-label="Close gallery">&times;</button>
+        <h3 id="lightbox-title" style="margin-bottom:4px; font-size: 1.4rem;">Before & After</h3>
+        <p style="margin-bottom:20px; font-size:0.95rem; color: var(--muted);">Drag the center slider to compare the transformation side-by-side.</p>
+        <div class="slider-container">
+          <img class="slider-img img-before" src="" alt="Before">
+          <img class="slider-img img-after" src="" alt="After">
+          <div class="slider-bar"></div>
+          <div class="slider-button">↔</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector(".lightbox-close").addEventListener("click", () => {
+      modal.classList.remove("is-open");
+    });
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("is-open");
+    });
+
+    // Slider comparison logic
+    const container = modal.querySelector(".slider-container");
+    const afterImg = modal.querySelector(".img-after");
+    const bar = modal.querySelector(".slider-bar");
+    const button = modal.querySelector(".slider-button");
+    let isDragging = false;
+
+    const moveSlider = (clientX) => {
+      const rect = container.getBoundingClientRect();
+      let x = clientX - rect.left;
+      if (x < 0) x = 0;
+      if (x > rect.width) x = rect.width;
+      const percent = (x / rect.width) * 100;
+
+      afterImg.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+      bar.style.left = `${percent}%`;
+      button.style.left = `${percent}%`;
+    };
+
+    const startDrag = () => { isDragging = true; };
+    const stopDrag = () => { isDragging = false; };
+
+    bar.addEventListener("mousedown", startDrag);
+    container.addEventListener("mousedown", startDrag);
+    window.addEventListener("mouseup", stopDrag);
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      moveSlider(e.clientX);
+    });
+
+    // Touch support
+    bar.addEventListener("touchstart", startDrag);
+    container.addEventListener("touchstart", startDrag);
+    window.addEventListener("touchend", stopDrag);
+    window.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
+      moveSlider(e.touches[0].clientX);
+    });
+  }
+
+  modal.querySelector("#lightbox-title").textContent = title;
+  modal.querySelector(".img-before").src = beforeSrc;
+  
+  const afterImg = modal.querySelector(".img-after");
+  afterImg.src = afterSrc;
+  afterImg.style.clipPath = "polygon(0 0, 50% 0, 50% 100%, 0 100%)";
+  
+  modal.querySelector(".slider-bar").style.left = "50%";
+  modal.querySelector(".slider-button").style.left = "50%";
+
+  modal.classList.add("is-open");
+}
+
+// Scroll animation logic
+function initScrollReveal() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("appeared");
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll(".fade-in-up").forEach((el) => observer.observe(el));
+}
+
+// Expose accordion and magnifier updates for dynamically rendered items
+window.refreshInteractiveFeatures = () => {
+  initAccordions();
+  initMagnifiers();
+};
