@@ -125,7 +125,7 @@ function applyPageHero(data) {
     }
     meta.setAttribute("content", page.metaDescription);
   }
-  if (page.title) document.title = `${page.title} | PristinePro Cleaning`;
+  if (page.title) document.title = `${page.title} | RS Cleaning Collective`;
 }
 
 function applyHome(home) {
@@ -165,7 +165,7 @@ function applyService(services) {
   const image = document.querySelector("main section:nth-of-type(2) img");
   attr(image, "src", service.heroImageUrl);
   attr(image, "alt", service.title);
-  if (service.title) document.title = `${service.title} | PristinePro Cleaning`;
+  if (service.title) document.title = `${service.title} | RS Cleaning Collective`;
 }
 
 function applyFaqs(faqs) {
