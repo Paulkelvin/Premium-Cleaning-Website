@@ -98,14 +98,9 @@ function initTestimonialSlider() {
 }
 
 function initHomeReviewsCarousel() {
-  const carousel = document.getElementById("homeReviewsCarousel");
   const track = document.getElementById("homeReviewsTrack");
-  const section = document.querySelector(".reviews-section");
-  if (!carousel || !track || !section || carousel.dataset.bound === "true") return;
-  carousel.dataset.bound = "true";
-
-  const prevBtn = section.querySelector(".prev-btn");
-  const nextBtn = section.querySelector(".next-btn");
+  if (!track || track.dataset.bound === "true") return;
+  track.dataset.bound = "true";
 
   const setupReviewCardScroll = (card) => {
     let text = card.querySelector(".review-text");
@@ -145,107 +140,9 @@ function initHomeReviewsCarousel() {
   });
   track.querySelectorAll(".review-card").forEach(setupReviewCardScroll);
 
-  const loopWidth = () => track.scrollWidth / 2;
-
-  const getScrollAmount = () => {
-    const card = track.querySelector(".review-card");
-    if (!card) return 0;
-    const styles = getComputedStyle(track);
-    const gap = parseFloat(styles.columnGap || styles.gap || "18") || 18;
-    return card.offsetWidth + gap;
-  };
-
-  const scrollByCard = (direction) => {
-    pauseAutoScrollBriefly();
-    carousel.classList.add("is-user-active");
-    carousel.scrollBy({ left: direction * getScrollAmount(), behavior: "smooth" });
-    setTimeout(normalizeScrollLoop, 400);
-  };
-
-  prevBtn?.addEventListener("click", () => scrollByCard(-1));
-  nextBtn?.addEventListener("click", () => scrollByCard(1));
-
-  let isDragging = false;
-  let startX = 0;
-  let startScrollLeft = 0;
-  let hasDragged = false;
-  let autoScrollPaused = false;
-  let resumeAutoScrollTimer = null;
-  let rafId = null;
-  const autoScrollSpeed = 0.32;
-
-  const normalizeScrollLoop = () => {
-    const width = loopWidth();
-    if (width <= 0) return;
-    if (carousel.scrollLeft >= width) carousel.scrollLeft -= width;
-    if (carousel.scrollLeft < 0) carousel.scrollLeft += width;
-  };
-
-  const pauseAutoScrollBriefly = () => {
-    autoScrollPaused = true;
-    carousel.classList.add("is-user-active");
-    if (resumeAutoScrollTimer) clearTimeout(resumeAutoScrollTimer);
-    resumeAutoScrollTimer = setTimeout(() => {
-      autoScrollPaused = false;
-      carousel.classList.remove("is-user-active");
-    }, 2800);
-  };
-
-  carousel.classList.add("is-auto-scroll");
-
-  const tickAutoScroll = () => {
-    if (!autoScrollPaused && !isDragging) {
-      carousel.scrollLeft += autoScrollSpeed;
-      normalizeScrollLoop();
-    }
-    rafId = requestAnimationFrame(tickAutoScroll);
-  };
-  rafId = requestAnimationFrame(tickAutoScroll);
-
-  carousel.addEventListener("mouseenter", () => { autoScrollPaused = true; });
-  carousel.addEventListener("mouseleave", () => {
-    if (!isDragging) autoScrollPaused = false;
-  });
-
-  carousel.addEventListener("pointerdown", (event) => {
-    isDragging = true;
-    hasDragged = false;
-    autoScrollPaused = true;
-    startX = event.clientX;
-    startScrollLeft = carousel.scrollLeft;
-    carousel.classList.add("is-dragging", "is-user-active");
-    carousel.setPointerCapture(event.pointerId);
-  });
-
-  carousel.addEventListener("pointermove", (event) => {
-    if (!isDragging) return;
-    const delta = event.clientX - startX;
-    if (Math.abs(delta) > 4) hasDragged = true;
-    carousel.scrollLeft = startScrollLeft - delta;
-    normalizeScrollLoop();
-  });
-
-  const endDrag = (event) => {
-    if (!isDragging) return;
-    isDragging = false;
-    carousel.classList.remove("is-dragging");
-    normalizeScrollLoop();
-    pauseAutoScrollBriefly();
-    if (event?.pointerId) {
-      try { carousel.releasePointerCapture(event.pointerId); } catch {}
-    }
-  };
-
-  carousel.addEventListener("pointerup", endDrag);
-  carousel.addEventListener("pointercancel", endDrag);
-  carousel.addEventListener("click", (event) => {
-    if (hasDragged) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }, true);
-
-  carousel.addEventListener("scroll", normalizeScrollLoop, { passive: true });
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    track.style.animation = "none";
+  }
 }
 
 // Accordions logic
@@ -507,28 +404,74 @@ function openLightbox(beforeSrc, afterSrc, title) {
 // Scroll animation logic
 let scrollRevealObserver;
 
-function initScrollReveal() {
+const REVEAL_SELECTORS = ".fade-in-up, .fade-in-left, .fade-in-right, .steps";
+const REVEAL_STAGGER_PARENTS = ".grid, .steps, [data-gallery-list], .home-proof-bar-inner, .premium-features, .faq-list, .split, .service-cards-stack";
+
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function assignRevealStagger(el) {
+  const parent = el.closest(REVEAL_STAGGER_PARENTS);
+  if (!parent) return;
+
+  const siblings = [...parent.children].filter((child) =>
+    child.matches(".fade-in-up, .fade-in-left, .fade-in-right, .gallery-card, .step, .faq-item, .service-card-horizontal")
+  );
+  const index = siblings.indexOf(el);
+  if (index >= 0) {
+    el.style.setProperty("--delay", `${index * 0.18}s`);
+  }
+}
+
+function assignProofBarStagger(container) {
+  container.querySelectorAll(".home-proof-compact li, .home-proof-stats li").forEach((item, index) => {
+    item.style.setProperty("--delay", `${index * 0.12}s`);
+  });
+}
+
+function revealElement(el) {
+  if (el.classList.contains("appeared")) return;
+  el.classList.add("appeared");
+
+  if (el.classList.contains("home-proof-bar-inner") || el.classList.contains("home-proof-compact")) {
+    assignProofBarStagger(el);
+  }
+}
+
+function initScrollReveal({ revealVisibleNow = false } = {}) {
+  if (prefersReducedMotion()) {
+    document.querySelectorAll(REVEAL_SELECTORS).forEach((el) => revealElement(el));
+    return;
+  }
+
   if (!scrollRevealObserver) {
     scrollRevealObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("appeared");
-        }
+        if (!entry.isIntersecting) return;
+        revealElement(entry.target);
+        scrollRevealObserver.unobserve(entry.target);
       });
-    }, { threshold: 0.1 });
+    }, {
+      threshold: 0.14,
+      rootMargin: "0px 0px -8% 0px",
+    });
   }
 
-  document.querySelectorAll(".fade-in-up:not([data-reveal-observed]), .steps:not([data-reveal-observed])").forEach((el) => {
+  document.querySelectorAll(`${REVEAL_SELECTORS}:not([data-reveal-observed])`).forEach((el) => {
+    assignRevealStagger(el);
     el.dataset.revealObserved = "true";
     scrollRevealObserver.observe(el);
   });
 
-  document.querySelectorAll(".fade-in-up:not(.appeared)").forEach((el) => {
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      el.classList.add("appeared");
-    }
-  });
+  if (revealVisibleNow) {
+    document.querySelectorAll(`${REVEAL_SELECTORS}:not(.appeared)`).forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
+        window.setTimeout(() => revealElement(el), 120);
+      }
+    });
+  }
 }
 
 // Expose accordion and magnifier updates for dynamically rendered items
@@ -537,7 +480,7 @@ window.refreshInteractiveFeatures = () => {
   initMagnifiers();
   initOnPageSliders();
   initHomeReviewsCarousel();
-  initScrollReveal();
+  initScrollReveal({ revealVisibleNow: true });
 };
 
 // 7. Cleaning-themed Homepage Bubbles

@@ -132,7 +132,7 @@ function applyHome(home) {
   if (!home || document.body.dataset.sanityPage !== "home") return;
   text(document.querySelector(".hero .eyebrow"), home.heroEyebrow);
   text(document.querySelector(".hero h1"), home.heroTitle);
-  text(document.querySelector(".hero p:not(.eyebrow)"), home.heroCopy);
+  text(document.querySelector(".hero .hero-lead"), home.heroCopy);
 
   const actions = document.querySelectorAll(".hero-actions a");
   text(actions[0], home.primaryCta?.label);
