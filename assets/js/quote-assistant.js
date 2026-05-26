@@ -508,6 +508,68 @@ function buildSubmissionPayload(form, table) {
   return { payload, pricing };
 }
 
+const QUOTE_STEP_JOURNEY = ["Space", "Service", "Extras", "Contact", "Your estimate"];
+
+const QUOTE_PLAN_IMAGES = [
+  "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85",
+  "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=85",
+  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=85",
+  "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=85",
+  "https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?auto=format&fit=crop&w=600&q=85"
+];
+
+function initQuoteSizeChips(form) {
+  const chipConfig = {
+    bedrooms: {
+      hidden: form.querySelector("#quoteBedrooms"),
+      custom: form.querySelector("#quoteBedroomsCustom"),
+      wrap: form.querySelector("#bedroomsCustomField")
+    },
+    bathrooms: {
+      hidden: form.querySelector("#quoteBathrooms"),
+      custom: form.querySelector("#quoteBathroomsCustom"),
+      wrap: form.querySelector("#bathroomsCustomField")
+    },
+    square_feet: {
+      hidden: form.querySelector("#quoteSqft"),
+      custom: form.querySelector("#quoteSqftCustom"),
+      wrap: form.querySelector("#sqftCustomField")
+    }
+  };
+
+  form.querySelectorAll("[data-chip-group]").forEach((group) => {
+    const key = group.getAttribute("data-chip-group");
+    const config = chipConfig[key];
+    if (!config?.hidden) return;
+
+    const syncValue = (value) => {
+      if (value === "" || value == null) return;
+      config.hidden.value = value;
+      if (config.custom) config.custom.value = value;
+      form.dispatchEvent(new Event("change", { bubbles: true }));
+    };
+
+    group.querySelectorAll(".quote-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        group.querySelectorAll(".quote-chip").forEach((node) => node.classList.remove("is-active"));
+        chip.classList.add("is-active");
+
+        if (chip.dataset.custom) {
+          if (config.wrap) config.wrap.hidden = false;
+          config.custom?.focus();
+          syncValue(config.custom?.value || config.hidden.value);
+          return;
+        }
+
+        if (config.wrap) config.wrap.hidden = true;
+        syncValue(chip.dataset.value);
+      });
+    });
+
+    config.custom?.addEventListener("input", () => syncValue(config.custom.value));
+  });
+}
+
 function initQuoteAssistant(formContainer = document) {
   const form = formContainer.querySelector("#quoteAssistantForm");
   if (!form) return;
@@ -554,6 +616,72 @@ function initQuoteAssistant(formContainer = document) {
   let reviewRevealTimer = null;
   let reviewMsgTimer = null;
   let reviewAnimationStep = -1;
+
+  const planPanelImage = document.getElementById("quotePlanImage");
+  const planPanelProperty = document.getElementById("planPanelProperty");
+  const planPanelService = document.getElementById("planPanelService");
+  const planPanelAddons = document.getElementById("planPanelAddons");
+  const planPanelTeaser = document.getElementById("quotePlanTeaser");
+  const planStripText = document.getElementById("quotePlanStripText");
+  const planStripThumb = document.getElementById("quotePlanStripThumb");
+
+  function updatePlanPanel() {
+    if (!isQuoteStudio) return;
+
+    const data = new FormData(form);
+    const pType = data.get("property_type") || "";
+    const beds = data.get("bedrooms") || "";
+    const baths = data.get("bathrooms") || "";
+    const sqft = data.get("square_feet") || "";
+    const service = data.get("service_type") || "";
+    const freq = data.get("frequency") || "";
+    const addons = data.getAll("add_ons[]");
+
+    if (planPanelProperty) {
+      planPanelProperty.textContent = pType
+        ? `${pType} · ${beds} bed / ${baths} bath · ${sqft} sq ft`
+        : beds
+          ? `${beds} bed / ${baths} bath · ${sqft} sq ft`
+          : "Tell us about your space";
+    }
+
+    if (planPanelService) {
+      planPanelService.textContent = service
+        ? `${service}${freq ? ` · ${freq}` : ""}`
+        : "Pick your service next";
+    }
+
+    if (planPanelAddons) {
+      planPanelAddons.textContent = addons.length
+        ? `${addons.length} add-on${addons.length > 1 ? "s" : ""} selected`
+        : "Add-ons optional";
+    }
+
+    let image = QUOTE_PLAN_IMAGES[currentStepIndex] || QUOTE_PLAN_IMAGES[0];
+    if (service && (service.includes("Deep") || service.includes("Move")) && currentStepIndex >= 1) {
+      image = "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=600&q=80";
+    }
+
+    if (planPanelImage) planPanelImage.src = image;
+    if (planStripThumb) planStripThumb.src = image;
+
+    const stripParts = [];
+    if (pType || beds) stripParts.push(pType || `${beds} bed`);
+    if (service) stripParts.push(service);
+    if (planStripText) {
+      planStripText.textContent = stripParts.length
+        ? stripParts.join(" · ")
+        : "Building your clean plan…";
+    }
+
+    if (planPanelTeaser) {
+      planPanelTeaser.textContent = currentStepIndex >= steps.length - 1
+        ? "Your estimate is ready below"
+        : "Estimate unlocks on final step";
+    }
+
+    root.dataset.step = String(currentStepIndex + 1);
+  }
 
   const quoteContext = !isBooking ? getQuoteContext() : null;
   const quoteMessages = [
@@ -830,7 +958,7 @@ function initQuoteAssistant(formContainer = document) {
 
   function resetReviewRevealAnimation() {
     if (!reviewReveal) return;
-    reviewReveal.querySelectorAll(".quote-review-row, .quote-review-total").forEach((row) => {
+    reviewReveal.querySelectorAll(".quote-review-row, .quote-review-total, .quote-plan-bullet, .quote-estimate-hero").forEach((row) => {
       row.classList.remove("is-visible");
     });
   }
@@ -841,8 +969,8 @@ function initQuoteAssistant(formContainer = document) {
     populateReview(true);
     resetReviewRevealAnimation();
 
-    const rows = reviewReveal.querySelectorAll(".quote-review-row");
-    const totalRow = reviewReveal.querySelector(".quote-review-total");
+    const rows = reviewReveal.querySelectorAll(".quote-plan-bullet, .quote-review-row");
+    const totalRow = reviewReveal.querySelector(".quote-estimate-hero, .quote-review-total");
     const totalEl = root.querySelector("#liveCalculatedTotal");
     const pricing = calculateQuoteTotal(form);
 
@@ -914,7 +1042,9 @@ function initQuoteAssistant(formContainer = document) {
   function updateStepChrome() {
     const stepNum = currentStepIndex + 1;
     if (progressFill) progressFill.style.width = `${(stepNum / steps.length) * 100}%`;
-    if (progressText) progressText.textContent = `Step ${stepNum} of ${steps.length}`;
+    if (progressText) {
+      progressText.textContent = QUOTE_STEP_JOURNEY[currentStepIndex] || `Step ${stepNum} of ${steps.length}`;
+    }
     if (stepHeading) {
       const activeStep = steps[currentStepIndex];
       stepHeading.classList.remove("is-changing");
@@ -981,6 +1111,7 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     updateStepChrome();
+    updatePlanPanel();
 
     if (btnBack) btnBack.style.display = currentStepIndex === 0 ? "none" : "inline-flex";
 
@@ -1026,6 +1157,8 @@ function initQuoteAssistant(formContainer = document) {
 
   updateUI();
   updateLiveSummary();
+  updatePlanPanel();
+  initQuoteSizeChips(form);
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
     playAssistantMessage(currentStepIndex);
     initPhoneFormatting(form);
@@ -1052,11 +1185,13 @@ function initQuoteAssistant(formContainer = document) {
 
   form.addEventListener("change", () => {
     updateLiveSummary();
+    updatePlanPanel();
     if (currentStepIndex === steps.length - 1) populateReview();
   });
 
   form.addEventListener("input", () => {
     updateLiveSummary();
+    updatePlanPanel();
     if (currentStepIndex === steps.length - 1) populateReview();
   });
 

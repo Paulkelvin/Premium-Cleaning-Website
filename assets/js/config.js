@@ -13,5 +13,7 @@ window.CLEANCO_CONFIG = {
     standardPerSqFt: 0.17,
     deepPerSqFt: 0.30
   },
+  // stripePaymentLink: paste your Stripe Payment Link URL to enable pay-online booking.
+  // Production: apply supabase/migrations/20250526_quote_booking_fields.sql for quote→book handoff.
   stripePaymentLink: ""
 };

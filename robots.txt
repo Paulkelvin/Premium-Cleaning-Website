@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://REDACTED.com/sitemap.xml

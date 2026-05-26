@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTestimonialSlider();
   initHomeReviewsCarousel();
   initContactPage();
+  initSiteMeta();
 
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
@@ -552,6 +553,7 @@ function initContactPage() {
   const firstName = document.getElementById("contactFirstName");
   const lastName = document.getElementById("contactLastName");
   const fullName = document.getElementById("contactFullName");
+  const inquirySelect = document.getElementById("contactInquiryType");
 
   const syncFullName = () => {
     if (!fullName || !firstName || !lastName) return;
@@ -560,15 +562,6 @@ function initContactPage() {
 
   firstName?.addEventListener("input", syncFullName);
   lastName?.addEventListener("input", syncFullName);
-
-  form.querySelectorAll(".contact-intent-card input[type='radio']").forEach((radio) => {
-    radio.addEventListener("change", () => {
-      form.querySelectorAll(".contact-intent-card").forEach((card) => {
-        const input = card.querySelector("input[type='radio']");
-        if (input) card.classList.toggle("is-selected", input.checked);
-      });
-    });
-  });
 
   const phoneInput = form.querySelector("[data-phone-format]");
   phoneInput?.addEventListener("input", () => {
@@ -581,15 +574,21 @@ function initContactPage() {
   form.addEventListener("submit", () => syncFullName(), true);
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get("inquiry") === "custom-quote") {
-    const customRadio = form.querySelector('input[name="inquiry_type"][value="Custom quote request"]');
-    if (customRadio) {
-      customRadio.checked = true;
-      customRadio.dispatchEvent(new Event("change", { bubbles: true }));
-    }
+  if (params.get("inquiry") === "custom-quote" && inquirySelect) {
+    const propertyOption = inquirySelect.querySelector('option[data-inquiry="property"]');
+    if (propertyOption) propertyOption.selected = true;
     const textarea = form.querySelector('textarea[name="message"]');
     if (textarea && !textarea.value) {
       textarea.value = "I'd like a custom quote for my property. Please contact me to discuss scope and pricing.";
     }
   }
+}
+
+function initSiteMeta() {
+  if (document.querySelector('link[rel="icon"]')) return;
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/svg+xml";
+  link.href = `${document.querySelector('link[rel="stylesheet"]')?.href?.includes("../") ? "../" : ""}assets/images/favicon.svg`;
+  document.head.appendChild(link);
 }

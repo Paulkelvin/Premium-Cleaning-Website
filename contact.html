@@ -31,7 +31,7 @@
         <div class="contact-form-panel fade-in-up">
           <p class="contact-kicker">Contact us</p>
           <h1>Get in touch</h1>
-          <p class="contact-lead">Our friendly team would love to hear from you. Most messages get a reply within one business day.</p>
+          <p class="contact-lead">Most messages get a reply within one business day.</p>
 
           <form class="contact-ui-form" data-lead-form data-table="contact_submissions" id="contactForm">
             <div class="contact-name-row">
@@ -56,36 +56,22 @@
               <input name="phone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" data-phone-format>
             </label>
 
-            <fieldset class="contact-intent-fieldset">
-              <legend>What best describes you?</legend>
-              <div class="contact-intent-cards">
-                <label class="contact-intent-card is-selected">
-                  <input type="radio" name="inquiry_type" value="Recurring cleaning" checked>
-                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
-                  <span class="contact-intent-icon"><i data-lucide="home"></i></span>
-                  <strong>I'm a homeowner</strong>
-                  <span>I need recurring or one-time home cleaning with clear pricing.</span>
-                </label>
-                <label class="contact-intent-card">
-                  <input type="radio" name="inquiry_type" value="Custom quote request">
-                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
-                  <span class="contact-intent-icon"><i data-lucide="key"></i></span>
-                  <strong>I manage a property</strong>
-                  <span>Move-outs, turnovers, or listings that need a reliable handoff clean.</span>
-                </label>
-                <label class="contact-intent-card">
-                  <input type="radio" name="inquiry_type" value="Booking help">
-                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
-                  <span class="contact-intent-icon"><i data-lucide="building-2"></i></span>
-                  <strong>I need office cleaning</strong>
-                  <span>Recurring care for a workplace, studio, or small commercial space.</span>
-                </label>
-              </div>
-            </fieldset>
+            <label class="field">
+              <span>What can we help with?</span>
+              <select name="inquiry_type" id="contactInquiryType" required>
+                <option value="Recurring cleaning">Home cleaning — recurring or one-time</option>
+                <option value="Custom quote request" data-inquiry="property">Property / move-out / turnover</option>
+                <option value="Custom quote request" data-inquiry="commercial">Office or commercial cleaning</option>
+                <option value="Quote help">Help with my quote</option>
+                <option value="Booking help">Help booking an appointment</option>
+                <option value="General question">General question</option>
+                <option value="Urgent request">Urgent / tight deadline</option>
+              </select>
+            </label>
 
             <label class="field">
               <span>Message</span>
-              <textarea name="message" required placeholder="Tell us about your space, timeline, or any questions…" rows="4"></textarea>
+              <textarea name="message" required placeholder="Tell us about your space, timeline, or any questions…" rows="3"></textarea>
             </label>
 
             <label class="field contact-consent">
@@ -95,11 +81,6 @@
 
             <button class="button contact-submit-btn" type="submit">Get in touch</button>
             <div data-form-state class="form-state" role="status"></div>
-
-            <p class="contact-form-note">
-              <i data-lucide="zap"></i>
-              Need pricing now? <a href="quote.html">Get an instant estimate</a> — takes about 2 minutes.
-            </p>
           </form>
         </div>
 
@@ -226,6 +207,5 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
-  <script src="assets/js/quote-assistant.js"></script>
 </body>
 </html>

@@ -107,32 +107,34 @@
           <h2>Three quick questions — we'll point you to the right service.</h2>
         </div>
         <form class="service-chooser fade-in-up" id="serviceChooser">
-          <fieldset class="service-chooser-step">
-            <legend>1. What's the main goal?</legend>
-            <div class="service-chooser-tiles">
-              <label class="service-chooser-tile"><input type="radio" name="goal" value="upkeep" checked><span>Keep up with routine cleaning</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="goal" value="reset"><span>Reset a space that's gotten behind</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="goal" value="handoff"><span>Move-in, move-out, or rental turnover</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="goal" value="workplace"><span>Clean a workplace</span></label>
+          <div class="service-chooser-card">
+            <div class="service-chooser-panel" role="group" aria-labelledby="chooser-q1">
+              <p class="service-chooser-question" id="chooser-q1">1. What's the main goal?</p>
+              <div class="service-chooser-tiles">
+                <label class="service-chooser-tile"><input type="radio" name="goal" value="upkeep" checked><span>Keep up with routine cleaning</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="goal" value="reset"><span>Reset a space that's gotten behind</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="goal" value="handoff"><span>Move-in, move-out, or rental turnover</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="goal" value="workplace"><span>Clean a workplace</span></label>
+              </div>
             </div>
-          </fieldset>
-          <fieldset class="service-chooser-step">
-            <legend>2. How often do you need it?</legend>
-            <div class="service-chooser-tiles">
-              <label class="service-chooser-tile"><input type="radio" name="frequency" value="recurring" checked><span>Weekly or bi-weekly</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="frequency" value="monthly"><span>Monthly or occasional</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="frequency" value="once"><span>One-time only</span></label>
+            <div class="service-chooser-panel" role="group" aria-labelledby="chooser-q2">
+              <p class="service-chooser-question" id="chooser-q2">2. How often do you need it?</p>
+              <div class="service-chooser-tiles">
+                <label class="service-chooser-tile"><input type="radio" name="frequency" value="recurring" checked><span>Weekly or bi-weekly</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="frequency" value="monthly"><span>Monthly or occasional</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="frequency" value="once"><span>One-time only</span></label>
+              </div>
             </div>
-          </fieldset>
-          <fieldset class="service-chooser-step">
-            <legend>3. What type of space?</legend>
-            <div class="service-chooser-tiles">
-              <label class="service-chooser-tile"><input type="radio" name="space" value="home" checked><span>Home or apartment</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="space" value="empty"><span>Empty home or rental</span></label>
-              <label class="service-chooser-tile"><input type="radio" name="space" value="office"><span>Office or commercial</span></label>
+            <div class="service-chooser-panel" role="group" aria-labelledby="chooser-q3">
+              <p class="service-chooser-question" id="chooser-q3">3. What type of space?</p>
+              <div class="service-chooser-tiles">
+                <label class="service-chooser-tile"><input type="radio" name="space" value="home" checked><span>Home or apartment</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="space" value="empty"><span>Empty home or rental</span></label>
+                <label class="service-chooser-tile"><input type="radio" name="space" value="office"><span>Office or commercial</span></label>
+              </div>
             </div>
-          </fieldset>
-          <button type="submit" class="button">Show my recommendation <i data-lucide="arrow-right"></i></button>
+            <button type="submit" class="button">Show my recommendation <i data-lucide="arrow-right"></i></button>
+          </div>
         </form>
       </div>
     </section>
@@ -183,7 +185,7 @@
 
     <section class="band services-story-proof">
       <div class="section-inner services-story-proof-inner">
-        <div class="services-story-proof-visual fade-in-up">
+        <div class="services-story-proof-visual fade-in-up frame-slant">
           <img src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=800&q=80" alt="Kitchen after professional cleaning">
           <span class="services-story-proof-badge">Real results</span>
         </div>
@@ -251,7 +253,6 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
-  <script src="assets/js/quote-assistant.js"></script>
   <script>
     document.getElementById("serviceChooser")?.addEventListener("submit", (event) => {
       event.preventDefault();

@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Before and After Gallery | RS Cleaning Collective</title>
+  <meta name="description" content="Before and after cleaning photos from RS Cleaning Collective — kitchens, bathrooms, living areas, and move-out turnovers in Austin.">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
@@ -25,13 +26,13 @@
   </header>
 
   <main>
-    <section class="page-hero" style="padding: 30px 0 10px 0; background: linear-gradient(135deg, var(--mint-light), var(--paper));">
-      <div class="section-inner" style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+    <section class="page-hero gallery-page-hero">
+      <div class="section-inner">
         <p class="eyebrow"><i data-lucide="sparkles"></i>Before and after</p>
-        <h1 style="max-width: 800px; font-size: clamp(1.8rem, 4vw, 2.8rem); margin-bottom: 12px;">Cleaning transformations that show our level of care.</h1>
-        <p style="max-width: 600px; font-size: 1rem; margin-bottom: 24px;">Examples of the detailed resets we support across homes and rentals.</p>
+        <h1>Cleaning transformations that show our level of care.</h1>
+        <p>Examples of the detailed resets we support across homes and rentals.</p>
         
-        <div class="gallery-filters" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+        <div class="gallery-filters">
           <button class="gallery-filter-btn active" data-filter="all">All Spaces</button>
           <button class="gallery-filter-btn" data-filter="kitchens">Kitchens</button>
           <button class="gallery-filter-btn" data-filter="bathrooms">Bathrooms</button>
@@ -40,6 +41,8 @@
         </div>
       </div>
     </section>
+
+    <div class="stripe-band" aria-hidden="true"></div>
 
     <section>
       <div class="section-inner">
@@ -120,10 +123,60 @@
     </section>
   </main>
 
+  <footer class="site-footer">
+    <div class="section-inner footer-grid">
+      <div>
+        <a class="brand" href="index.html" style="color:var(--white);"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
+        <p style="margin-top:14px; margin-bottom: 20px; font-size:0.95rem;">Premium local cleaning for homes, rentals, and workplaces.</p>
+        <a class="button secondary small" href="quote.html">Request quote</a>
+      </div>
+      <div>
+        <h3>Quick links</h3>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Services</h3>
+        <ul>
+          <li><a href="services/standard-cleaning.html">Standard cleaning</a></li>
+          <li><a href="services/deep-cleaning.html">Deep cleaning</a></li>
+          <li><a href="services/move-in-out-cleaning.html">Move-in/out</a></li>
+          <li><a href="services/office-cleaning.html">Office cleaning</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="tel:+15550147820">(555) 014-7820</a></li>
+          <li><a href="mailto:hello@REDACTED.com">hello@REDACTED.com</a></li>
+          <li>Austin, TX</li>
+          <li>Mon-Sat, 8am-6pm</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Areas</h3>
+        <ul>
+          <li>Austin</li>
+          <li>Round Rock</li>
+          <li>Cedar Park</li>
+          <li>Pflugerville</li>
+          <li>Lakeway</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-inner footer-bottom">
+      <span>© <span data-year></span> RS Cleaning Collective. All rights reserved.</span>
+      <span><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a> · <a href="admin-login.html">Admin</a></span>
+    </div>
+  </footer>
+
   <script src="assets/js/config.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
-  <script src="assets/js/quote-assistant.js"></script>
 </body>
 </html>
