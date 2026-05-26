@@ -27,290 +27,287 @@
 
   <main class="quote-studio">
     <div class="quote-studio-ambient" aria-hidden="true">
-      <div class="quote-ambient-orb quote-ambient-orb--blue"></div>
-      <div class="quote-ambient-orb quote-ambient-orb--gold"></div>
       <div class="quote-ambient-grid"></div>
-      <div class="quote-deco quote-deco--sparkle quote-deco--left"><i data-lucide="sparkles"></i></div>
-      <div class="quote-deco quote-deco--shield quote-deco--right"><i data-lucide="shield-check"></i></div>
-      <div class="quote-deco quote-deco--star quote-deco--top-right"><i data-lucide="star"></i></div>
-      <div class="quote-deco-ring quote-deco-ring--one"></div>
-      <div class="quote-deco-ring quote-deco-ring--two"></div>
-      <svg class="quote-deco-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M0,64 C240,96 480,32 720,64 C960,96 1200,32 1440,64 L1440,120 L0,120 Z" fill="rgba(15,79,207,0.04)"></path>
-      </svg>
     </div>
-
-    <div class="stripe-band" aria-hidden="true"></div>
 
     <section class="quote-studio-section">
       <div class="section-inner quote-studio-inner">
 
-        <div class="quote-studio-grid">
-          <div class="quote-studio-main">
-        <div class="quote-window" id="quoteAssistantCard">
-          <div class="quote-avatar-wrap">
-            <img class="quote-avatar" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=160&h=160&q=85" alt="RS Cleaning care specialist">
-            <span class="quote-avatar-status" aria-hidden="true"></span>
-          </div>
-
-          <div class="quote-window-body">
-            <div class="quote-window-head">
-              <div class="quote-step-dots" id="quoteStepDots" aria-hidden="true">
-                <span class="quote-step-dot is-active"></span>
-                <span class="quote-step-dot"></span>
-                <span class="quote-step-dot"></span>
-                <span class="quote-step-dot"></span>
-                <span class="quote-step-dot"></span>
-              </div>
-              <p class="quote-convo-bubble" id="assistantBubble"><span id="assistantBubbleText"></span><span class="quote-type-cursor" aria-hidden="true"></span></p>
-              <div class="quote-plan-strip" id="quotePlanStrip" aria-live="polite">
-                <img class="quote-plan-strip-thumb" id="quotePlanStripThumb" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=120&q=80" alt="">
-                <span id="quotePlanStripText">Building your clean plan…</span>
-              </div>
+        <div class="quote-app quote-window" id="quoteAssistantCard">
+          <header class="quote-app-header">
+            <nav class="quote-journey" id="quoteJourneyBar" aria-label="Quote progress">
+              <span class="quote-journey-step is-active" data-journey="0">Space</span>
+              <span class="quote-journey-step" data-journey="1">Service</span>
+              <span class="quote-journey-step" data-journey="2">Extras</span>
+              <span class="quote-journey-step" data-journey="3">Contact</span>
+              <span class="quote-journey-step" data-journey="4">Estimate</span>
+            </nav>
+            <p class="quote-coach-line" id="assistantBubble"><span id="assistantBubbleText"></span><span class="quote-type-cursor" aria-hidden="true"></span></p>
+            <div class="quote-plan-strip" id="quotePlanStrip" aria-live="polite">
+              <img class="quote-plan-strip-thumb" id="quotePlanStripThumb" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=120&q=80" alt="">
+              <span id="quotePlanStripText">Building your clean plan…</span>
             </div>
-
-            <div class="quote-window-expand">
-            <div class="quote-progress quote-progress--slim">
+            <div class="quote-step-dots" id="quoteStepDots" hidden aria-hidden="true">
+              <span class="quote-step-dot is-active"></span>
+              <span class="quote-step-dot"></span>
+              <span class="quote-step-dot"></span>
+              <span class="quote-step-dot"></span>
+              <span class="quote-step-dot"></span>
+            </div>
+            <div class="quote-progress quote-progress--slim" hidden aria-hidden="true">
               <div class="quote-progress-bar">
                 <div class="quote-progress-fill" id="quoteProgressFill"></div>
               </div>
             </div>
+            <p class="quote-step-kicker" id="quoteProgressText" hidden>Space</p>
+          </header>
 
-            <div class="quote-step-banner">
-              <p class="quote-step-kicker" id="quoteProgressText">Space</p>
-              <h2 class="quote-step-heading" id="quoteStepHeading">Your space</h2>
-            </div>
+          <div class="quote-app-body">
+            <div class="quote-app-main">
+              <div class="quote-window-body">
+                <h2 class="quote-step-heading" id="quoteStepHeading">Your space</h2>
 
-            <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests" novalidate>
+                <div class="quote-window-expand">
+                  <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests" novalidate>
+                    <div class="quote-form-stage">
 
-              <div class="quote-form-stage">
+                      <div class="quote-step active" data-step="1" data-step-title="Your space">
+                        <fieldset class="quote-fieldset quote-fieldset--compact">
+                          <legend class="quote-legend">Property type</legend>
+                          <div class="quote-option-grid quote-option-grid--4 quote-option-grid--compact">
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="House" required>
+                              <span class="quote-option-face"><i data-lucide="home"></i><em>House</em></span>
+                            </label>
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="Apartment">
+                              <span class="quote-option-face"><i data-lucide="building"></i><em>Apt</em></span>
+                            </label>
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="Office">
+                              <span class="quote-option-face"><i data-lucide="briefcase"></i><em>Office</em></span>
+                            </label>
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="Rental">
+                              <span class="quote-option-face"><i data-lucide="key"></i><em>Rental</em></span>
+                            </label>
+                          </div>
+                        </fieldset>
+                        <div class="quote-home-size">
+                          <p class="quote-field-label">Home size <span class="quote-sizer-hint-inline">Most Austin 3/2 ~1,600–2,000 sq ft</span></p>
+                          <div class="quote-chip-group">
+                            <span class="quote-chip-sublabel">Beds</span>
+                            <div class="quote-chip-row" data-chip-group="bedrooms">
+                              <button type="button" class="quote-chip" data-value="0">0</button>
+                              <button type="button" class="quote-chip" data-value="1">1</button>
+                              <button type="button" class="quote-chip" data-value="2">2</button>
+                              <button type="button" class="quote-chip is-active" data-value="3">3</button>
+                              <button type="button" class="quote-chip" data-value="4">4+</button>
+                              <button type="button" class="quote-chip quote-chip--custom" data-custom="bedrooms">Custom</button>
+                            </div>
+                            <label class="field quote-chip-custom-field" id="bedroomsCustomField" hidden>
+                              <input type="number" id="quoteBedroomsCustom" min="0" placeholder="3" value="3">
+                            </label>
+                          </div>
+                          <div class="quote-chip-group">
+                            <span class="quote-chip-sublabel">Baths</span>
+                            <div class="quote-chip-row" data-chip-group="bathrooms">
+                              <button type="button" class="quote-chip" data-value="1">1</button>
+                              <button type="button" class="quote-chip" data-value="1.5">1.5</button>
+                              <button type="button" class="quote-chip is-active" data-value="2">2</button>
+                              <button type="button" class="quote-chip" data-value="2.5">2.5</button>
+                              <button type="button" class="quote-chip" data-value="3">3</button>
+                              <button type="button" class="quote-chip" data-value="4">3+</button>
+                              <button type="button" class="quote-chip quote-chip--custom" data-custom="bathrooms">Custom</button>
+                            </div>
+                            <label class="field quote-chip-custom-field" id="bathroomsCustomField" hidden>
+                              <input type="number" id="quoteBathroomsCustom" min="0" step="0.5" placeholder="2" value="2">
+                            </label>
+                          </div>
+                          <div class="quote-chip-group">
+                            <span class="quote-chip-sublabel">Sq ft</span>
+                            <div class="quote-chip-row" data-chip-group="square_feet">
+                              <button type="button" class="quote-chip" data-value="1000">&lt;1,200</button>
+                              <button type="button" class="quote-chip is-active" data-value="1600">1.2–2k</button>
+                              <button type="button" class="quote-chip" data-value="2400">2k+</button>
+                              <button type="button" class="quote-chip quote-chip--custom" data-custom="square_feet">Exact</button>
+                            </div>
+                            <label class="field quote-chip-custom-field" id="sqftCustomField" hidden>
+                              <input type="number" id="quoteSqftCustom" placeholder="1800" min="200" value="1600">
+                            </label>
+                          </div>
+                        </div>
+                        <div class="quote-sizer-inputs" aria-hidden="true">
+                          <input type="number" id="quoteBedrooms" name="bedrooms" min="0" required value="3" tabindex="-1">
+                          <input type="number" id="quoteBathrooms" name="bathrooms" min="0" step="0.5" required value="2" tabindex="-1">
+                          <input type="number" id="quoteSqft" name="square_feet" required min="200" value="1600" tabindex="-1">
+                        </div>
+                      </div>
 
-              <div class="quote-step active" data-step="1" data-step-title="Your space">
-                <fieldset class="quote-fieldset">
-                  <legend class="quote-legend">Property type</legend>
-                  <div class="quote-option-grid quote-option-grid--4">
-                    <label class="quote-option">
-                      <input type="radio" name="property_type" value="House" required>
-                      <span class="quote-option-face"><i data-lucide="home"></i><em>House</em></span>
-                    </label>
-                    <label class="quote-option">
-                      <input type="radio" name="property_type" value="Apartment">
-                      <span class="quote-option-face"><i data-lucide="building"></i><em>Apartment</em></span>
-                    </label>
-                    <label class="quote-option">
-                      <input type="radio" name="property_type" value="Office">
-                      <span class="quote-option-face"><i data-lucide="briefcase"></i><em>Office</em></span>
-                    </label>
-                    <label class="quote-option">
-                      <input type="radio" name="property_type" value="Rental">
-                      <span class="quote-option-face"><i data-lucide="key"></i><em>Rental</em></span>
-                    </label>
-                  </div>
-                </fieldset>
-                <p class="quote-sizer-hint">Most Austin 3/2 homes are ~1,600–2,000 sq ft.</p>
-                <div class="quote-chip-field">
-                  <p class="quote-field-label">Bedrooms</p>
-                  <div class="quote-chip-row" data-chip-group="bedrooms">
-                    <button type="button" class="quote-chip" data-value="0">0</button>
-                    <button type="button" class="quote-chip" data-value="1">1</button>
-                    <button type="button" class="quote-chip" data-value="2">2</button>
-                    <button type="button" class="quote-chip is-active" data-value="3">3</button>
-                    <button type="button" class="quote-chip" data-value="4">4+</button>
-                    <button type="button" class="quote-chip quote-chip--custom" data-custom="bedrooms">Custom</button>
-                  </div>
-                  <label class="field quote-chip-custom-field" id="bedroomsCustomField" hidden>
-                    <input type="number" id="quoteBedroomsCustom" min="0" placeholder="3" value="3">
-                  </label>
-                </div>
-                <div class="quote-chip-field">
-                  <p class="quote-field-label">Bathrooms</p>
-                  <div class="quote-chip-row" data-chip-group="bathrooms">
-                    <button type="button" class="quote-chip" data-value="1">1</button>
-                    <button type="button" class="quote-chip" data-value="1.5">1.5</button>
-                    <button type="button" class="quote-chip is-active" data-value="2">2</button>
-                    <button type="button" class="quote-chip" data-value="2.5">2.5</button>
-                    <button type="button" class="quote-chip" data-value="3">3</button>
-                    <button type="button" class="quote-chip" data-value="4">3+</button>
-                    <button type="button" class="quote-chip quote-chip--custom" data-custom="bathrooms">Custom</button>
-                  </div>
-                  <label class="field quote-chip-custom-field" id="bathroomsCustomField" hidden>
-                    <input type="number" id="quoteBathroomsCustom" min="0" step="0.5" placeholder="2" value="2">
-                  </label>
-                </div>
-                <div class="quote-chip-field">
-                  <p class="quote-field-label">Square footage</p>
-                  <div class="quote-chip-row" data-chip-group="square_feet">
-                    <button type="button" class="quote-chip" data-value="1000">Under 1,200</button>
-                    <button type="button" class="quote-chip is-active" data-value="1600">1,200–2,000</button>
-                    <button type="button" class="quote-chip" data-value="2400">2,000+</button>
-                    <button type="button" class="quote-chip quote-chip--custom" data-custom="square_feet">Exact sq ft</button>
-                  </div>
-                  <label class="field quote-chip-custom-field" id="sqftCustomField" hidden>
-                    <input type="number" id="quoteSqftCustom" placeholder="1800" min="200" value="1600">
-                  </label>
-                </div>
-                <div class="quote-sizer-inputs" aria-hidden="true">
-                  <input type="number" id="quoteBedrooms" name="bedrooms" min="0" required value="3" tabindex="-1">
-                  <input type="number" id="quoteBathrooms" name="bathrooms" min="0" step="0.5" required value="2" tabindex="-1">
-                  <input type="number" id="quoteSqft" name="square_feet" required min="200" value="1600" tabindex="-1">
-                </div>
-              </div>
+                      <div class="quote-step" data-step="2" data-step-title="Service">
+                        <fieldset class="quote-fieldset">
+                          <legend class="quote-legend">Cleaning type</legend>
+                          <div class="quote-option-grid quote-option-grid--2">
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Standard cleaning" required>
+                                <span class="quote-option-face"><i data-lucide="sparkles"></i><em>Standard<small>Regular upkeep</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About standard cleaning" data-tip="Recurring upkeep for kitchens, bathrooms, floors, and high-touch surfaces. Ideal for maintaining a consistently clean home."><i data-lucide="info"></i></button>
+                            </div>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Deep cleaning">
+                                <span class="quote-option-face"><i data-lucide="layers"></i><em>Deep<small>Top-to-bottom</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About deep cleaning" data-tip="A detailed reset for buildup, baseboards, fixtures, and often-missed areas. Great before events or seasonal refreshes."><i data-lucide="info"></i></button>
+                            </div>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Move-in/Move-out">
+                                <span class="quote-option-face"><i data-lucide="truck"></i><em>Move<small>Thorough reset</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About move cleaning" data-tip="Empty-home detail for handoffs — cabinets, appliances, and full sanitization for landlords, buyers, and new tenants."><i data-lucide="info"></i></button>
+                            </div>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Office cleaning">
+                                <span class="quote-option-face"><i data-lucide="building-2"></i><em>Office<small>Commercial</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About office cleaning" data-tip="Workspace-focused cleaning for desks, break areas, restrooms, and client-facing zones on a schedule that fits your business."><i data-lucide="info"></i></button>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <fieldset class="quote-fieldset">
+                          <legend class="quote-legend">Frequency</legend>
+                          <div class="quote-pill-row">
+                            <label class="quote-pill"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
+                          </div>
+                        </fieldset>
+                      </div>
 
-              <div class="quote-step" data-step="2" data-step-title="Service">
-                <fieldset class="quote-fieldset">
-                  <legend class="quote-legend">Cleaning type</legend>
-                  <div class="quote-option-grid quote-option-grid--2">
-                    <div class="quote-option-cell">
-                      <label class="quote-option quote-option--wide">
-                        <input type="radio" name="service_type" value="Standard cleaning" required>
-                        <span class="quote-option-face"><i data-lucide="sparkles"></i><em>Standard<small>Regular upkeep</small></em></span>
-                      </label>
-                      <button type="button" class="quote-tip-trigger" aria-label="About standard cleaning" data-tip="Recurring upkeep for kitchens, bathrooms, floors, and high-touch surfaces. Ideal for maintaining a consistently clean home."><i data-lucide="info"></i></button>
+                      <div class="quote-step" data-step="3" data-step-title="Add-ons">
+                        <p class="quote-step-hint">Optional — skip if none needed.</p>
+                        <div class="quote-addon-grid">
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span>Carpet</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span>Wash & fold</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside oven"><span>Oven</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span>Fridge</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span>Cabinets</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Interior windows"><span>Windows</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Junk removal"><span>Junk</span></label>
+                          <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Power washing"><span>Power wash</span></label>
+                        </div>
+                      </div>
+
+                      <div class="quote-step" data-step="4" data-step-title="Contact">
+                        <label class="field">Full name
+                          <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
+                        </label>
+                        <div class="quote-input-row quote-input-row--2">
+                          <label class="field">Phone
+                            <input name="phone" type="tel" inputmode="tel" required autocomplete="tel" placeholder="(555) 000-0000" maxlength="14">
+                          </label>
+                          <label class="field">Email
+                            <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
+                          </label>
+                        </div>
+                        <div class="quote-contact-prefs">
+                          <p class="quote-field-label">Preferred contact</p>
+                          <div class="quote-pill-row">
+                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
+                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Phone"><span>Phone</span></label>
+                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="quote-step" data-step="5" data-step-title="Your estimate">
+                        <div id="quoteCalculatingState" class="quote-calculating">
+                          <div class="quote-calculating-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+                          <p class="quote-calculating-text">Calculating your estimate…</p>
+                          <p class="quote-calculating-sub">Reviewing space, service, and add-ons</p>
+                        </div>
+                        <div id="quoteReviewReveal" class="quote-review-reveal" hidden>
+                          <div class="quote-estimate-card">
+                            <h3>Your clean plan</h3>
+                            <ul class="quote-plan-bullets">
+                              <li class="quote-plan-bullet"><i data-lucide="home"></i><div><span>Property</span><strong id="reviewProperty">—</strong></div></li>
+                              <li class="quote-plan-bullet"><i data-lucide="sparkles"></i><div><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div></li>
+                              <li class="quote-plan-bullet"><i data-lucide="layout-grid"></i><div><span>Size</span><strong id="reviewSize">—</strong></div></li>
+                              <li class="quote-plan-bullet"><i data-lucide="plus-circle"></i><div><span>Add-ons</span><strong id="reviewAddons">None</strong></div></li>
+                            </ul>
+                            <div class="quote-estimate-hero">
+                              <p>Your space, clearly priced</p>
+                              <strong id="liveCalculatedTotal">$0.00</strong>
+                              <span>Confirmed before we arrive</span>
+                            </div>
+                          </div>
+                          <label class="field check quote-consent">
+                            <input name="consent" type="checkbox" required>
+                            <span>I agree to be contacted about my quote.</span>
+                          </label>
+                          <div data-form-state class="form-state" role="status"></div>
+                        </div>
+                      </div>
+
                     </div>
-                    <div class="quote-option-cell">
-                      <label class="quote-option quote-option--wide">
-                        <input type="radio" name="service_type" value="Deep cleaning">
-                        <span class="quote-option-face"><i data-lucide="layers"></i><em>Deep<small>Top-to-bottom</small></em></span>
-                      </label>
-                      <button type="button" class="quote-tip-trigger" aria-label="About deep cleaning" data-tip="A detailed reset for buildup, baseboards, fixtures, and often-missed areas. Great before events or seasonal refreshes."><i data-lucide="info"></i></button>
-                    </div>
-                    <div class="quote-option-cell">
-                      <label class="quote-option quote-option--wide">
-                        <input type="radio" name="service_type" value="Move-in/Move-out">
-                        <span class="quote-option-face"><i data-lucide="truck"></i><em>Move<small>Thorough reset</small></em></span>
-                      </label>
-                      <button type="button" class="quote-tip-trigger" aria-label="About move cleaning" data-tip="Empty-home detail for handoffs — cabinets, appliances, and full sanitization for landlords, buyers, and new tenants."><i data-lucide="info"></i></button>
-                    </div>
-                    <div class="quote-option-cell">
-                      <label class="quote-option quote-option--wide">
-                        <input type="radio" name="service_type" value="Office cleaning">
-                        <span class="quote-option-face"><i data-lucide="building-2"></i><em>Office<small>Commercial</small></em></span>
-                      </label>
-                      <button type="button" class="quote-tip-trigger" aria-label="About office cleaning" data-tip="Workspace-focused cleaning for desks, break areas, restrooms, and client-facing zones on a schedule that fits your business."><i data-lucide="info"></i></button>
-                    </div>
-                  </div>
-                </fieldset>
-                <fieldset class="quote-fieldset">
-                  <legend class="quote-legend">Frequency</legend>
-                  <div class="quote-pill-row">
-                    <label class="quote-pill"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
-                    <label class="quote-pill"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
-                    <label class="quote-pill"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
-                    <label class="quote-pill"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
-                  </div>
-                </fieldset>
-              </div>
 
-              <div class="quote-step" data-step="3" data-step-title="Add-ons">
-                <p class="quote-step-hint">Optional — skip if none needed.</p>
-                <div class="quote-addon-grid">
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span>Carpet</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span>Wash & fold</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside oven"><span>Oven</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span>Fridge</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span>Cabinets</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Interior windows"><span>Windows</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Junk removal"><span>Junk</span></label>
-                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Power washing"><span>Power wash</span></label>
+                    <div class="quote-app-footer quote-form-nav">
+                      <button type="button" class="button ghost quote-nav-back" id="btnQuoteBack"><i data-lucide="arrow-left"></i> Back</button>
+                      <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
+                      <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Submit quote &amp; book <i data-lucide="arrow-right"></i></button>
+                    </div>
+                  </form>
                 </div>
-              </div>
 
-              <div class="quote-step" data-step="4" data-step-title="Contact">
-                <label class="field">Full name
-                  <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
-                </label>
-                <div class="quote-input-row quote-input-row--2">
-                  <label class="field">Phone
-                    <input name="phone" type="tel" inputmode="tel" required autocomplete="tel" placeholder="(555) 000-0000" maxlength="14">
-                  </label>
-                  <label class="field">Email
-                    <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
-                  </label>
-                </div>
-                <div class="quote-contact-prefs">
-                  <p class="quote-field-label">Preferred contact</p>
-                  <div class="quote-pill-row">
-                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
-                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Phone"><span>Phone</span></label>
-                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
+                <div id="quoteSuccessState" class="quote-success-panel" hidden>
+                  <div class="quote-success-icon"><i data-lucide="check"></i></div>
+                  <h2>Your estimate is ready</h2>
+                  <p class="quote-success-total">Estimated total: <strong data-success-total>$0.00</strong></p>
+                  <p class="quote-success-copy">We've saved your quote. Continue to booking to pick your date and choose how to pay.</p>
+                  <div class="quote-success-actions">
+                    <button type="button" class="button" id="btnContinueToBook">Book this cleaning <i data-lucide="calendar"></i></button>
+                    <a href="contact.html?inquiry=custom-quote" class="button ghost">Custom quote</a>
                   </div>
-                </div>
-              </div>
-
-              <div class="quote-step" data-step="5" data-step-title="Your estimate">
-                <div id="quoteCalculatingState" class="quote-calculating">
-                  <div class="quote-calculating-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
-                  <p class="quote-calculating-text">Calculating your estimate…</p>
-                  <p class="quote-calculating-sub">Reviewing space, service, and add-ons</p>
-                </div>
-                <div id="quoteReviewReveal" class="quote-review-reveal" hidden>
-                <div class="quote-estimate-card">
-                  <h3>Your clean plan</h3>
-                  <ul class="quote-plan-bullets">
-                    <li class="quote-plan-bullet"><i data-lucide="home"></i><div><span>Property</span><strong id="reviewProperty">—</strong></div></li>
-                    <li class="quote-plan-bullet"><i data-lucide="sparkles"></i><div><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div></li>
-                    <li class="quote-plan-bullet"><i data-lucide="layout-grid"></i><div><span>Size</span><strong id="reviewSize">—</strong></div></li>
-                    <li class="quote-plan-bullet"><i data-lucide="plus-circle"></i><div><span>Add-ons</span><strong id="reviewAddons">None</strong></div></li>
+                  <ul class="quote-success-steps">
+                    <li><i data-lucide="calendar-check"></i> Choose your date and time</li>
+                    <li><i data-lucide="credit-card"></i> Pay online or at service</li>
+                    <li><i data-lucide="phone"></i> We confirm within a few hours</li>
                   </ul>
-                  <div class="quote-estimate-hero">
-                    <p>Your space, clearly priced</p>
-                    <strong id="liveCalculatedTotal">$0.00</strong>
-                    <span>Confirmed before we arrive</span>
-                  </div>
-                </div>
-                <label class="field check quote-consent">
-                  <input name="consent" type="checkbox" required>
-                  <span>I agree to be contacted about my quote.</span>
-                </label>
-                <div data-form-state class="form-state" role="status"></div>
+                  <button type="button" class="button ghost quote-restart" id="btnRestartQuote">Start another quote</button>
                 </div>
               </div>
-
-              </div>
-
-              <div class="quote-form-nav">
-                <button type="button" class="button ghost quote-nav-back" id="btnQuoteBack"><i data-lucide="arrow-left"></i> Back</button>
-                <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
-                <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Submit quote &amp; book <i data-lucide="arrow-right"></i></button>
-              </div>
-            </form>
             </div>
 
-            <div id="quoteSuccessState" class="quote-success-panel" hidden>
-              <div class="quote-success-icon"><i data-lucide="check"></i></div>
-              <h2>Your estimate is ready</h2>
-              <p class="quote-success-total">Estimated total: <strong data-success-total>$0.00</strong></p>
-              <p class="quote-success-copy">We've saved your quote. Continue to booking to pick your date and choose how to pay.</p>
-              <div class="quote-success-actions">
-                <button type="button" class="button" id="btnContinueToBook">Book this cleaning <i data-lucide="calendar"></i></button>
-                <a href="contact.html?inquiry=custom-quote" class="button ghost">Custom quote</a>
+            <aside class="quote-app-preview" id="quotePlanPanel" aria-label="Live clean plan preview">
+              <div class="quote-plan-image">
+                <img id="quotePlanImage" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85" alt="Clean kitchen preview">
               </div>
-              <ul class="quote-success-steps">
-                <li><i data-lucide="calendar-check"></i> Choose your date and time</li>
-                <li><i data-lucide="credit-card"></i> Pay online or at service</li>
-                <li><i data-lucide="phone"></i> We confirm within a few hours</li>
-              </ul>
-              <button type="button" class="button ghost quote-restart" id="btnRestartQuote">Start another quote</button>
-            </div>
+              <div class="quote-plan-summary">
+                <h3>Your clean plan</h3>
+                <ul class="quote-preview-checklist">
+                  <li class="quote-check-item" id="planCheckSpace" data-check="pending">
+                    <span class="quote-check-icon" aria-hidden="true"></span>
+                    <div><span>Space</span><strong id="planPanelProperty">Tell us about your space</strong></div>
+                  </li>
+                  <li class="quote-check-item" id="planCheckService" data-check="pending">
+                    <span class="quote-check-icon" aria-hidden="true"></span>
+                    <div><span>Service</span><strong id="planPanelService">Pick your service next</strong></div>
+                  </li>
+                  <li class="quote-check-item" id="planCheckAddons" data-check="pending">
+                    <span class="quote-check-icon" aria-hidden="true"></span>
+                    <div><span>Add-ons</span><strong id="planPanelAddons">Optional</strong></div>
+                  </li>
+                </ul>
+              </div>
+              <p class="quote-plan-trust">No hidden fees · Insured crews</p>
+              <p class="quote-plan-teaser" id="quotePlanTeaser">Estimate unlocks on final step</p>
+            </aside>
           </div>
-        </div>
-          </div>
-
-          <aside class="quote-plan-panel" id="quotePlanPanel" aria-label="Live clean plan preview">
-            <div class="quote-plan-image frame-arch">
-              <img id="quotePlanImage" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85" alt="Clean kitchen preview">
-            </div>
-            <div class="quote-plan-summary">
-              <h3>Building your clean plan</h3>
-              <ul>
-                <li><i data-lucide="home"></i><div><strong id="planPanelProperty">Tell us about your space</strong></div></li>
-                <li><i data-lucide="sparkles"></i><div><strong id="planPanelService">Service unlocks next</strong></div></li>
-                <li><i data-lucide="plus-circle"></i><div><strong id="planPanelAddons">Add-ons optional</strong></div></li>
-              </ul>
-            </div>
-            <p class="quote-plan-trust">No hidden fees · Insured crews</p>
-            <p class="quote-plan-teaser" id="quotePlanTeaser">Estimate unlocks on final step</p>
-          </aside>
         </div>
 
         <p class="quote-studio-foot">Need something fully custom? <a href="contact.html?inquiry=custom-quote">Talk to our team</a></p>

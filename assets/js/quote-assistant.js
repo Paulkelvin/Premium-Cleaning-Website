@@ -680,6 +680,15 @@ function initQuoteAssistant(formContainer = document) {
         : "Estimate unlocks on final step";
     }
 
+    const checkSpace = document.getElementById("planCheckSpace");
+    const checkService = document.getElementById("planCheckService");
+    const checkAddons = document.getElementById("planCheckAddons");
+    const hasSpace = Boolean(pType || beds);
+    const hasService = Boolean(service);
+    if (checkSpace) checkSpace.dataset.check = hasSpace ? "done" : "pending";
+    if (checkService) checkService.dataset.check = hasService ? "done" : (currentStepIndex >= 1 ? "partial" : "pending");
+    if (checkAddons) checkAddons.dataset.check = addons.length ? "done" : (currentStepIndex >= 2 ? "partial" : "pending");
+
     root.dataset.step = String(currentStepIndex + 1);
   }
 
@@ -743,7 +752,6 @@ function initQuoteAssistant(formContainer = document) {
     if (typewriterTimer) clearInterval(typewriterTimer);
     bubbleText.textContent = "";
     bubble.classList.add("is-typing");
-    root.querySelector(".quote-avatar-wrap")?.classList.add("is-listening");
 
     if (isQuoteStudio) {
       collapseExpandable();
@@ -758,7 +766,6 @@ function initQuoteAssistant(formContainer = document) {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
         bubble.classList.remove("is-typing");
-        root.querySelector(".quote-avatar-wrap")?.classList.remove("is-listening");
         if (isQuoteStudio) {
           setTimeout(() => {
             setStepContentVisible(true);
@@ -781,6 +788,10 @@ function initQuoteAssistant(formContainer = document) {
     root.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
       dot.classList.toggle("is-active", index === currentStepIndex);
       dot.classList.toggle("is-done", index < currentStepIndex);
+    });
+    root.querySelectorAll(".quote-journey-step").forEach((step, index) => {
+      step.classList.toggle("is-active", index === currentStepIndex);
+      step.classList.toggle("is-done", index < currentStepIndex);
     });
   }
 
