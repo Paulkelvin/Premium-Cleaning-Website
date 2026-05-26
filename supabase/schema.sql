@@ -25,6 +25,9 @@ create table if not exists quote_requests (
   square_feet text,
   add_ons text,
   message text,
+  frequency text,
+  preferred_contact text,
+  estimated_total numeric(10,2),
   consent boolean default false
 );
 
@@ -36,10 +39,20 @@ create table if not exists bookings (
   email text,
   phone text,
   service_type text,
+  property_type text,
+  bedrooms text,
+  bathrooms text,
+  square_feet text,
+  add_ons text,
+  frequency text,
   preferred_date date,
   preferred_time text,
   address text,
   message text,
+  estimated_total numeric(10,2),
+  payment_method text default 'pay_at_service',
+  payment_status text default 'pending',
+  quote_id uuid,
   consent boolean default false
 );
 

@@ -54,6 +54,7 @@
                   <select name="inquiry_type" required>
                     <option value="">Choose inquiry</option>
                     <option>General question</option>
+                    <option>Custom quote request</option>
                     <option>Quote help</option>
                     <option>Booking help</option>
                     <option>Recurring cleaning</option>
@@ -178,6 +179,22 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("inquiry") !== "custom-quote") return;
+      const select = document.querySelector('select[name="inquiry_type"]');
+      const textarea = document.querySelector('textarea[name="message"]');
+      if (select) {
+        for (const opt of select.options) {
+          if (opt.textContent === "Custom quote request") { opt.selected = true; break; }
+        }
+      }
+      if (textarea && !textarea.value) {
+        textarea.value = "I'd like a custom quote for my property. Please contact me to discuss scope and pricing.";
+      }
+    })();
+  </script>
   <script src="assets/js/quote-assistant.js"></script>
 </body>
 </html>

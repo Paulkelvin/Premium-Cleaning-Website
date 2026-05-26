@@ -30,9 +30,13 @@
     
     <section style="padding: 20px 0 12px 0; text-align: center; position:relative; z-index:1;">
       <div class="section-inner" style="max-width: 900px;">
-        <p class="eyebrow" style="justify-content:center; margin-bottom:4px;"><i data-lucide="calculator"></i>Quick estimate</p>
-        <h1 style="font-size: 1.7rem; margin-bottom: 6px; line-height: 1.2;">Get your cleaning quote.</h1>
-        <p style="font-size: 0.9rem; color: var(--muted); margin:0 auto;">Quick questions, instant estimate.</p>
+        <p class="eyebrow" style="justify-content:center; margin-bottom:4px;"><i data-lucide="calculator"></i>Quote in minutes</p>
+        <h1 style="font-size: 1.7rem; margin-bottom: 6px; line-height: 1.2;">Get your instant cleaning estimate.</h1>
+        <p style="font-size: 0.9rem; color: var(--muted); margin:0 auto 16px;">Standard clean: <strong>$0.17/sq ft</strong> · Deep clean: <strong>$0.30/sq ft</strong> · Add-ons available</p>
+        <div class="quote-path-chooser" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <span class="tag" style="background:var(--mint-light); color:var(--mint-dark);">Instant estimate</span>
+          <a href="contact.html?inquiry=custom-quote" class="tag" style="border:1px solid var(--line);">Need a custom quote? Contact us</a>
+        </div>
       </div>
     </section>
 
@@ -73,7 +77,7 @@
               </div>
 
               <label class="field full" style="margin-top: 10px;">Square feet
-                <input type="number" name="square_feet" placeholder="e.g. 1800" style="font-size: 0.9rem;">
+                <input type="number" name="square_feet" placeholder="e.g. 1800" required min="200" style="font-size: 0.9rem;">
               </label>
             </div>
 
@@ -99,7 +103,7 @@
                   </div>
                 </label>
                 <label class="select-card" style="padding: 12px;">
-                  <input type="radio" name="service_type" value="Move-in / Move-out">
+                  <input type="radio" name="service_type" value="Move-in/Move-out">
                   <div class="select-card-inner">
                     <strong style="font-size: 0.95rem;">Move</strong>
                     <span style="font-size: 0.8rem;">Thorough reset</span>
@@ -130,11 +134,11 @@
               
               <div class="chip-grid add-on-grid" style="gap: 6px;">
                 <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Carpet</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Laundry"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Laundry</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Oven"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Oven</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Fridge"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Fridge</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside cabinets"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Cabinets</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Windows"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Windows</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Wash & fold</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside oven"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Oven</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Fridge</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Cabinets</span></label>
+                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Interior windows"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Windows</span></label>
                 <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Junk removal"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Junk</span></label>
                 <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Power washing"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Power wash</span></label>
               </div>
@@ -193,7 +197,7 @@
               <button type="button" class="button ghost" id="btnQuoteBack" style="display:none; font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="arrow-left"></i> Back</button>
               <div style="margin-left:auto; display: flex; gap: 8px;">
                 <button type="button" class="button secondary" id="btnQuoteNext" style="font-size: 0.9rem; padding: 8px 14px;">Next <i data-lucide="arrow-right"></i></button>
-                <button type="submit" class="button" id="btnQuoteSubmit" style="display:none; font-size: 0.9rem; padding: 8px 14px;">Submit <i data-lucide="check"></i></button>
+                <button type="submit" class="button" id="btnQuoteSubmit" style="display:none; font-size: 0.9rem; padding: 8px 14px;">Get estimate &amp; continue <i data-lucide="arrow-right"></i></button>
               </div>
             </div>
 
@@ -204,27 +208,61 @@
             <div style="width: 48px; height: 48px; background: var(--mint-light); color: var(--mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
               <i data-lucide="check" style="width: 24px; height: 24px;"></i>
             </div>
-            <h2 style="font-size: 1.4rem; margin-bottom: 6px;">Request sent!</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; max-width: 400px; margin: 0 auto 12px;">We'll review your details and contact you shortly with an estimate.</p>
+            <h2 style="font-size: 1.4rem; margin-bottom: 6px;">Your estimate is ready!</h2>
+            <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 8px;">Estimated total: <strong data-success-total style="color:var(--mint-dark); font-size:1.2rem;">$0.00</strong></p>
+            <p style="color: var(--muted); font-size: 0.85rem; max-width: 420px; margin: 0 auto 16px;">We've saved your quote. Continue to booking to pick your date and choose how to pay.</p>
             
-            <div style="text-align:left; margin-bottom: 12px; padding: 12px; background: var(--mint-light); border-radius: 8px; font-size: 0.8rem;">
-              <h4 style="color: var(--mint-dark); margin-bottom: 6px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size: 0.75rem;">Next Steps</h4>
+            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap:wrap; margin-bottom: 16px;">
+              <button type="button" class="button" id="btnContinueToBook" style="font-size: 0.95rem; padding: 10px 18px;">Book this cleaning <i data-lucide="calendar"></i></button>
+              <a href="contact.html?inquiry=custom-quote" class="button ghost" style="font-size: 0.9rem; padding: 8px 14px;">Request custom quote</a>
+            </div>
+
+            <div style="text-align:left; margin-bottom: 12px; padding: 12px; background: var(--mint-light); border-radius: 8px; font-size: 0.8rem; max-width:420px; margin-left:auto; margin-right:auto;">
+              <h4 style="color: var(--mint-dark); margin-bottom: 6px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size: 0.75rem;">What happens next</h4>
               <ul style="list-style:none; padding:0; margin:0; color: var(--navy); display:flex; flex-direction:column; gap:4px;">
-                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="clock" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We calculate your precise estimate.</li>
-                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="phone" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We contact you via your preferred method.</li>
+                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="calendar-check" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> Choose your date and time slot.</li>
+                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="credit-card" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> Pay online now or at service — your choice.</li>
+                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="phone" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We confirm within a few hours.</li>
               </ul>
             </div>
 
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap:wrap;">
-              <a href="index.html" class="button" style="font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="home"></i> Home</a>
-              <button type="button" class="button ghost" id="btnRestartQuote" style="font-size: 0.9rem; padding: 8px 14px;">Start another</button>
-            </div>
+            <button type="button" class="button ghost" id="btnRestartQuote" style="font-size: 0.85rem; padding: 8px 14px;">Start another quote</button>
           </div>
 
         </div>
       </div>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <div class="section-inner footer-grid">
+      <div>
+        <a class="brand" href="index.html" style="color:var(--white);"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
+        <p style="margin-top:14px; margin-bottom: 20px; font-size:0.95rem;">Premium local cleaning for homes, rentals, and workplaces.</p>
+      </div>
+      <div>
+        <h3>Quick links</h3>
+        <ul>
+          <li><a href="about.html">About</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="book.html">Book online</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <ul>
+          <li><a href="tel:+15550147820">(555) 014-7820</a></li>
+          <li><a href="mailto:hello@REDACTED.com">hello@REDACTED.com</a></li>
+          <li>Austin, TX</li>
+        </ul>
+      </div>
+    </div>
+    <div class="section-inner footer-bottom">
+      <span>© <span data-year></span> RS Cleaning Collective. All rights reserved.</span>
+      <span><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Service</a></span>
+    </div>
+  </footer>
 
   <script src="assets/js/config.js"></script>
   <script src="assets/js/site.js"></script>

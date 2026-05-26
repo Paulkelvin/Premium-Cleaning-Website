@@ -167,7 +167,12 @@ function renderRows(table, rows) {
 
   target.innerHTML = rows.map((row) => {
     const name = row.full_name || row.name || row.email || "New lead";
-    const detail = row.message || row.service_type || row.inquiry_type || row.preferred_date || "";
+    const detail = [
+      row.service_type,
+      row.estimated_total ? `$${Number(row.estimated_total).toFixed(2)}` : "",
+      row.payment_method ? row.payment_method.replace(/_/g, " ") : "",
+      row.message || row.inquiry_type || row.preferred_date || ""
+    ].filter(Boolean).join(" · ") || "No details";
     const status = row.status || "new";
     const created = row.created_at ? new Date(row.created_at).toLocaleString() : "Just now";
     return `

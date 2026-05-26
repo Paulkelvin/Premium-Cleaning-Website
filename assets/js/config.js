@@ -8,5 +8,10 @@ window.CLEANCO_CONFIG = {
   adminEmail: "admin@REDACTED.com",
   sanityProjectId: "hjrx2q9w",
   sanityDataset: "production",
-  sanityApiVersion: "2025-05-23"
+  sanityApiVersion: "2025-05-23",
+  pricing: {
+    standardPerSqFt: 0.17,
+    deepPerSqFt: 0.30
+  },
+  stripePaymentLink: ""
 };

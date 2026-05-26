@@ -33,6 +33,10 @@
 
   --header-height: 80px;
 
+  --primary: var(--mint);
+  --surface: var(--white);
+  --navy: var(--ink);
+
   font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
