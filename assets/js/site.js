@@ -45,12 +45,55 @@ document.addEventListener("DOMContentLoaded", () => {
   initHomepageBubbles();
   initGalleryFilters();
 
+  // 8. Testimonial Slider
+  initTestimonialSlider();
+
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
     const key = node.getAttribute("data-copy-config");
     if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
   });
 });
+
+// Testimonial slider logic
+function initTestimonialSlider() {
+  const track = document.getElementById("testimonialTrack");
+  const prevBtn = document.getElementById("prevTestimonial");
+  const nextBtn = document.getElementById("nextTestimonial");
+  if (!track || !prevBtn || !nextBtn) return;
+
+  let currentIndex = 0;
+  
+  function updateSlider() {
+    const slide = track.querySelector(".slide") || track.querySelector(".card");
+    if (!slide) return;
+    const slideWidth = slide.offsetWidth;
+    const gap = 24; // from CSS gap
+    const moveAmount = slideWidth + gap;
+    track.style.transform = `translateX(-${currentIndex * moveAmount}px)`;
+  }
+
+  nextBtn.addEventListener("click", () => {
+    const totalSlides = track.children.length;
+    const slidesVisible = window.innerWidth >= 768 ? 3 : 1; // Basic responsive check
+    if (currentIndex < totalSlides - slidesVisible) {
+      currentIndex++;
+      updateSlider();
+    }
+  });
+
+  prevBtn.addEventListener("click", () => {
+    if (currentIndex > 0) {
+      currentIndex--;
+      updateSlider();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    currentIndex = 0;
+    updateSlider();
+  });
+}
 
 // Accordions logic
 function initAccordions() {

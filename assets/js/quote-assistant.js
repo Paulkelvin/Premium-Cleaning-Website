@@ -1,3 +1,26 @@
+const PRICING_CONFIG = {
+  rates: {
+    "Standard cleaning": 0.17,
+    "Deep cleaning": 0.30,
+    "Move-in/Move-out": 0.35,
+    "Post-construction": 0.40,
+    "Office cleaning": 0.20
+  },
+  addOns: {
+    "Inside fridge": 25,
+    "Inside oven": 25,
+    "Interior windows": 40,
+    "Baseboards detail": 35,
+    "Cabinet interiors": 30
+  },
+  frequencyDiscounts: {
+    "Weekly": 0.20,      // 20% off
+    "Bi-weekly": 0.15,   // 15% off
+    "Monthly": 0.10,     // 10% off
+    "One-time": 0.0      // 0% off
+  }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   initQuoteAssistant();
   initQuoteModalIntercept();
@@ -162,6 +185,41 @@ function initQuoteAssistant(formContainer = document) {
     const email = data.get("email") || "-";
     if (reviewContact) reviewContact.textContent = `${name} • ${phone} • ${email}`;
     if (reviewMethod) reviewMethod.textContent = data.get("preferred_contact") || "-";
+    
+    // Calculate and display price
+    const sType = data.get("service_type");
+    const sqftRaw = data.get("square_feet");
+    const freq = data.get("frequency") || "One-time";
+    
+    let total = 0;
+    if (sType && sqftRaw && PRICING_CONFIG.rates[sType]) {
+      const sqftNum = parseInt(sqftRaw.replace(/,/g, ''), 10) || 0;
+      let basePrice = sqftNum * PRICING_CONFIG.rates[sType];
+      
+      // Minimum fee
+      if (basePrice > 0 && basePrice < 100) basePrice = 100;
+      
+      // Add-ons
+      let addonsPrice = 0;
+      addons.forEach(addon => {
+        if (PRICING_CONFIG.addOns[addon]) addonsPrice += PRICING_CONFIG.addOns[addon];
+      });
+      
+      let subtotal = basePrice + addonsPrice;
+      
+      // Discount
+      if (PRICING_CONFIG.frequencyDiscounts[freq]) {
+        subtotal = subtotal - (subtotal * PRICING_CONFIG.frequencyDiscounts[freq]);
+      }
+      
+      total = subtotal;
+    }
+    
+    // Update total display elements
+    const liveTotalDisplay = formContainer.querySelector("#liveCalculatedTotal");
+    if (liveTotalDisplay) {
+      liveTotalDisplay.textContent = total > 0 ? `$${total.toFixed(2)}` : "$0.00";
+    }
   }
 
   function updateAssistantBubble() {

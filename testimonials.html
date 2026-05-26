@@ -4,14 +4,23 @@
 <body data-sanity-page="testimonials">
   <header class="site-header"><div class="nav-wrap"><a class="brand" href="index.html"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a><button class="nav-toggle" aria-expanded="false" aria-label="Open navigation">☰</button><nav class="site-nav"><a href="about.html">About</a><a href="services.html">Services</a><a href="service-areas.html">Areas</a><a href="gallery.html">Gallery</a><a href="faq.html">FAQs</a><a href="contact.html">Contact</a><a class="button small" href="quote.html">Get a Quote</a></nav></div></header>
   <main><section class="page-hero"><div class="section-inner"><p class="eyebrow">Reviews</p><h1>Clients choose us for clarity, reliability, and polished results.</h1><p>Use this page for live Google reviews or curated testimonials from completed cleaning projects.</p></div></section>
-    <section><div class="section-inner"><div class="grid" data-testimonial-list>
-      <article class="card testimonial"><blockquote>"Fast estimate, clear communication, and the deep clean made our home feel new again."</blockquote><strong>Maria L.</strong><p>Deep cleaning</p></article>
-      <article class="card testimonial"><blockquote>"They handled our move-out clean perfectly. The property manager had no complaints."</blockquote><strong>Andre P.</strong><p>Move-out cleaning</p></article>
-      <article class="card testimonial"><blockquote>"Our office stays consistently clean now. Reliable team and easy scheduling."</blockquote><strong>Jenna K.</strong><p>Office cleaning</p></article>
-      <article class="card testimonial"><blockquote>"Booking was simple and the team paid attention to all the small details I mentioned."</blockquote><strong>Priya S.</strong><p>Recurring cleaning</p></article>
-      <article class="card testimonial"><blockquote>"The kitchen and bathrooms looked excellent. The estimate was transparent from the start."</blockquote><strong>Caleb R.</strong><p>Standard cleaning</p></article>
-      <article class="card testimonial"><blockquote>"They helped us turn over a rental quickly and communicated throughout the process."</blockquote><strong>Danielle M.</strong><p>Rental turnover</p></article>
-    </div></div></section>
+    <section><div class="section-inner">
+      <div class="testimonial-slider-wrapper" style="position: relative; overflow: hidden; padding: 10px 0;">
+        <div class="testimonial-slider-track" id="testimonialTrack" style="display: flex; gap: 24px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);">
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"Fast estimate, clear communication, and the deep clean made our home feel new again."</blockquote><strong>Maria L.</strong><p style="margin-top:4px; font-size:0.85rem;">Deep cleaning</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"They handled our move-out clean perfectly. The property manager had no complaints."</blockquote><strong>Andre P.</strong><p style="margin-top:4px; font-size:0.85rem;">Move-out cleaning</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"Our office stays consistently clean now. Reliable team and easy scheduling."</blockquote><strong>Jenna K.</strong><p style="margin-top:4px; font-size:0.85rem;">Office cleaning</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"Booking was simple and the team paid attention to all the small details I mentioned."</blockquote><strong>Priya S.</strong><p style="margin-top:4px; font-size:0.85rem;">Recurring cleaning</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"The kitchen and bathrooms looked excellent. The estimate was transparent from the start."</blockquote><strong>Caleb R.</strong><p style="margin-top:4px; font-size:0.85rem;">Standard cleaning</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"They helped us turn over a rental quickly and communicated throughout the process."</blockquote><strong>Danielle M.</strong><p style="margin-top:4px; font-size:0.85rem;">Rental turnover</p></article>
+          <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;"><blockquote>"Incredible attention to detail. The whole house felt completely refreshed and vibrant."</blockquote><strong>James T.</strong><p style="margin-top:4px; font-size:0.85rem;">Deep cleaning</p></article>
+        </div>
+        <div class="slider-controls" style="display: flex; justify-content: center; gap: 12px; margin-top: 32px;">
+          <button id="prevTestimonial" class="button ghost" style="padding: 10px; min-height: 44px; border-radius: 50%;" aria-label="Previous review"><i data-lucide="chevron-left"></i></button>
+          <button id="nextTestimonial" class="button ghost" style="padding: 10px; min-height: 44px; border-radius: 50%;" aria-label="Next review"><i data-lucide="chevron-right"></i></button>
+        </div>
+      </div>
+    </div></section>
   </main>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/site.js"></script>
