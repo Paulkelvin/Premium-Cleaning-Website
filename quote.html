@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Get a Quote | RS Cleaning Collective</title>
+  <meta name="description" content="Get your cleaning estimate in minutes with RS Cleaning Collective.">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body data-sanity-page="quote">
+<body class="quote-page" data-sanity-page="quote">
   <header class="site-header">
     <div class="nav-wrap">
       <a class="brand" href="index.html"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
@@ -24,212 +25,197 @@
     </div>
   </header>
 
-  <main class="quote-main-layout" style="position:relative; overflow:hidden;">
-    <div class="bg-blob bg-blob-blue"></div>
-    <div class="bg-blob bg-blob-gold"></div>
-    
-    <section style="padding: 20px 0 12px 0; text-align: center; position:relative; z-index:1;">
-      <div class="section-inner" style="max-width: 900px;">
-        <p class="eyebrow" style="justify-content:center; margin-bottom:4px;"><i data-lucide="calculator"></i>Quote in minutes</p>
-        <h1 style="font-size: 1.7rem; margin-bottom: 6px; line-height: 1.2;">Get your instant cleaning estimate.</h1>
-        <p style="font-size: 0.9rem; color: var(--muted); margin:0 auto 16px;">Standard clean: <strong>$0.17/sq ft</strong> · Deep clean: <strong>$0.30/sq ft</strong> · Add-ons available</p>
-        <div class="quote-path-chooser" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-          <span class="tag" style="background:var(--mint-light); color:var(--mint-dark);">Instant estimate</span>
-          <a href="contact.html?inquiry=custom-quote" class="tag" style="border:1px solid var(--line);">Need a custom quote? Contact us</a>
-        </div>
-      </div>
-    </section>
+  <main class="quote-studio">
+    <div class="quote-studio-ambient" aria-hidden="true">
+      <div class="quote-ambient-orb quote-ambient-orb--blue"></div>
+      <div class="quote-ambient-orb quote-ambient-orb--gold"></div>
+      <div class="quote-ambient-grid"></div>
+    </div>
 
-    <section style="padding: 18px 0 40px 0; position:relative; z-index:1;">
-      <div class="section-inner" style="max-width: 680px;">
-        
-        <div class="card fade-in-up" id="quoteAssistantCard" style="padding: 24px;">
-          
-          <div class="quote-progress" style="margin-bottom: 18px;">
-            <div class="quote-progress-bar">
-              <div class="quote-progress-fill" id="quoteProgressFill" style="width: 20%;"></div>
-            </div>
-            <div class="quote-progress-text" id="quoteProgressText" style="font-size: 0.8rem; color: var(--muted); margin-top: 6px; font-weight:600;">Step 1 of 5</div>
+    <section class="quote-studio-section">
+      <div class="section-inner quote-studio-inner">
+
+        <div class="quote-window" id="quoteAssistantCard">
+          <div class="quote-avatar-wrap">
+            <img class="quote-avatar" src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=160&h=160&q=85" alt="RS Cleaning care specialist">
+            <span class="quote-avatar-status" aria-hidden="true"></span>
           </div>
 
-          <form id="quoteAssistantForm" data-table="quote_requests">
-            
-            <!-- Step 1: About your space -->
-            <div class="quote-step active" data-step="1">
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Your space</h2>
-              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Property type and size</p>
-
-              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Property type</label>
-              <div class="chip-grid" style="gap: 6px; margin-bottom: 12px;">
-                <label class="chip"><input type="radio" name="property_type" value="House" required><span style="font-size: 0.9rem;"><i data-lucide="home"></i> House</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Apartment"><span style="font-size: 0.9rem;"><i data-lucide="building"></i> Apartment</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Office"><span style="font-size: 0.9rem;"><i data-lucide="briefcase"></i> Office</span></label>
-                <label class="chip"><input type="radio" name="property_type" value="Rental"><span style="font-size: 0.9rem;"><i data-lucide="key"></i> Rental</span></label>
+          <div class="quote-window-body">
+            <div class="quote-window-head">
+              <div class="quote-step-dots" id="quoteStepDots" aria-hidden="true">
+                <span class="quote-step-dot is-active"></span>
+                <span class="quote-step-dot"></span>
+                <span class="quote-step-dot"></span>
+                <span class="quote-step-dot"></span>
+                <span class="quote-step-dot"></span>
               </div>
-
-              <div class="grid two" style="gap: 10px;">
-                <label class="field">Bedrooms
-                  <input type="number" name="bedrooms" min="0" placeholder="e.g. 3" required style="font-size: 0.9rem;">
-                </label>
-                <label class="field">Bathrooms
-                  <input type="number" name="bathrooms" min="0" step="0.5" placeholder="e.g. 2" required style="font-size: 0.9rem;">
-                </label>
-              </div>
-
-              <label class="field full" style="margin-top: 10px;">Square feet
-                <input type="number" name="square_feet" placeholder="e.g. 1800" required min="200" style="font-size: 0.9rem;">
-              </label>
+              <p class="quote-convo-bubble" id="assistantBubble">Hi! What kind of space are we cleaning today?</p>
+              <p class="quote-progress-text" id="quoteProgressText">Step 1 of 5</p>
             </div>
 
-            <!-- Step 2: Cleaning type -->
-            <div class="quote-step" data-step="2">
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Service type</h2>
-              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">What level of cleaning do you need?</p>
-              
-              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Cleaning service</label>
-              <div class="card-grid" style="gap: 8px; margin-bottom: 12px;">
-                <label class="select-card" style="padding: 12px;">
-                  <input type="radio" name="service_type" value="Standard cleaning" required>
-                  <div class="select-card-inner">
-                    <strong style="font-size: 0.95rem;">Standard</strong>
-                    <span style="font-size: 0.8rem;">Regular upkeep</span>
-                  </div>
-                </label>
-                <label class="select-card" style="padding: 12px;">
-                  <input type="radio" name="service_type" value="Deep cleaning">
-                  <div class="select-card-inner">
-                    <strong style="font-size: 0.95rem;">Deep</strong>
-                    <span style="font-size: 0.8rem;">Top-to-bottom</span>
-                  </div>
-                </label>
-                <label class="select-card" style="padding: 12px;">
-                  <input type="radio" name="service_type" value="Move-in/Move-out">
-                  <div class="select-card-inner">
-                    <strong style="font-size: 0.95rem;">Move</strong>
-                    <span style="font-size: 0.8rem;">Thorough reset</span>
-                  </div>
-                </label>
-                <label class="select-card" style="padding: 12px;">
-                  <input type="radio" name="service_type" value="Office cleaning">
-                  <div class="select-card-inner">
-                    <strong style="font-size: 0.95rem;">Office</strong>
-                    <span style="font-size: 0.8rem;">Commercial</span>
-                  </div>
-                </label>
-              </div>
-
-              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Frequency</label>
-              <div class="chip-grid" style="gap: 6px;">
-                <label class="chip"><input type="radio" name="frequency" value="One-time" required><span style="font-size: 0.9rem;">One-time</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Weekly"><span style="font-size: 0.9rem;">Weekly</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Bi-weekly"><span style="font-size: 0.9rem;">Bi-weekly</span></label>
-                <label class="chip"><input type="radio" name="frequency" value="Monthly"><span style="font-size: 0.9rem;">Monthly</span></label>
+            <div class="quote-progress quote-progress--slim">
+              <div class="quote-progress-bar">
+                <div class="quote-progress-fill" id="quoteProgressFill"></div>
               </div>
             </div>
 
-            <!-- Step 3: Add-ons -->
-            <div class="quote-step" data-step="3">
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Add-ons</h2>
-              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Any additional services needed?</p>
-              
-              <div class="chip-grid add-on-grid" style="gap: 6px;">
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Carpet</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Wash & fold</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside oven"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Oven</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Fridge</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Cabinets</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Interior windows"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Windows</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Junk removal"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Junk</span></label>
-                <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Power washing"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Power wash</span></label>
-              </div>
-            </div>
+            <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests">
 
-            <!-- Step 4: Contact details -->
-            <div class="quote-step" data-step="4">
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Contact info</h2>
-              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Where should we send the estimate?</p>
-              
-              <label class="field full">Full name
-                <input name="full_name" required autocomplete="name" placeholder="Jane Doe" style="font-size: 0.9rem;">
-              </label>
-              
-              <div class="grid two" style="gap: 10px; margin-top: 10px;">
-                <label class="field">Phone
-                  <input name="phone" required autocomplete="tel" placeholder="(555) 000-0000" style="font-size: 0.9rem;">
-                </label>
-                <label class="field">Email
-                  <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com" style="font-size: 0.9rem;">
-                </label>
-              </div>
-
-              <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500; margin-top: 10px;">Reach you by</label>
-              <div class="chip-grid" style="gap: 6px;">
-                <label class="chip"><input type="radio" name="preferred_contact" value="Email" required><span style="font-size: 0.9rem;">Email</span></label>
-                <label class="chip"><input type="radio" name="preferred_contact" value="Phone"><span style="font-size: 0.9rem;">Phone</span></label>
-                <label class="chip"><input type="radio" name="preferred_contact" value="Text"><span style="font-size: 0.9rem;">Text</span></label>
-              </div>
-            </div>
-
-            <!-- Step 5: Review and submit -->
-            <div class="quote-step" data-step="5">
-              <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Review</h2>
-              <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Verify before submitting</p>
-              
-              <div style="background: var(--surface); padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
-                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Property:</strong> <span id="reviewProperty">-</span></div>
-                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Service:</strong> <span id="reviewService">-</span> (<span id="reviewFrequency">-</span>)</div>
-                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Size:</strong> <span id="reviewSize">-</span></div>
-                <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Add-ons:</strong> <span id="reviewAddons">None</span></div>
-                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px;">
-                  <strong>Estimated Total:</strong> <span id="liveCalculatedTotal" style="font-size: 1.1rem; font-weight: 600; color: var(--primary);">$0.00</span>
+              <div class="quote-step active" data-step="1">
+                <h2 class="quote-step-title">Your space</h2>
+                <fieldset class="quote-fieldset">
+                  <legend class="quote-legend">Property type</legend>
+                  <div class="quote-option-grid quote-option-grid--4">
+                    <label class="quote-option">
+                      <input type="radio" name="property_type" value="House" required>
+                      <span class="quote-option-face"><i data-lucide="home"></i><em>House</em></span>
+                    </label>
+                    <label class="quote-option">
+                      <input type="radio" name="property_type" value="Apartment">
+                      <span class="quote-option-face"><i data-lucide="building"></i><em>Apartment</em></span>
+                    </label>
+                    <label class="quote-option">
+                      <input type="radio" name="property_type" value="Office">
+                      <span class="quote-option-face"><i data-lucide="briefcase"></i><em>Office</em></span>
+                    </label>
+                    <label class="quote-option">
+                      <input type="radio" name="property_type" value="Rental">
+                      <span class="quote-option-face"><i data-lucide="key"></i><em>Rental</em></span>
+                    </label>
+                  </div>
+                </fieldset>
+                <div class="quote-input-row">
+                  <label class="field">Bedrooms
+                    <input type="number" name="bedrooms" min="0" placeholder="3" required>
+                  </label>
+                  <label class="field">Bathrooms
+                    <input type="number" name="bathrooms" min="0" step="0.5" placeholder="2" required>
+                  </label>
+                  <label class="field">Sq ft
+                    <input type="number" name="square_feet" placeholder="1800" required min="200">
+                  </label>
                 </div>
               </div>
 
-              <label class="field full check" style="margin-bottom: 12px;">
-                <input name="consent" type="checkbox" required>
-                <span style="font-size: 0.9rem;">I agree to be contacted about my quote request.</span>
-              </label>
-
-              <div data-form-state class="form-state" role="status"></div>
-            </div>
-
-            <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: space-between;">
-              <button type="button" class="button ghost" id="btnQuoteBack" style="display:none; font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="arrow-left"></i> Back</button>
-              <div style="margin-left:auto; display: flex; gap: 8px;">
-                <button type="button" class="button secondary" id="btnQuoteNext" style="font-size: 0.9rem; padding: 8px 14px;">Next <i data-lucide="arrow-right"></i></button>
-                <button type="submit" class="button" id="btnQuoteSubmit" style="display:none; font-size: 0.9rem; padding: 8px 14px;">Get estimate &amp; continue <i data-lucide="arrow-right"></i></button>
+              <div class="quote-step" data-step="2">
+                <h2 class="quote-step-title">Service</h2>
+                <fieldset class="quote-fieldset">
+                  <legend class="quote-legend">Cleaning type</legend>
+                  <div class="quote-option-grid quote-option-grid--2">
+                    <label class="quote-option quote-option--wide">
+                      <input type="radio" name="service_type" value="Standard cleaning" required>
+                      <span class="quote-option-face"><i data-lucide="sparkles"></i><em>Standard<small>Regular upkeep</small></em></span>
+                    </label>
+                    <label class="quote-option quote-option--wide">
+                      <input type="radio" name="service_type" value="Deep cleaning">
+                      <span class="quote-option-face"><i data-lucide="layers"></i><em>Deep<small>Top-to-bottom</small></em></span>
+                    </label>
+                    <label class="quote-option quote-option--wide">
+                      <input type="radio" name="service_type" value="Move-in/Move-out">
+                      <span class="quote-option-face"><i data-lucide="truck"></i><em>Move<small>Thorough reset</small></em></span>
+                    </label>
+                    <label class="quote-option quote-option--wide">
+                      <input type="radio" name="service_type" value="Office cleaning">
+                      <span class="quote-option-face"><i data-lucide="building-2"></i><em>Office<small>Commercial</small></em></span>
+                    </label>
+                  </div>
+                </fieldset>
+                <fieldset class="quote-fieldset">
+                  <legend class="quote-legend">Frequency</legend>
+                  <div class="quote-pill-row">
+                    <label class="quote-pill"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
+                    <label class="quote-pill"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
+                    <label class="quote-pill"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
+                    <label class="quote-pill"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
+                  </div>
+                </fieldset>
               </div>
-            </div>
 
-          </form>
+              <div class="quote-step" data-step="3">
+                <h2 class="quote-step-title">Add-ons</h2>
+                <p class="quote-step-hint">Optional — skip if none needed.</p>
+                <div class="quote-addon-grid">
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span>Carpet</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span>Wash & fold</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside oven"><span>Oven</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span>Fridge</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span>Cabinets</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Interior windows"><span>Windows</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Junk removal"><span>Junk</span></label>
+                  <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Power washing"><span>Power wash</span></label>
+                </div>
+              </div>
 
-          <!-- Success State (Hidden by default) -->
-          <div id="quoteSuccessState" class="quote-success-state" style="display:none; text-align:center; padding: 24px 12px;">
-            <div style="width: 48px; height: 48px; background: var(--mint-light); color: var(--mint); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
-              <i data-lucide="check" style="width: 24px; height: 24px;"></i>
-            </div>
-            <h2 style="font-size: 1.4rem; margin-bottom: 6px;">Your estimate is ready!</h2>
-            <p style="color: var(--muted); font-size: 0.95rem; margin-bottom: 8px;">Estimated total: <strong data-success-total style="color:var(--mint-dark); font-size:1.2rem;">$0.00</strong></p>
-            <p style="color: var(--muted); font-size: 0.85rem; max-width: 420px; margin: 0 auto 16px;">We've saved your quote. Continue to booking to pick your date and choose how to pay.</p>
-            
-            <div style="display: flex; gap: 8px; justify-content: center; flex-wrap:wrap; margin-bottom: 16px;">
-              <button type="button" class="button" id="btnContinueToBook" style="font-size: 0.95rem; padding: 10px 18px;">Book this cleaning <i data-lucide="calendar"></i></button>
-              <a href="contact.html?inquiry=custom-quote" class="button ghost" style="font-size: 0.9rem; padding: 8px 14px;">Request custom quote</a>
-            </div>
+              <div class="quote-step" data-step="4">
+                <h2 class="quote-step-title">Contact</h2>
+                <label class="field">Full name
+                  <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
+                </label>
+                <div class="quote-input-row quote-input-row--2">
+                  <label class="field">Phone
+                    <input name="phone" required autocomplete="tel" placeholder="(555) 000-0000">
+                  </label>
+                  <label class="field">Email
+                    <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
+                  </label>
+                </div>
+                <fieldset class="quote-fieldset">
+                  <legend class="quote-legend">Reach you by</legend>
+                  <div class="quote-pill-row">
+                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
+                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Phone"><span>Phone</span></label>
+                    <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
+                  </div>
+                </fieldset>
+              </div>
 
-            <div style="text-align:left; margin-bottom: 12px; padding: 12px; background: var(--mint-light); border-radius: 8px; font-size: 0.8rem; max-width:420px; margin-left:auto; margin-right:auto;">
-              <h4 style="color: var(--mint-dark); margin-bottom: 6px; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; font-size: 0.75rem;">What happens next</h4>
-              <ul style="list-style:none; padding:0; margin:0; color: var(--navy); display:flex; flex-direction:column; gap:4px;">
-                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="calendar-check" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> Choose your date and time slot.</li>
-                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="credit-card" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> Pay online now or at service — your choice.</li>
-                <li style="display:flex; align-items:flex-start; gap:6px;"><i data-lucide="phone" style="width:12px;height:12px;color:var(--mint); flex-shrink:0; margin-top:2px;"></i> We confirm within a few hours.</li>
+              <div class="quote-step" data-step="5">
+                <h2 class="quote-step-title">Your estimate</h2>
+                <div class="quote-review-card">
+                  <div class="quote-review-row"><span>Property</span><strong id="reviewProperty">—</strong></div>
+                  <div class="quote-review-row"><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div>
+                  <div class="quote-review-row"><span>Size</span><strong id="reviewSize">—</strong></div>
+                  <div class="quote-review-row"><span>Add-ons</span><strong id="reviewAddons">None</strong></div>
+                  <div class="quote-review-total">
+                    <span>Estimated total</span>
+                    <strong id="liveCalculatedTotal">$0.00</strong>
+                  </div>
+                </div>
+                <label class="field check quote-consent">
+                  <input name="consent" type="checkbox" required>
+                  <span>I agree to be contacted about my quote.</span>
+                </label>
+                <div data-form-state class="form-state" role="status"></div>
+              </div>
+
+              <div class="quote-form-nav">
+                <button type="button" class="button ghost quote-nav-back" id="btnQuoteBack"><i data-lucide="arrow-left"></i> Back</button>
+                <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
+                <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Get estimate &amp; continue <i data-lucide="arrow-right"></i></button>
+              </div>
+            </form>
+
+            <div id="quoteSuccessState" class="quote-success-panel" hidden>
+              <div class="quote-success-icon"><i data-lucide="check"></i></div>
+              <h2>Your estimate is ready</h2>
+              <p class="quote-success-total">Estimated total: <strong data-success-total>$0.00</strong></p>
+              <p class="quote-success-copy">We've saved your quote. Continue to booking to pick your date and choose how to pay.</p>
+              <div class="quote-success-actions">
+                <button type="button" class="button" id="btnContinueToBook">Book this cleaning <i data-lucide="calendar"></i></button>
+                <a href="contact.html?inquiry=custom-quote" class="button ghost">Custom quote</a>
+              </div>
+              <ul class="quote-success-steps">
+                <li><i data-lucide="calendar-check"></i> Choose your date and time</li>
+                <li><i data-lucide="credit-card"></i> Pay online or at service</li>
+                <li><i data-lucide="phone"></i> We confirm within a few hours</li>
               </ul>
+              <button type="button" class="button ghost quote-restart" id="btnRestartQuote">Start another quote</button>
             </div>
-
-            <button type="button" class="button ghost" id="btnRestartQuote" style="font-size: 0.85rem; padding: 8px 14px;">Start another quote</button>
           </div>
-
         </div>
+
+        <p class="quote-studio-foot">Need something fully custom? <a href="contact.html?inquiry=custom-quote">Talk to our team</a></p>
       </div>
     </section>
   </main>

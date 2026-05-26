@@ -204,8 +204,28 @@ function initQuoteAssistant(formContainer = document) {
   const reviewContact = formContainer.querySelector("#reviewContact");
   const reviewMethod = formContainer.querySelector("#reviewMethod");
   const assistantBubble = formContainer.querySelector("#assistantBubble");
+  const isQuoteStudio = formContainer.classList.contains("quote-window");
+  const windowHead = formContainer.querySelector(".quote-window-head");
 
   let currentStepIndex = 0;
+
+  function updateStepDots() {
+    formContainer.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
+      dot.classList.toggle("is-active", index === currentStepIndex);
+      dot.classList.toggle("is-done", index < currentStepIndex);
+    });
+  }
+
+  function showSuccessPanel(successState) {
+    if (!successState) return;
+    successState.hidden = false;
+    if (typeof lucide !== "undefined") lucide.createIcons({ root: successState });
+  }
+
+  function hideSuccessPanel(successState) {
+    if (!successState) return;
+    successState.hidden = true;
+  }
 
   const dateInput = form.querySelector('input[name="preferred_date"]');
   if (dateInput) {
@@ -287,18 +307,28 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   function updateUI() {
-    steps.forEach((step, index) => {
-      if (index === currentStepIndex) {
-        step.classList.add("active");
-        step.style.display = "block";
-        setTimeout(() => { step.style.opacity = "1"; step.style.transform = "translateX(0)"; }, 10);
-      } else {
-        step.classList.remove("active");
-        step.style.opacity = "0";
-        step.style.transform = "translateX(10px)";
-        setTimeout(() => { if (!step.classList.contains("active")) step.style.display = "none"; }, 300);
-      }
-    });
+    if (isQuoteStudio) {
+      steps.forEach((step, index) => {
+        step.classList.toggle("active", index === currentStepIndex);
+        step.style.display = "";
+        step.style.opacity = "";
+        step.style.transform = "";
+      });
+      updateStepDots();
+    } else {
+      steps.forEach((step, index) => {
+        if (index === currentStepIndex) {
+          step.classList.add("active");
+          step.style.display = "block";
+          setTimeout(() => { step.style.opacity = "1"; step.style.transform = "translateX(0)"; }, 10);
+        } else {
+          step.classList.remove("active");
+          step.style.opacity = "0";
+          step.style.transform = "translateX(10px)";
+          setTimeout(() => { if (!step.classList.contains("active")) step.style.display = "none"; }, 300);
+        }
+      });
+    }
 
     const stepNum = currentStepIndex + 1;
     if (progressFill) progressFill.style.width = `${(stepNum / steps.length) * 100}%`;
@@ -316,17 +346,20 @@ function initQuoteAssistant(formContainer = document) {
     }
   }
 
-  steps.forEach((step) => {
-    step.style.transition = "opacity 0.3s ease, transform 0.3s ease";
-    if (!step.classList.contains("active")) {
-      step.style.display = "none";
-      step.style.opacity = "0";
-      step.style.transform = "translateX(10px)";
-    }
-  });
+  if (!isQuoteStudio) {
+    steps.forEach((step) => {
+      step.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+      if (!step.classList.contains("active")) {
+        step.style.display = "none";
+        step.style.opacity = "0";
+        step.style.transform = "translateX(10px)";
+      }
+    });
+  }
 
   updateUI();
   updateLiveSummary();
+  updateAssistantBubble(formContainer, currentStepIndex, isBooking);
 
   if (btnNext) {
     btnNext.addEventListener("click", () => {
@@ -411,13 +444,13 @@ function initQuoteAssistant(formContainer = document) {
         form.style.display = "none";
         const progress = formContainer.querySelector(".quote-progress");
         if (progress) progress.style.display = "none";
+        if (windowHead) windowHead.style.display = "none";
 
         const successState = formContainer.querySelector("#quoteSuccessState");
         if (successState) {
           const totalEl = successState.querySelector("[data-success-total]");
           if (totalEl) totalEl.textContent = formatMoney(pricing.total);
-          successState.style.display = "block";
-          if (typeof lucide !== "undefined") lucide.createIcons({ root: successState });
+          showSuccessPanel(successState);
         }
       } else {
         const payOnline = payload.payment_method === "pay_online";
@@ -480,13 +513,14 @@ function initQuoteAssistant(formContainer = document) {
       form.reset();
       currentStepIndex = 0;
       const successState = formContainer.querySelector("#quoteSuccessState");
-      if (successState) successState.style.display = "none";
-      form.style.display = "block";
+      hideSuccessPanel(successState);
+      form.style.display = "";
       const progress = formContainer.querySelector(".quote-progress");
-      if (progress) progress.style.display = "block";
+      if (progress) progress.style.display = "";
+      if (windowHead) windowHead.style.display = "";
       updateUI();
       updateLiveSummary();
-      updateAssistantBubble(formContainer, 0, isBooking);
+      updateAssistantBubble(formContainer, currentStepIndex, isBooking);
     });
   }
 
@@ -502,11 +536,11 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
   const bubble = formContainer.querySelector("#assistantBubble");
   if (!bubble) return;
   const quoteMessages = [
-    "Let's build your instant estimate — starting with your space.",
-    "Standard is $0.17/sq ft, deep clean is $0.30/sq ft.",
-    "Add extras like carpet, laundry, or power washing if you need them.",
-    "Where should we send your estimate?",
-    "Review your quote, then continue straight to booking."
+    "Hi! What kind of space are we cleaning today?",
+    "Perfect. Which service fits what you need?",
+    "Any extras you'd like us to include?",
+    "Almost done — how should we reach you?",
+    "Here's your estimate. Ready to book when you are."
   ];
   const bookMessages = [
     "Welcome back — let's finish your booking.",
@@ -517,10 +551,15 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
   ];
   const messages = isBooking ? bookMessages : quoteMessages;
   bubble.style.opacity = "0";
+  bubble.style.transform = "translateY(4px)";
   setTimeout(() => {
     bubble.textContent = messages[stepIndex] || messages[0];
     bubble.style.opacity = "1";
-  }, 200);
+    bubble.style.transform = "translateY(0)";
+    bubble.style.animation = "none";
+    void bubble.offsetWidth;
+    bubble.style.animation = "";
+  }, 180);
 }
 
 function initQuoteModalIntercept() {

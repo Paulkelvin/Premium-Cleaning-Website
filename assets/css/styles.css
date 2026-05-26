@@ -3565,3 +3565,621 @@ textarea {
     padding: 40px 60px;
   }
 }
+
+/* ================================================================
+   QUOTE STUDIO — premium conversational quote page
+   ================================================================ */
+
+.quote-page main {
+  overflow: hidden;
+}
+
+.quote-studio {
+  position: relative;
+  min-height: calc(100vh - var(--header-height));
+  padding: 12px 0 48px;
+}
+
+.quote-studio-ambient {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.quote-ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  animation: quoteOrbDrift 18s ease-in-out infinite alternate;
+}
+
+.quote-ambient-orb--blue {
+  width: 280px;
+  height: 280px;
+  background: rgba(15, 79, 207, 0.12);
+  top: 8%;
+  left: -80px;
+}
+
+.quote-ambient-orb--gold {
+  width: 220px;
+  height: 220px;
+  background: rgba(216, 190, 122, 0.18);
+  bottom: 10%;
+  right: -60px;
+  animation-delay: -6s;
+}
+
+.quote-ambient-grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(15, 79, 207, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+@keyframes quoteOrbDrift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(24px, -16px) scale(1.06); }
+}
+
+.quote-studio-inner {
+  max-width: 480px;
+  position: relative;
+  z-index: 1;
+}
+
+.quote-window {
+  position: relative;
+  margin-top: 40px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 79, 207, 0.08);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 60px rgba(11, 19, 36, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(12px);
+  animation: quoteWindowIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes quoteWindowIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quote-avatar-wrap {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  z-index: 3;
+}
+
+.quote-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--white);
+  box-shadow: 0 10px 28px rgba(11, 19, 36, 0.14);
+  animation: quoteAvatarFloat 5s ease-in-out infinite;
+}
+
+.quote-avatar-status {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #22c55e;
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+  animation: quotePulse 2.4s ease-in-out infinite;
+}
+
+@keyframes quoteAvatarFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes quotePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15); }
+  50% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0.08); }
+}
+
+.quote-window-body {
+  padding: 44px 20px 20px;
+}
+
+.quote-window-head {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.quote-step-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.quote-step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quote-step-dot.is-active {
+  width: 22px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--mint), #3b82f6);
+}
+
+.quote-step-dot.is-done {
+  background: var(--mint);
+  opacity: 0.45;
+}
+
+.quote-convo-bubble {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--navy);
+  background: linear-gradient(135deg, var(--mint-light), #fff);
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin: 0 auto 8px;
+  max-width: 100%;
+  position: relative;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  animation: quoteBubbleIn 0.4s ease both;
+}
+
+.quote-convo-bubble::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--mint-light);
+  border-left: 1px solid rgba(15, 79, 207, 0.08);
+  border-top: 1px solid rgba(15, 79, 207, 0.08);
+}
+
+@keyframes quoteBubbleIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quote-progress-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+.quote-progress--slim {
+  margin-bottom: 16px;
+}
+
+.quote-progress--slim .quote-progress-bar {
+  height: 4px;
+}
+
+.quote-form {
+  min-height: 0;
+}
+
+.quote-step {
+  display: none;
+  opacity: 0;
+  transform: translateX(12px);
+  transition: opacity 0.32s ease, transform 0.32s ease;
+}
+
+.quote-step.active {
+  display: block;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.quote-step-title {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.quote-step-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: -6px 0 10px;
+}
+
+.quote-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.quote-legend {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.quote-option-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.quote-option-grid--4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.quote-option-grid--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.quote-option {
+  cursor: pointer;
+  position: relative;
+}
+
+.quote-option input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+}
+
+.quote-option-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 58px;
+  padding: 8px 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quote-option-face i,
+.quote-option-face svg {
+  width: 16px;
+  height: 16px;
+  color: var(--mint);
+}
+
+.quote-option-face em {
+  font-style: normal;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.quote-option-face small {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.quote-option--wide .quote-option-face {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  min-height: 52px;
+  padding: 10px 12px;
+}
+
+.quote-option--wide .quote-option-face em {
+  text-align: left;
+}
+
+.quote-option:hover .quote-option-face {
+  border-color: rgba(15, 79, 207, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 79, 207, 0.06);
+}
+
+.quote-option input:checked + .quote-option-face {
+  background: var(--mint-light);
+  border-color: var(--mint);
+  color: var(--mint-dark);
+  box-shadow: 0 8px 20px rgba(15, 79, 207, 0.1);
+}
+
+.quote-pill-row,
+.quote-addon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.quote-addon-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.quote-pill {
+  cursor: pointer;
+  position: relative;
+}
+
+.quote-pill input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+}
+
+.quote-pill span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 11px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quote-pill:hover span {
+  border-color: rgba(15, 79, 207, 0.25);
+  color: var(--mint-dark);
+}
+
+.quote-pill input:checked + span {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.2);
+}
+
+.quote-input-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.quote-input-row--2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.quote-studio .field {
+  margin-bottom: 0;
+}
+
+.quote-studio .field input {
+  padding: 9px 11px;
+  font-size: 0.84rem;
+  border-radius: 10px;
+}
+
+.quote-studio .field label,
+.quote-studio .field {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.quote-review-card {
+  background: linear-gradient(180deg, var(--mint-light), var(--white));
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+}
+
+.quote-review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  color: var(--muted);
+}
+
+.quote-review-row strong {
+  color: var(--navy);
+  font-weight: 600;
+  text-align: right;
+}
+
+.quote-review-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(15, 79, 207, 0.15);
+}
+
+.quote-review-total strong {
+  font-size: 1.15rem;
+  color: var(--mint-dark);
+}
+
+.quote-consent {
+  font-size: 0.8rem;
+}
+
+.quote-form-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.quote-nav-back {
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+
+.quote-nav-next,
+.quote-nav-submit {
+  margin-left: auto;
+  padding: 9px 16px;
+  font-size: 0.84rem;
+}
+
+.quote-nav-back,
+.quote-nav-submit {
+  display: none;
+}
+
+.quote-success-panel {
+  text-align: center;
+  padding: 8px 4px 4px;
+  animation: quoteWindowIn 0.45s ease both;
+}
+
+.quote-success-panel[hidden] {
+  display: none !important;
+}
+
+.quote-success-icon {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: var(--mint-light);
+  color: var(--mint);
+  display: grid;
+  place-items: center;
+}
+
+.quote-success-panel h2 {
+  font-size: 1.2rem;
+  margin-bottom: 6px;
+}
+
+.quote-success-total {
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.quote-success-total strong {
+  color: var(--mint-dark);
+  font-size: 1.1rem;
+}
+
+.quote-success-copy {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.quote-success-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.quote-success-steps {
+  list-style: none;
+  text-align: left;
+  font-size: 0.78rem;
+  color: var(--navy);
+  background: var(--mint-light);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 0 auto 12px;
+  max-width: 360px;
+}
+
+.quote-success-steps li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.quote-success-steps svg {
+  width: 14px;
+  height: 14px;
+  color: var(--mint);
+  flex-shrink: 0;
+}
+
+.quote-restart {
+  font-size: 0.8rem;
+}
+
+.quote-studio-foot {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 16px;
+}
+
+.quote-studio-foot a {
+  color: var(--mint-dark);
+  font-weight: 600;
+}
+
+/* Modal inherits quote studio card */
+.quote-modal-body .quote-window {
+  margin-top: 36px;
+  box-shadow: none;
+  border: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.quote-modal-body .quote-studio-foot {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .quote-option-grid--4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quote-input-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-window-body {
+    padding: 42px 16px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-avatar,
+  .quote-ambient-orb,
+  .quote-avatar-status {
+    animation: none;
+  }
+
+  .quote-step {
+    transition: none;
+  }
+}
