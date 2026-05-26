@@ -4,10 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Book Appointment | RS Cleaning Collective</title>
+  <meta name="description" content="Complete your cleaning booking with RS Cleaning Collective. Your quote carries over automatically.">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body data-sanity-page="book">
+<body class="book-page" data-sanity-page="book">
   <header class="site-header">
     <div class="nav-wrap">
       <a class="brand" href="index.html"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
@@ -24,230 +25,151 @@
     </div>
   </header>
 
-  <main>
-    <section class="page-hero" style="padding-bottom: 24px; min-height: auto;">
-      <div class="section-inner" style="text-align: center; max-width: 600px;">
-        <p class="eyebrow" style="justify-content: center;"><i data-lucide="calendar"></i>Book Online</p>
-        <h1 style="font-size: 2.5rem;">Complete your booking.</h1>
-        <p style="color: var(--muted);">Your quote carries over — pick a date, confirm details, and choose how to pay.</p>
-      </div>
-    </section>
+  <main class="quote-studio">
+    <div class="quote-studio-ambient" aria-hidden="true">
+      <div class="quote-ambient-orb quote-ambient-orb--blue"></div>
+      <div class="quote-ambient-orb quote-ambient-orb--gold"></div>
+      <div class="quote-ambient-grid"></div>
+      <div class="quote-deco quote-deco--sparkle quote-deco--left"><i data-lucide="sparkles"></i></div>
+      <div class="quote-deco quote-deco--shield quote-deco--right"><i data-lucide="shield-check"></i></div>
+      <div class="quote-deco-ring quote-deco-ring--one"></div>
+      <svg class="quote-deco-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0,64 C240,96 480,32 720,64 C960,96 1200,32 1440,64 L1440,120 L0,120 Z" fill="rgba(15,79,207,0.04)"></path>
+      </svg>
+    </div>
 
-    <section style="padding: 0 0 20px 0;">
-      <div class="section-inner" style="max-width: 900px;">
-        <div id="quotePrefillBanner" class="card" style="display:none; padding:16px 20px; margin-bottom:20px; background:var(--mint-light); border:1px solid rgba(15,79,207,0.15);">
-          <p style="margin:0; font-size:0.95rem;"><i data-lucide="check-circle-2" style="width:16px;height:16px; display:inline; vertical-align:middle; color:var(--mint);"></i> Quote loaded: <strong data-prefill-service>your service</strong> · <strong data-prefill-total>$0.00</strong>. Just add your address and schedule.</p>
-        </div>
-        <div id="noQuoteBanner" class="card" style="display:none; padding:16px 20px; margin-bottom:20px; background:var(--gold-light); border:1px solid rgba(216,190,122,0.4);">
-          <p style="margin:0 0 10px; font-size:0.95rem;">For the fastest booking, start with an instant quote — your details carry over automatically.</p>
-          <a href="quote.html" class="button small secondary">Get quote in minutes <i data-lucide="arrow-right"></i></a>
-        </div>
-      </div>
-    </section>
+    <section class="quote-studio-section">
+      <div class="section-inner quote-studio-inner">
 
-    <section style="padding: 0 0 60px 0;">
-      <div class="section-inner">
-        <div class="quote-assistant-layout">
-          
-          <!-- Left Column: The Form -->
-          <div class="quote-form-container card fade-in-up" style="padding: 0; overflow: hidden; border: 1px solid var(--line);">
-            <div class="quote-progress" style="padding: 16px 24px; border-bottom: 1px solid var(--line); background: var(--surface);">
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 500; margin-bottom: 8px;">
-                <span id="quoteProgressText">Step 1 of 5</span>
-                <span>Secure Booking</span>
+        <div class="quote-window" id="bookAssistantCard">
+          <div class="quote-avatar-wrap">
+            <img class="quote-avatar" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=160&h=160&q=85" alt="RS Cleaning scheduling specialist">
+            <span class="quote-avatar-status" aria-hidden="true"></span>
+          </div>
+
+          <div id="bookNoQuoteGate" class="book-no-quote-gate" hidden>
+            <div class="book-no-quote-icon"><i data-lucide="clipboard-list"></i></div>
+            <h2>Start with your quote</h2>
+            <p>Get an instant estimate first — your service, contact details, and pricing carry over here automatically.</p>
+            <a href="quote.html?intent=book" class="button">Get estimate in minutes <i data-lucide="arrow-right"></i></a>
+          </div>
+
+          <div class="quote-window-body" id="bookFormWrap">
+            <div class="quote-window-head">
+              <div class="quote-step-dots" id="quoteStepDots" aria-hidden="true">
+                <span class="quote-step-dot is-active"></span>
+                <span class="quote-step-dot"></span>
               </div>
-              <div style="height: 4px; background: var(--line); border-radius: 4px; overflow: hidden;">
-                <div id="quoteProgressFill" style="height: 100%; width: 20%; background: var(--mint); transition: width 0.3s ease;"></div>
+              <p class="quote-convo-bubble" id="assistantBubble"><span id="assistantBubbleText"></span><span class="quote-type-cursor" aria-hidden="true"></span></p>
+            </div>
+
+            <div class="quote-window-expand">
+            <div id="quotePrefillBanner" class="book-quote-chip" hidden>
+              <i data-lucide="check-circle-2"></i>
+              <span><strong data-prefill-service>Your service</strong> · <strong data-prefill-total>$0.00</strong> — details from your quote are already saved.</span>
+            </div>
+
+            <div class="quote-progress quote-progress--slim">
+              <div class="quote-progress-bar">
+                <div class="quote-progress-fill" id="quoteProgressFill"></div>
               </div>
             </div>
 
-            <form id="quoteAssistantForm" data-table="bookings" style="padding: 24px;">
-              
-              <!-- Step 1: Contact Details -->
-              <div class="quote-step active" data-step="1">
-                <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Contact Info</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Who are we cleaning for?</p>
-                
-                <label class="field full">Full name
-                  <input name="full_name" required autocomplete="name" placeholder="John Doe" style="font-size: 0.9rem;">
+            <div class="quote-step-banner">
+              <p class="quote-step-kicker" id="quoteProgressText">Step 1 of 2</p>
+              <h2 class="quote-step-heading" id="quoteStepHeading">Schedule</h2>
+            </div>
+
+            <form id="quoteAssistantForm" class="quote-form" data-table="bookings" novalidate>
+
+              <div class="quote-form-stage">
+
+              <div class="quote-step active" data-step="1" data-step-title="Schedule">
+                <label class="field">Service address
+                  <input name="address" required autocomplete="street-address" placeholder="123 Main St, Austin, TX">
                 </label>
-                
-                <div class="grid two" style="gap: 10px; margin-top: 10px;">
-                  <label class="field">Phone
-                    <input name="phone" required autocomplete="tel" placeholder="(555) 000-0000" style="font-size: 0.9rem;">
-                  </label>
-                  <label class="field">Email
-                    <input name="email" type="email" required autocomplete="email" placeholder="john@example.com" style="font-size: 0.9rem;">
-                  </label>
-                </div>
-                
-                <label class="field full" style="margin-top: 10px;">Service Address
-                  <input name="address" required autocomplete="street-address" placeholder="123 Main St, Austin, TX" style="font-size: 0.9rem;">
-                </label>
-              </div>
 
-              <!-- Step 2: Service & Size -->
-              <div class="quote-step" data-step="2">
-                <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Service Details</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Tell us about your home and what you need.</p>
-
-                <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Service Type</label>
-                <div class="chip-grid" style="gap: 6px; margin-bottom: 16px;">
-                  <label class="chip"><input type="radio" name="service_type" value="Standard cleaning" required><span style="font-size: 0.9rem;">Standard</span></label>
-                  <label class="chip"><input type="radio" name="service_type" value="Deep cleaning"><span style="font-size: 0.9rem;">Deep Clean</span></label>
-                  <label class="chip"><input type="radio" name="service_type" value="Move-in/Move-out"><span style="font-size: 0.9rem;">Move in/out</span></label>
-                  <label class="chip"><input type="radio" name="service_type" value="Office cleaning"><span style="font-size: 0.9rem;">Office</span></label>
+                <div class="book-schedule-block">
+                  <p class="quote-field-label">Preferred day</p>
+                  <div class="book-date-scroll" id="bookDatePicker" role="listbox" aria-label="Choose a date"></div>
+                  <input type="hidden" name="preferred_date" required>
                 </div>
 
-                <div class="grid two" style="gap: 10px; margin-bottom: 16px;">
-                  <label class="field">Bedrooms
-                    <select name="bedrooms" required style="font-size: 0.9rem;">
-                      <option value="">Select</option>
-                      <option value="1">1 Bed</option><option value="2">2 Beds</option>
-                      <option value="3">3 Beds</option><option value="4">4 Beds</option>
-                      <option value="5+">5+ Beds</option>
-                    </select>
-                  </label>
-                  <label class="field">Bathrooms
-                    <select name="bathrooms" required style="font-size: 0.9rem;">
-                      <option value="">Select</option>
-                      <option value="1">1 Bath</option><option value="2">2 Baths</option>
-                      <option value="3">3 Baths</option><option value="4">4 Baths</option>
-                    </select>
-                  </label>
-                </div>
-
-                <label class="field full">Estimated Square Footage
-                  <input name="square_feet" required placeholder="e.g. 1500" style="font-size: 0.9rem;" pattern="[0-9,]*">
-                </label>
-              </div>
-
-              <!-- Step 3: Frequency & Add-ons -->
-              <div class="quote-step" data-step="3">
-                <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Customize</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Any extras or recurring schedules?</p>
-
-                <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Frequency (Save with recurring!)</label>
-                <div class="chip-grid" style="gap: 6px; margin-bottom: 16px;">
-                  <label class="chip"><input type="radio" name="frequency" value="One-time" required><span style="font-size: 0.9rem;">One-time</span></label>
-                  <label class="chip"><input type="radio" name="frequency" value="Weekly"><span style="font-size: 0.9rem;">Weekly (20% off)</span></label>
-                  <label class="chip"><input type="radio" name="frequency" value="Bi-weekly"><span style="font-size: 0.9rem;">Bi-weekly (15% off)</span></label>
-                  <label class="chip"><input type="radio" name="frequency" value="Monthly"><span style="font-size: 0.9rem;">Monthly (10% off)</span></label>
-                </div>
-
-                <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">Add-ons</label>
-                <div class="chip-grid add-on-grid" style="gap: 6px;">
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Carpet</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Wash & fold</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside fridge"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Fridge</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Inside oven"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Oven</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Interior windows"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Windows</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Cabinet interiors"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Cabinets</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Junk removal"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Junk</span></label>
-                  <label class="chip check-chip"><input type="checkbox" name="add_ons[]" value="Power washing"><span style="font-size: 0.85rem;"><i data-lucide="plus"></i> Power wash</span></label>
-                </div>
-              </div>
-
-              <!-- Step 4: Schedule -->
-              <div class="quote-step" data-step="4">
-                <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Schedule</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">When should we come by?</p>
-
-                <div class="grid two" style="gap: 10px; margin-bottom: 16px;">
-                  <label class="field">Date
-                    <input name="preferred_date" type="date" required style="font-size: 0.9rem;">
-                  </label>
-                  <label class="field">Time Arrival Window
-                    <select name="preferred_time" required style="font-size: 0.9rem;">
-                      <option value="">Select Time</option>
-                      <option>Morning (8am - 12pm)</option>
-                      <option>Afternoon (12pm - 4pm)</option>
-                    </select>
-                  </label>
-                </div>
-
-                <label class="field full">Notes / Access Instructions
-                  <textarea name="message" placeholder="Gate codes, parking info, or pets to be aware of" style="font-size: 0.9rem; min-height: 70px;"></textarea>
-                </label>
-              </div>
-
-              <!-- Step 5: Review -->
-              <div class="quote-step" data-step="5">
-                <h2 style="font-size: 1.3rem; margin-bottom: 4px;">Review &amp; pay</h2>
-                <p style="color: var(--muted); margin-bottom: 12px; font-size: 0.9rem;">Verify your booking and choose payment</p>
-                
-                <div style="background: var(--surface); padding: 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem;">
-                  <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Service:</strong> <span id="reviewService">-</span> (<span id="reviewFrequency">-</span>)</div>
-                  <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Size:</strong> <span id="reviewSize">-</span></div>
-                  <div style="display: flex; justify-content: space-between; padding: 4px 0;"><strong>Add-ons:</strong> <span id="reviewAddons">None</span></div>
-                  <div style="display: flex; justify-content: space-between; padding: 4px 0; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px;">
-                    <strong>Total:</strong> <span id="liveCalculatedTotal" style="font-size: 1.2rem; font-weight: 600; color: var(--primary);">$0.00</span>
+                <div class="book-schedule-block">
+                  <p class="quote-field-label">Arrival window</p>
+                  <div class="book-time-grid">
+                    <label class="book-time-option">
+                      <input type="radio" name="preferred_time" value="Morning (8am – 12pm)" required>
+                      <span class="book-time-face"><i data-lucide="sunrise"></i><em>Morning<small>8am – 12pm · best for early starts</small></em></span>
+                    </label>
+                    <label class="book-time-option">
+                      <input type="radio" name="preferred_time" value="Afternoon (12pm – 4pm)">
+                      <span class="book-time-face"><i data-lucide="sun"></i><em>Afternoon<small>12pm – 4pm · after lunch</small></em></span>
+                    </label>
                   </div>
                 </div>
 
-                <label class="field full" style="font-size: 0.85rem; margin-bottom: 8px; font-weight: 500;">How would you like to pay?</label>
-                <div class="chip-grid" style="gap: 6px; margin-bottom: 12px;">
-                  <label class="chip"><input type="radio" name="payment_method" value="pay_online" required><span style="font-size: 0.9rem;"><i data-lucide="credit-card"></i> Pay online now</span></label>
-                  <label class="chip"><input type="radio" name="payment_method" value="pay_at_service" checked><span style="font-size: 0.9rem;"><i data-lucide="banknote"></i> Pay at service</span></label>
+                <label class="field">Access notes <small class="field-optional">optional</small>
+                  <textarea name="message" rows="2" placeholder="Gate code, parking, pets, etc."></textarea>
+                </label>
+              </div>
+
+              <div class="quote-step" data-step="2" data-step-title="Confirm &amp; pay">
+                <div class="quote-review-card book-summary-card">
+                  <div class="quote-review-row is-visible"><span>Contact</span><strong id="reviewContact">—</strong></div>
+                  <div class="quote-review-row is-visible"><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div>
+                  <div class="quote-review-row is-visible"><span>Space</span><strong id="reviewSize">—</strong></div>
+                  <div class="quote-review-row is-visible"><span>Add-ons</span><strong id="reviewAddons">None</strong></div>
+                  <div class="quote-review-row is-visible"><span>When</span><strong id="reviewSchedule">—</strong></div>
+                  <div class="quote-review-total is-visible">
+                    <span>Total</span>
+                    <strong id="liveCalculatedTotal">$0.00</strong>
+                  </div>
                 </div>
 
-                <label class="field full check" style="margin-bottom: 12px;">
-                  <input name="consent" type="checkbox" required>
-                  <span style="font-size: 0.9rem;">I agree to the cancellation policy and terms of service.</span>
-                </label>
+                <p class="quote-field-label">How would you like to pay?</p>
+                <div class="book-time-grid book-payment-grid">
+                  <label class="book-time-option">
+                    <input type="radio" name="payment_method" value="pay_at_service" checked>
+                    <span class="book-time-face"><i data-lucide="banknote"></i><em>Pay at service<small>Cash or card when we arrive</small></em></span>
+                  </label>
+                  <label class="book-time-option">
+                    <input type="radio" name="payment_method" value="pay_online">
+                    <span class="book-time-face"><i data-lucide="credit-card"></i><em>Pay online now<small>Secure checkout link after booking</small></em></span>
+                  </label>
+                </div>
 
+                <label class="field check quote-consent">
+                  <input name="consent" type="checkbox" required>
+                  <span>I agree to the cancellation policy and terms of service.</span>
+                </label>
                 <div data-form-state class="form-state" role="status"></div>
               </div>
 
-              <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: space-between;">
-                <button type="button" class="button ghost" id="btnQuoteBack" style="display:none; font-size: 0.9rem; padding: 8px 14px;"><i data-lucide="arrow-left"></i> Back</button>
-                <div style="margin-left:auto; display: flex; gap: 8px;">
-                  <button type="button" class="button secondary" id="btnQuoteNext" style="font-size: 0.9rem; padding: 8px 14px;">Next <i data-lucide="arrow-right"></i></button>
-                  <button type="submit" class="button" id="btnQuoteSubmit" style="display:none; font-size: 0.9rem; padding: 8px 14px;">Confirm booking <i data-lucide="calendar-check"></i></button>
-                </div>
+              </div>
+
+              <div class="quote-form-nav">
+                <button type="button" class="button ghost quote-nav-back" id="btnQuoteBack"><i data-lucide="arrow-left"></i> Back</button>
+                <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
+                <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Confirm booking <i data-lucide="calendar-check"></i></button>
               </div>
             </form>
-
-            <div id="quoteSuccessState" class="quote-success-state" style="display:none; text-align:center; padding: 24px 12px;">
-              <div style="width: 48px; height: 48px; background: var(--mint); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
-                <i data-lucide="check" style="width: 24px; height: 24px;"></i>
-              </div>
-              <h3 style="font-size: 1.3rem; margin-bottom: 8px;">Booking confirmed!</h3>
-              <p style="font-size: 0.95rem; margin-bottom: 6px;">Total: <strong data-success-total style="color:var(--mint-dark);">$0.00</strong></p>
-              <p data-booking-message style="font-size: 0.9rem; color: var(--muted); margin-bottom: 16px;">Your appointment request is confirmed. We'll contact you shortly to finalize your time slot.</p>
-              <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
-                <a href="index.html" class="button small">Back to home</a>
-                <button type="button" class="button ghost small" onclick="location.href='quote.html'">Book another</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Column: Assistant / Summary -->
-          <div class="quote-assistant-sidebar">
-            <div class="assistant-avatar">
-              <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&q=80&w=150&h=150" alt="Customer Support" style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div class="assistant-speech" id="assistantBubble">
-              Hi! Let's get your booking started step-by-step.
             </div>
 
-            <div class="live-summary card">
-              <h3 style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px;">
-                <i data-lucide="clipboard-list" style="width:14px; height:14px;"></i> Live Summary
-              </h3>
-              <ul class="summary-list">
-                <li><span class="label">Service</span> <span class="val" id="liveService">Pending...</span></li>
-                <li><span class="label">Frequency</span> <span class="val" id="liveFrequency">-</span></li>
-                <li><span class="label">Space</span> <span class="val" id="liveSpace">Pending...</span></li>
-                <li><span class="label">Add-ons</span> <span class="val" id="liveAddons">0 selected</span></li>
-              </ul>
-              <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: 0.85rem; color: var(--muted);">
-                <strong>Est. Scope:</strong> <span id="liveScope">Calculating...</span>
+            <div id="quoteSuccessState" class="quote-success-panel" hidden>
+              <div class="quote-success-icon"><i data-lucide="check"></i></div>
+              <h2>Booking confirmed</h2>
+              <p class="quote-success-total">Total: <strong data-success-total>$0.00</strong></p>
+              <p class="quote-success-copy" data-booking-message>Your appointment request is confirmed. We'll contact you shortly to finalize your time slot.</p>
+              <div class="quote-success-actions">
+                <a href="index.html" class="button">Back to home</a>
+                <a href="quote.html" class="button ghost">Book another</a>
               </div>
             </div>
           </div>
-          
         </div>
+
+        <p class="quote-studio-foot">Need to change your service? <a href="quote.html">Update your quote</a></p>
       </div>
     </section>
   </main>
@@ -257,7 +179,6 @@
       <div>
         <a class="brand" href="index.html" style="color:var(--white);"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
         <p style="margin-top:14px; margin-bottom: 20px; font-size:0.95rem;">Premium local cleaning for homes, rentals, and workplaces.</p>
-        <a class="button secondary small" href="quote.html">Get a quote</a>
       </div>
       <div>
         <h3>Quick links</h3>
@@ -266,15 +187,6 @@
           <li><a href="services.html">Services</a></li>
           <li><a href="gallery.html">Gallery</a></li>
           <li><a href="contact.html">Contact</a></li>
-        </ul>
-      </div>
-      <div>
-        <h3>Services</h3>
-        <ul>
-          <li><a href="services/standard-cleaning.html">Standard cleaning</a></li>
-          <li><a href="services/deep-cleaning.html">Deep cleaning</a></li>
-          <li><a href="services/move-in-out-cleaning.html">Move-in/out</a></li>
-          <li><a href="services/carpet-cleaning.html">Carpet cleaning</a></li>
         </ul>
       </div>
       <div>

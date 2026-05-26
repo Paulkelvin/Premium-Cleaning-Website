@@ -48,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 8. Testimonial Slider
   initTestimonialSlider();
   initHomeReviewsCarousel();
+  initContactPage();
 
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
@@ -106,6 +107,46 @@ function initHomeReviewsCarousel() {
   const prevBtn = section.querySelector(".prev-btn");
   const nextBtn = section.querySelector(".next-btn");
 
+  const setupReviewCardScroll = (card) => {
+    let text = card.querySelector(".review-text");
+    if (!text || card.dataset.scrollReady === "true") return;
+    card.dataset.scrollReady = "true";
+
+    if (!text.closest(".review-body")) {
+      const body = document.createElement("div");
+      body.className = "review-body";
+      text.parentNode.insertBefore(body, text);
+      body.appendChild(text);
+      const hint = document.createElement("span");
+      hint.className = "review-scroll-hint";
+      hint.textContent = "Scroll for more";
+      body.appendChild(hint);
+    }
+
+    const body = card.querySelector(".review-body");
+    const updateOverflow = () => {
+      if (!body || !text) return;
+      const hasOverflow = text.scrollHeight > text.clientHeight + 2;
+      body.classList.toggle("has-overflow", hasOverflow);
+      const atEnd = text.scrollTop + text.clientHeight >= text.scrollHeight - 4;
+      body.classList.toggle("is-scrolled-end", atEnd);
+    };
+
+    text.addEventListener("scroll", updateOverflow, { passive: true });
+    window.addEventListener("resize", updateOverflow);
+    requestAnimationFrame(updateOverflow);
+  };
+
+  track.querySelectorAll(".review-card").forEach(setupReviewCardScroll);
+
+  const originalCards = [...track.children];
+  originalCards.forEach((card) => {
+    track.appendChild(card.cloneNode(true));
+  });
+  track.querySelectorAll(".review-card").forEach(setupReviewCardScroll);
+
+  const loopWidth = () => track.scrollWidth / 2;
+
   const getScrollAmount = () => {
     const card = track.querySelector(".review-card");
     if (!card) return 0;
@@ -115,7 +156,10 @@ function initHomeReviewsCarousel() {
   };
 
   const scrollByCard = (direction) => {
+    pauseAutoScrollBriefly();
+    carousel.classList.add("is-user-active");
     carousel.scrollBy({ left: direction * getScrollAmount(), behavior: "smooth" });
+    setTimeout(normalizeScrollLoop, 400);
   };
 
   prevBtn?.addEventListener("click", () => scrollByCard(-1));
@@ -125,13 +169,51 @@ function initHomeReviewsCarousel() {
   let startX = 0;
   let startScrollLeft = 0;
   let hasDragged = false;
+  let autoScrollPaused = false;
+  let resumeAutoScrollTimer = null;
+  let rafId = null;
+  const autoScrollSpeed = 0.32;
+
+  const normalizeScrollLoop = () => {
+    const width = loopWidth();
+    if (width <= 0) return;
+    if (carousel.scrollLeft >= width) carousel.scrollLeft -= width;
+    if (carousel.scrollLeft < 0) carousel.scrollLeft += width;
+  };
+
+  const pauseAutoScrollBriefly = () => {
+    autoScrollPaused = true;
+    carousel.classList.add("is-user-active");
+    if (resumeAutoScrollTimer) clearTimeout(resumeAutoScrollTimer);
+    resumeAutoScrollTimer = setTimeout(() => {
+      autoScrollPaused = false;
+      carousel.classList.remove("is-user-active");
+    }, 2800);
+  };
+
+  carousel.classList.add("is-auto-scroll");
+
+  const tickAutoScroll = () => {
+    if (!autoScrollPaused && !isDragging) {
+      carousel.scrollLeft += autoScrollSpeed;
+      normalizeScrollLoop();
+    }
+    rafId = requestAnimationFrame(tickAutoScroll);
+  };
+  rafId = requestAnimationFrame(tickAutoScroll);
+
+  carousel.addEventListener("mouseenter", () => { autoScrollPaused = true; });
+  carousel.addEventListener("mouseleave", () => {
+    if (!isDragging) autoScrollPaused = false;
+  });
 
   carousel.addEventListener("pointerdown", (event) => {
     isDragging = true;
     hasDragged = false;
+    autoScrollPaused = true;
     startX = event.clientX;
     startScrollLeft = carousel.scrollLeft;
-    carousel.classList.add("is-dragging");
+    carousel.classList.add("is-dragging", "is-user-active");
     carousel.setPointerCapture(event.pointerId);
   });
 
@@ -140,12 +222,15 @@ function initHomeReviewsCarousel() {
     const delta = event.clientX - startX;
     if (Math.abs(delta) > 4) hasDragged = true;
     carousel.scrollLeft = startScrollLeft - delta;
+    normalizeScrollLoop();
   });
 
   const endDrag = (event) => {
     if (!isDragging) return;
     isDragging = false;
     carousel.classList.remove("is-dragging");
+    normalizeScrollLoop();
+    pauseAutoScrollBriefly();
     if (event?.pointerId) {
       try { carousel.releasePointerCapture(event.pointerId); } catch {}
     }
@@ -159,6 +244,8 @@ function initHomeReviewsCarousel() {
       event.stopPropagation();
     }
   }, true);
+
+  carousel.addEventListener("scroll", normalizeScrollLoop, { passive: true });
 }
 
 // Accordions logic
@@ -418,16 +505,30 @@ function openLightbox(beforeSrc, afterSrc, title) {
 }
 
 // Scroll animation logic
-function initScrollReveal() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("appeared");
-      }
-    });
-  }, { threshold: 0.1 });
+let scrollRevealObserver;
 
-  document.querySelectorAll(".fade-in-up, .steps").forEach((el) => observer.observe(el));
+function initScrollReveal() {
+  if (!scrollRevealObserver) {
+    scrollRevealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("appeared");
+        }
+      });
+    }, { threshold: 0.1 });
+  }
+
+  document.querySelectorAll(".fade-in-up:not([data-reveal-observed]), .steps:not([data-reveal-observed])").forEach((el) => {
+    el.dataset.revealObserved = "true";
+    scrollRevealObserver.observe(el);
+  });
+
+  document.querySelectorAll(".fade-in-up:not(.appeared)").forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight && rect.bottom > 0) {
+      el.classList.add("appeared");
+    }
+  });
 }
 
 // Expose accordion and magnifier updates for dynamically rendered items
@@ -436,6 +537,7 @@ window.refreshInteractiveFeatures = () => {
   initMagnifiers();
   initOnPageSliders();
   initHomeReviewsCarousel();
+  initScrollReveal();
 };
 
 // 7. Cleaning-themed Homepage Bubbles
@@ -498,4 +600,53 @@ function initGalleryFilters() {
       });
     });
   });
+}
+
+function initContactPage() {
+  const form = document.getElementById("contactForm");
+  if (!form) return;
+
+  const firstName = document.getElementById("contactFirstName");
+  const lastName = document.getElementById("contactLastName");
+  const fullName = document.getElementById("contactFullName");
+
+  const syncFullName = () => {
+    if (!fullName || !firstName || !lastName) return;
+    fullName.value = `${firstName.value.trim()} ${lastName.value.trim()}`.trim();
+  };
+
+  firstName?.addEventListener("input", syncFullName);
+  lastName?.addEventListener("input", syncFullName);
+
+  form.querySelectorAll(".contact-intent-card input[type='radio']").forEach((radio) => {
+    radio.addEventListener("change", () => {
+      form.querySelectorAll(".contact-intent-card").forEach((card) => {
+        const input = card.querySelector("input[type='radio']");
+        if (input) card.classList.toggle("is-selected", input.checked);
+      });
+    });
+  });
+
+  const phoneInput = form.querySelector("[data-phone-format]");
+  phoneInput?.addEventListener("input", () => {
+    const digits = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) phoneInput.value = digits;
+    else if (digits.length <= 6) phoneInput.value = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    else phoneInput.value = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  });
+
+  form.addEventListener("submit", () => syncFullName(), true);
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("inquiry") === "custom-quote") {
+    const customRadio = form.querySelector('input[name="inquiry_type"][value="Custom quote request"]');
+    if (customRadio) {
+      customRadio.checked = true;
+      customRadio.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    const textarea = form.querySelector('textarea[name="message"]');
+    if (textarea && !textarea.value) {
+      textarea.value = "I'd like a custom quote for my property. Please contact me to discuss scope and pricing.";
+    }
+  }
 }

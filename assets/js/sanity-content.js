@@ -134,16 +134,6 @@ function applyHome(home) {
   text(document.querySelector(".hero h1"), home.heroTitle);
   text(document.querySelector(".hero p:not(.eyebrow)"), home.heroCopy);
 
-  const hero = document.querySelector(".hero");
-  const heroImage = document.querySelector(".hero-image");
-  if (hero) {
-    hero.style.backgroundImage = "";
-  }
-  if (heroImage && home.heroImageUrl) {
-    attr(heroImage, "src", home.heroImageUrl);
-    attr(heroImage, "alt", `${window.CLEANCO_CONFIG?.businessName || "RS Cleaning Collective"} professional cleaning team`);
-  }
-
   const actions = document.querySelectorAll(".hero-actions a");
   text(actions[0], home.primaryCta?.label);
   attr(actions[0], "href", home.primaryCta?.href);

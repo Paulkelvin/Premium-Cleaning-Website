@@ -29,28 +29,55 @@
     <div class="bg-blob bg-blob-blue"></div>
     <div class="bg-blob bg-blob-gold"></div>
     <section class="hero">
-      <div class="section-inner hero-split">
+      <div class="section-inner hero-split hero-split--conversion">
         <div class="hero-content">
-          <h1>Your Space, Perfectly Clean.</h1>
-          <p>Professional residential & commercial cleaning in Austin. Transparent pricing, reliable teams, spotless results.</p>
+          <p class="hero-social-proof fade-in-up">
+            <span class="hero-avatar-stack" aria-hidden="true">
+              <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=64&h=64&q=80" alt="">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80" alt="">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=64&h=64&q=80" alt="">
+            </span>
+            Trusted by <strong>500+</strong> Austin homes &amp; workplaces
+          </p>
+          <h1>Walk in to a cleaner space — without the guesswork.</h1>
+          <p class="hero-value-prop">See your price in about 2 minutes. No phone tag, no vague quotes, no surprises at the door.</p>
           <div class="hero-actions">
-            <a class="button secondary open-quote-modal" href="quote.html">Get estimate in minutes <i data-lucide="arrow-right"></i></a>
-            <a class="button ghost" href="book.html">Book appointment <i data-lucide="calendar"></i></a>
+            <a class="button secondary" href="quote.html">Get estimate in minutes <i data-lucide="arrow-right"></i></a>
+            <a class="button ghost" href="quote.html?intent=book">Book appointment <i data-lucide="calendar"></i></a>
           </div>
+          <p class="hero-micro-commitment">Free estimate · No obligation · Same-week availability in most areas</p>
           <div class="hero-strip" aria-label="Trust indicators">
-            <div><strong>4.9/5</strong><span>Average client rating</span></div>
-            <div><strong>Insured</strong><span>Professional standards</span></div>
+            <div><strong>4.9/5</strong><span>500+ local reviews</span></div>
+            <div><strong>2 min</strong><span>Instant online estimate</span></div>
+            <div><strong>Insured</strong><span>Vetted professional crews</span></div>
           </div>
         </div>
-        <div class="hero-image-wrap">
-          <div class="hero-image-bg-card"></div>
-          <div class="hero-image-bg-glow"></div>
-          <div class="deco-dot-grid" style="position: absolute; top: -20px; right: -20px; z-index: 0;"></div>
-          <img src="assets/images/hero-image.png" alt="RS Cleaning Collective professional cleaning team" class="hero-image">
-          <i data-lucide="sparkles" style="position: absolute; top: 10%; right: 10%; color: var(--gold); z-index: 3; width: 32px; height: 32px; animation: float 4s ease-in-out infinite alternate;"></i>
+        <div class="hero-visual fade-in-up">
+          <div class="hero-visual-card">
+            <img class="hero-image" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=85" alt="Spotless Austin home interior after professional cleaning">
+            <div class="hero-visual-badge">
+              <i data-lucide="sparkles"></i>
+              <div>
+                <strong>Most booked this week</strong>
+                <span>Standard &amp; deep cleaning</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="geo-dots" aria-hidden="true"></div>
+    </section>
+
+    <section class="home-proof-bar band">
+      <div class="section-inner home-proof-bar-inner fade-in-up">
+        <p class="home-proof-label">Why clients stay with RS</p>
+        <ul class="home-proof-stats">
+          <li><strong>94%</strong><span>rebook within 60 days</span></li>
+          <li><strong>4.9★</strong><span>average rating</span></li>
+          <li><strong>&lt; 2 hrs</strong><span>typical quote response</span></li>
+          <li><strong>0</strong><span>hidden fees at checkout</span></li>
+        </ul>
+      </div>
     </section>
 
     <section class="band why-choose-us-band">
@@ -104,7 +131,7 @@
               </div>
             </li>
           </ul>
-          <a class="button" href="book.html" style="margin-top: 12px; box-shadow: 0 4px 15px rgba(0, 87, 255, 0.25);">Book appointment <i data-lucide="calendar"></i></a>
+          <a class="button" href="quote.html?intent=book" style="margin-top: 12px; box-shadow: 0 4px 15px rgba(0, 87, 255, 0.25);">Book appointment <i data-lucide="calendar"></i></a>
         </div>
       </div>
     </section>
@@ -121,7 +148,7 @@
             <blockquote>"The detail-oriented cleaning methods we develop keep Austin spaces immaculate and calm."</blockquote>
             <span class="quote-author">— Vetted Crew Leaders</span>
           </div>
-          <a class="button secondary open-quote-modal" href="quote.html" style="margin-top: 24px;">Build a custom clean <i data-lucide="arrow-right"></i></a>
+          <a class="button secondary" href="quote.html" style="margin-top: 24px;">Build a custom clean <i data-lucide="arrow-right"></i></a>
         </div>
         <div class="services-right-col">
           <article class="card service-card-horizontal fade-in-up" style="--delay: 0.1s;">
@@ -139,6 +166,7 @@
                 <li><i data-lucide="check"></i> High-touch zones dusted</li>
               </ul>
               <a class="tag" href="services/standard-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+              <a class="tag tag--cta" href="quote.html?service=standard-cleaning&step=2">Get estimate</a>
             </div>
           </article>
           
@@ -157,6 +185,7 @@
                 <li><i data-lucide="check"></i> In-depth floor scrub</li>
               </ul>
               <a class="tag" href="services/deep-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+              <a class="tag tag--cta" href="quote.html?service=deep-cleaning&step=2">Get estimate</a>
             </div>
           </article>
           
@@ -175,6 +204,7 @@
                 <li><i data-lucide="check"></i> Baseboards & detail cleaning</li>
               </ul>
               <a class="tag" href="services/move-in-out-cleaning.html">Learn more <i data-lucide="arrow-right" style="width: 14px; height: 14px; margin-left: 2px;"></i></a>
+              <a class="tag tag--cta" href="quote.html?service=move-in-out-cleaning&step=2">Get estimate</a>
             </div>
           </article>
         </div>
@@ -302,9 +332,9 @@
     <section class="band">
       <div class="section-inner quote-section-split">
         <div class="quote-panel fade-in-up">
-          <p class="eyebrow" style="background: var(--gold-light); color: var(--gold); padding: 4px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 700; width: fit-content;"><i data-lucide="clock" style="width:14px;height:14px;"></i>Quote in minutes</p>
-          <h2 style="margin-top:16px;">Tell us about your space and get a clear estimate fast.</h2>
-          <p>Share your property size, service type, and add-ons. We will confirm details before service so expectations stay crisp.</p>
+          <p class="eyebrow" style="background: var(--gold-light); color: var(--gold); padding: 4px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; font-weight: 700; width: fit-content;"><i data-lucide="clock" style="width:14px;height:14px;"></i>Most clients book within 24 hours</p>
+          <h2 style="margin-top:16px;">Stop guessing what cleaning costs — see your number first.</h2>
+          <p>Share your space, pick your service, and get a clear total before anyone arrives. No awkward surprises, no pressure to decide on the spot.</p>
           
           <div class="quote-preview-points" style="margin: 20px 0; display: flex; flex-direction: column; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: rgba(255,255,255,0.85);">
@@ -318,7 +348,7 @@
             </div>
           </div>
 
-          <a class="button secondary open-quote-modal" href="quote.html" style="margin-top:12px; box-shadow: 0 4px 15px rgba(217, 164, 65, 0.3);">Start my quote <i data-lucide="arrow-right"></i></a>
+          <a class="button secondary" href="quote.html" style="margin-top:12px; box-shadow: 0 4px 15px rgba(217, 164, 65, 0.3);">Start my quote <i data-lucide="arrow-right"></i></a>
           
           <div class="reassurance-line">
             <i data-lucide="shield-check" style="width:16px;height:16px;"></i>
@@ -525,12 +555,13 @@
       <div class="section-inner split">
         <div class="fade-in-up">
           <p class="eyebrow">Ready when you are</p>
-          <h2>Request a quote or schedule a call today.</h2>
-          <p style="margin-bottom: 24px;">Tell us what you need and we will help match the right cleaning plan to your space.</p>
+          <h2>Your cleaner space is two minutes away.</h2>
+          <p style="margin-bottom: 24px;">Get a transparent estimate first — then pick a time that works. Hundreds of Austin clients already did.</p>
           <div class="cta-row">
-            <a class="button secondary open-quote-modal" href="quote.html">Get a quote <i data-lucide="arrow-right"></i></a>
-            <a class="button" href="book.html">Book appointment <i data-lucide="calendar"></i></a>
+            <a class="button secondary" href="quote.html">Get a quote <i data-lucide="arrow-right"></i></a>
+            <a class="button" href="quote.html?intent=book">Book appointment <i data-lucide="calendar"></i></a>
           </div>
+          <p class="home-final-reassurance"><i data-lucide="shield-check"></i> No hidden fees · Insured crews · Cancel-friendly scheduling</p>
         </div>
         <div class="fade-in-up">
           <img src="https://images.unsplash.com/photo-1556745757-8d76bdb6984b?auto=format&fit=crop&w=700&q=85" alt="Ready to help" style="border-radius: 24px; max-height: 300px; object-fit: cover; width: 100%; box-shadow: 0 16px 40px rgba(11,17,15,0.1);">

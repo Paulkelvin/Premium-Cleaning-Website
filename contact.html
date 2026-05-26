@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Contact | RS Cleaning Collective</title>
-  <meta name="description" content="Get in touch with RS Cleaning Collective for quotes, bookings, and questions. Serving Austin, TX.">
+  <title>Contact Us | RS Cleaning Collective</title>
+  <meta name="description" content="Get in touch with RS Cleaning Collective. Our friendly Austin team replies within one business day.">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body data-sanity-page="contact">
+<body class="contact-page" data-sanity-page="contact">
   <header class="site-header">
     <div class="nav-wrap">
       <a class="brand" href="index.html"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
@@ -26,99 +26,146 @@
   </header>
 
   <main>
-    <section style="padding: 60px 0;">
-      <div class="section-inner">
-        <div class="contact-split-premium fade-in-up">
-          <!-- LEFT: Form -->
-          <div class="contact-form-side premium-glass-panel">
-            <div style="margin-bottom: 24px;">
-              <p class="eyebrow"><i data-lucide="mail"></i> Get in touch</p>
-              <h1 style="font-size: clamp(1.6rem, 3.5vw, 2.4rem); margin-bottom: 8px;">We'd love to hear from you.</h1>
-              <p style="font-size: 0.95rem;">Send us a message and we'll reply promptly.</p>
-            </div>
-            <form class="form-grid compact-form" data-lead-form data-table="contact_submissions">
-              <div class="form-row-2">
-                <label class="field">Full name
-                  <input name="full_name" required autocomplete="name" placeholder="John Doe">
-                </label>
-                <label class="field">Email
-                  <input name="email" type="email" required autocomplete="email" placeholder="john@example.com">
-                </label>
-              </div>
-              
-              <div class="form-row-2">
-                <label class="field">Phone
-                  <input name="phone" autocomplete="tel" placeholder="(555) 000-0000">
-                </label>
-                <label class="field">Inquiry type
-                  <select name="inquiry_type" required>
-                    <option value="">Choose inquiry</option>
-                    <option>General question</option>
-                    <option>Custom quote request</option>
-                    <option>Quote help</option>
-                    <option>Booking help</option>
-                    <option>Recurring cleaning</option>
-                    <option>Urgent request</option>
-                  </select>
-                </label>
-              </div>
-              
-              <label class="field full">Message
-                <textarea name="message" required placeholder="Tell us how we can help with your space..." style="min-height: 100px;"></textarea>
+    <section class="contact-hero-section">
+      <div class="section-inner contact-hero-split">
+        <div class="contact-form-panel fade-in-up">
+          <p class="contact-kicker">Contact us</p>
+          <h1>Get in touch</h1>
+          <p class="contact-lead">Our friendly team would love to hear from you. Most messages get a reply within one business day.</p>
+
+          <form class="contact-ui-form" data-lead-form data-table="contact_submissions" id="contactForm">
+            <div class="contact-name-row">
+              <label class="field">
+                <span>First name</span>
+                <input type="text" id="contactFirstName" required autocomplete="given-name" placeholder="Jane">
               </label>
-              
-              <div class="form-actions-row">
-                <label class="field check compact-check">
-                  <input name="consent" type="checkbox" required>
-                  <span style="font-size: 0.85rem;">I consent to being contacted.</span>
+              <label class="field">
+                <span>Last name</span>
+                <input type="text" id="contactLastName" required autocomplete="family-name" placeholder="Smith">
+              </label>
+            </div>
+            <input type="hidden" name="full_name" id="contactFullName">
+
+            <label class="field">
+              <span>Email</span>
+              <input name="email" type="email" required autocomplete="email" placeholder="you@email.com">
+            </label>
+
+            <label class="field">
+              <span>Phone number</span>
+              <input name="phone" type="tel" autocomplete="tel" placeholder="(555) 000-0000" data-phone-format>
+            </label>
+
+            <fieldset class="contact-intent-fieldset">
+              <legend>What best describes you?</legend>
+              <div class="contact-intent-cards">
+                <label class="contact-intent-card is-selected">
+                  <input type="radio" name="inquiry_type" value="Recurring cleaning" checked>
+                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
+                  <span class="contact-intent-icon"><i data-lucide="home"></i></span>
+                  <strong>I'm a homeowner</strong>
+                  <span>I need recurring or one-time home cleaning with clear pricing.</span>
                 </label>
-                <button class="button" type="submit">Send message <i data-lucide="send" style="width:16px;height:16px;"></i></button>
+                <label class="contact-intent-card">
+                  <input type="radio" name="inquiry_type" value="Custom quote request">
+                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
+                  <span class="contact-intent-icon"><i data-lucide="key"></i></span>
+                  <strong>I manage a property</strong>
+                  <span>Move-outs, turnovers, or listings that need a reliable handoff clean.</span>
+                </label>
+                <label class="contact-intent-card">
+                  <input type="radio" name="inquiry_type" value="Booking help">
+                  <span class="contact-intent-check" aria-hidden="true"><i data-lucide="check"></i></span>
+                  <span class="contact-intent-icon"><i data-lucide="building-2"></i></span>
+                  <strong>I need office cleaning</strong>
+                  <span>Recurring care for a workplace, studio, or small commercial space.</span>
+                </label>
               </div>
-              <div data-form-state class="form-state" role="status"></div>
-            </form>
+            </fieldset>
+
+            <label class="field">
+              <span>Message</span>
+              <textarea name="message" required placeholder="Tell us about your space, timeline, or any questions…" rows="4"></textarea>
+            </label>
+
+            <label class="field contact-consent">
+              <input name="consent" type="checkbox" required>
+              <span>You agree to our friendly <a href="privacy.html">privacy policy</a>.</span>
+            </label>
+
+            <button class="button contact-submit-btn" type="submit">Get in touch</button>
+            <div data-form-state class="form-state" role="status"></div>
+
+            <p class="contact-form-note">
+              <i data-lucide="zap"></i>
+              Need pricing now? <a href="quote.html">Get an instant estimate</a> — takes about 2 minutes.
+            </p>
+          </form>
+        </div>
+
+        <aside class="contact-proof-panel fade-in-up" aria-label="Client testimonial">
+          <div class="contact-proof-image-wrap">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=85" alt="Happy RS Cleaning client">
+            <div class="contact-proof-overlay">
+              <blockquote>
+                "RS Cleaning Collective made booking effortless. The estimate was transparent from the start, and our home has never felt this calm after a clean."
+              </blockquote>
+              <div class="contact-proof-meta">
+                <div>
+                  <strong>Maria Chen</strong>
+                  <span>Homeowner · Hyde Park, Austin</span>
+                </div>
+                <div class="contact-proof-stars" aria-label="5 out of 5 stars">
+                  <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <!-- RIGHT: Compact Info Panel -->
-          <div class="contact-info-side premium-info-panel">
-            <div class="sparkle-accent" style="top:20px; right:20px;"><i data-lucide="sparkles"></i></div>
-            <h3 style="font-size: 1.25rem; margin-bottom: 24px; color: var(--white);">Direct Contact</h3>
-            
-            <div class="contact-method compact">
-              <div class="contact-method-icon"><i data-lucide="phone"></i></div>
-              <div>
-                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Phone</strong>
-                <a href="tel:+15550147820" style="color: var(--white); font-weight: 600; display: block; font-size: 1.1rem;">(555) 014-7820</a>
-              </div>
-            </div>
-            
-            <div class="contact-method compact">
-              <div class="contact-method-icon"><i data-lucide="mail"></i></div>
-              <div>
-                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Email</strong>
-                <a href="mailto:hello@REDACTED.com" style="color: var(--white); font-weight: 500; display: block;">hello@REDACTED.com</a>
-              </div>
-            </div>
-            
-            <div class="contact-method compact">
-              <div class="contact-method-icon"><i data-lucide="map-pin"></i></div>
-              <div>
-                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Service Area</strong>
-                <span style="color: var(--white); display: block;">Austin, TX & surrounding areas</span>
-              </div>
-            </div>
-            
-            <div class="contact-method compact" style="margin-bottom: 32px;">
-              <div class="contact-method-icon"><i data-lucide="clock"></i></div>
-              <div>
-                <strong style="color: rgba(255,255,255,0.6); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em;">Hours</strong>
-                <span style="color: var(--white); display: block;">Mon - Sat, 8am - 6pm</span>
-              </div>
-            </div>
-            
-            <div style="background: rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; border-left: 3px solid var(--gold);">
-              <strong style="color: var(--gold); display: block; margin-bottom: 4px; font-size: 0.9rem;">Urgent or tight deadline?</strong>
-              <p style="font-size: 0.85rem; margin: 0; color: rgba(255,255,255,0.85);">Call us directly. We prioritize emergency turnovers and deep cleans when possible.</p>
-            </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="contact-mid-cta">
+      <div class="section-inner contact-mid-cta-inner fade-in-up">
+        <div>
+          <h2>Let's get started on something great</h2>
+          <p>Join hundreds of Austin households and property teams who trust RS for clear estimates and spotless results.</p>
+        </div>
+        <div class="contact-mid-cta-actions">
+          <a class="button ghost" href="tel:+15550147820"><i data-lucide="phone"></i> Call us</a>
+          <a class="button" href="quote.html">Get started <i data-lucide="arrow-right"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-details-strip">
+      <div class="section-inner contact-details-grid">
+        <div class="contact-detail-item">
+          <i data-lucide="mail"></i>
+          <div>
+            <strong>Email</strong>
+            <a href="mailto:hello@REDACTED.com">hello@REDACTED.com</a>
+          </div>
+        </div>
+        <div class="contact-detail-item">
+          <i data-lucide="phone"></i>
+          <div>
+            <strong>Phone</strong>
+            <a href="tel:+15550147820">(555) 014-7820</a>
+          </div>
+        </div>
+        <div class="contact-detail-item">
+          <i data-lucide="map-pin"></i>
+          <div>
+            <strong>Service area</strong>
+            <span>Austin, TX &amp; surrounding communities</span>
+          </div>
+        </div>
+        <div class="contact-detail-item">
+          <i data-lucide="clock"></i>
+          <div>
+            <strong>Hours</strong>
+            <span>Mon–Sat, 8am–6pm</span>
           </div>
         </div>
       </div>
@@ -179,22 +226,6 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
-  <script>
-    (function () {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("inquiry") !== "custom-quote") return;
-      const select = document.querySelector('select[name="inquiry_type"]');
-      const textarea = document.querySelector('textarea[name="message"]');
-      if (select) {
-        for (const opt of select.options) {
-          if (opt.textContent === "Custom quote request") { opt.selected = true; break; }
-        }
-      }
-      if (textarea && !textarea.value) {
-        textarea.value = "I'd like a custom quote for my property. Please contact me to discuss scope and pricing.";
-      }
-    })();
-  </script>
   <script src="assets/js/quote-assistant.js"></script>
 </body>
 </html>
