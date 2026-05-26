@@ -203,14 +203,15 @@ function initQuoteAssistant(formContainer = document) {
   const reviewAddons = formContainer.querySelector("#reviewAddons");
   const reviewContact = formContainer.querySelector("#reviewContact");
   const reviewMethod = formContainer.querySelector("#reviewMethod");
-  const assistantBubble = formContainer.querySelector("#assistantBubble");
-  const isQuoteStudio = formContainer.classList.contains("quote-window");
-  const windowHead = formContainer.querySelector(".quote-window-head");
+  const root = form.closest("#quoteAssistantCard, .quote-window") || formContainer;
+  const isQuoteStudio = root.classList.contains("quote-window");
+  const windowHead = root.querySelector(".quote-window-head");
+  const assistantBubble = root.querySelector("#assistantBubble");
 
   let currentStepIndex = 0;
 
   function updateStepDots() {
-    formContainer.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
+    root.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
       dot.classList.toggle("is-active", index === currentStepIndex);
       dot.classList.toggle("is-done", index < currentStepIndex);
     });
@@ -306,6 +307,58 @@ function initQuoteAssistant(formContainer = document) {
     updatePaymentUI();
   }
 
+  function validateStep(stepEl) {
+    const seenRadios = new Set();
+    let valid = true;
+    let firstInvalid = null;
+
+    stepEl.querySelectorAll("input[required], select[required], textarea[required]").forEach((input) => {
+      if (input.type === "radio") {
+        if (seenRadios.has(input.name)) return;
+        seenRadios.add(input.name);
+        if (!stepEl.querySelector(`input[name="${input.name}"]:checked`)) {
+          if (!firstInvalid) firstInvalid = input;
+          valid = false;
+        }
+        return;
+      }
+      if (!input.checkValidity()) {
+        if (!firstInvalid) firstInvalid = input;
+        valid = false;
+      }
+    });
+
+    if (firstInvalid) firstInvalid.reportValidity();
+    return valid;
+  }
+
+  function transitionToStep(nextIndex, direction = 1) {
+    if (nextIndex < 0 || nextIndex >= steps.length) return;
+
+    if (!isQuoteStudio) {
+      currentStepIndex = nextIndex;
+      updateUI();
+      updateAssistantBubble(root, currentStepIndex, isBooking);
+      return;
+    }
+
+    const currentStepEl = steps[currentStepIndex];
+    const nextStepEl = steps[nextIndex];
+    if (currentStepEl === nextStepEl) return;
+
+    currentStepEl.classList.add(direction > 0 ? "is-exiting-forward" : "is-exiting-back");
+    setTimeout(() => {
+      currentStepEl.classList.remove("active", "is-exiting-forward", "is-exiting-back");
+      currentStepIndex = nextIndex;
+      nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
+      updateUI();
+      updateAssistantBubble(root, currentStepIndex, isBooking);
+      setTimeout(() => {
+        nextStepEl.classList.remove("is-entering-forward", "is-entering-back");
+      }, 360);
+    }, 240);
+  }
+
   function updateUI() {
     if (isQuoteStudio) {
       steps.forEach((step, index) => {
@@ -359,22 +412,13 @@ function initQuoteAssistant(formContainer = document) {
 
   updateUI();
   updateLiveSummary();
-  updateAssistantBubble(formContainer, currentStepIndex, isBooking);
+  updateAssistantBubble(root, currentStepIndex, isBooking);
 
   if (btnNext) {
     btnNext.addEventListener("click", () => {
-      const currentStepEl = steps[currentStepIndex];
-      const inputs = currentStepEl.querySelectorAll("input[required], select[required]");
-      let valid = true;
-      inputs.forEach((input) => {
-        if (!input.reportValidity()) valid = false;
-      });
-      if (!valid) return;
-
+      if (!validateStep(steps[currentStepIndex])) return;
       if (currentStepIndex < steps.length - 1) {
-        currentStepIndex++;
-        updateUI();
-        updateAssistantBubble(formContainer, currentStepIndex, isBooking);
+        transitionToStep(currentStepIndex + 1, 1);
       }
     });
   }
@@ -382,9 +426,7 @@ function initQuoteAssistant(formContainer = document) {
   if (btnBack) {
     btnBack.addEventListener("click", () => {
       if (currentStepIndex > 0) {
-        currentStepIndex--;
-        updateUI();
-        updateAssistantBubble(formContainer, currentStepIndex, isBooking);
+        transitionToStep(currentStepIndex - 1, -1);
       }
     });
   }
@@ -520,7 +562,7 @@ function initQuoteAssistant(formContainer = document) {
       if (windowHead) windowHead.style.display = "";
       updateUI();
       updateLiveSummary();
-      updateAssistantBubble(formContainer, currentStepIndex, isBooking);
+      updateAssistantBubble(root, 0, isBooking);
     });
   }
 

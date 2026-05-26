@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 8. Testimonial Slider
   initTestimonialSlider();
+  initHomeReviewsCarousel();
 
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
@@ -93,6 +94,71 @@ function initTestimonialSlider() {
     currentIndex = 0;
     updateSlider();
   });
+}
+
+function initHomeReviewsCarousel() {
+  const carousel = document.getElementById("homeReviewsCarousel");
+  const track = document.getElementById("homeReviewsTrack");
+  const section = document.querySelector(".reviews-section");
+  if (!carousel || !track || !section || carousel.dataset.bound === "true") return;
+  carousel.dataset.bound = "true";
+
+  const prevBtn = section.querySelector(".prev-btn");
+  const nextBtn = section.querySelector(".next-btn");
+
+  const getScrollAmount = () => {
+    const card = track.querySelector(".review-card");
+    if (!card) return 0;
+    const styles = getComputedStyle(track);
+    const gap = parseFloat(styles.columnGap || styles.gap || "18") || 18;
+    return card.offsetWidth + gap;
+  };
+
+  const scrollByCard = (direction) => {
+    carousel.scrollBy({ left: direction * getScrollAmount(), behavior: "smooth" });
+  };
+
+  prevBtn?.addEventListener("click", () => scrollByCard(-1));
+  nextBtn?.addEventListener("click", () => scrollByCard(1));
+
+  let isDragging = false;
+  let startX = 0;
+  let startScrollLeft = 0;
+  let hasDragged = false;
+
+  carousel.addEventListener("pointerdown", (event) => {
+    isDragging = true;
+    hasDragged = false;
+    startX = event.clientX;
+    startScrollLeft = carousel.scrollLeft;
+    carousel.classList.add("is-dragging");
+    carousel.setPointerCapture(event.pointerId);
+  });
+
+  carousel.addEventListener("pointermove", (event) => {
+    if (!isDragging) return;
+    const delta = event.clientX - startX;
+    if (Math.abs(delta) > 4) hasDragged = true;
+    carousel.scrollLeft = startScrollLeft - delta;
+  });
+
+  const endDrag = (event) => {
+    if (!isDragging) return;
+    isDragging = false;
+    carousel.classList.remove("is-dragging");
+    if (event?.pointerId) {
+      try { carousel.releasePointerCapture(event.pointerId); } catch {}
+    }
+  };
+
+  carousel.addEventListener("pointerup", endDrag);
+  carousel.addEventListener("pointercancel", endDrag);
+  carousel.addEventListener("click", (event) => {
+    if (hasDragged) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  }, true);
 }
 
 // Accordions logic
@@ -369,6 +435,7 @@ window.refreshInteractiveFeatures = () => {
   initAccordions();
   initMagnifiers();
   initOnPageSliders();
+  initHomeReviewsCarousel();
 };
 
 // 7. Cleaning-themed Homepage Bubbles
