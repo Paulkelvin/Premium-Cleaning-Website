@@ -763,22 +763,105 @@ function buildSubmissionPayload(form, table) {
 }
 
 
+function hasBedBathEntries(form) {
+  const { bedsRaw, bathsRaw } = readSpaceMetrics(form);
+  return bedsRaw !== "" || bathsRaw !== "";
+}
+
+function hasSqftEntries(form) {
+  const { sqftRaw } = readSpaceMetrics(form);
+  return sqftRaw !== "";
+}
+
+function getSizeSwitchConfirmCopy(targetMode) {
+  if (targetMode === "sqft") {
+    return {
+      text: "Switch to square footage? Your beds & baths will be cleared.",
+      cancel: "Keep beds & baths",
+      ok: "Switch to sq ft"
+    };
+  }
+  return {
+    text: "Switch to beds & baths? Your square footage will be cleared.",
+    cancel: "Keep square footage",
+    ok: "Switch to beds & baths"
+  };
+}
+
 function initQuoteSizeMode(form, { onUpdate } = {}) {
   if (!form.querySelector(".quote-size-metrics")) return;
+
+  const confirmEl = form.querySelector("[data-size-switch-confirm]");
+  const confirmText = form.querySelector("[data-size-switch-confirm-text]");
+  const confirmCancel = form.querySelector("[data-size-switch-cancel]");
+  const confirmOk = form.querySelector("[data-size-switch-ok]");
+  let pendingConfirmCallback = null;
+  let committedMode = getSizeInputMode(form);
 
   const triggerUpdate = () => {
     if (typeof onUpdate === "function") onUpdate();
   };
 
+  const revertModeRadio = (mode) => {
+    const input = form.querySelector(`input[name="size_input_mode"][value="${mode}"]`);
+    if (input) input.checked = true;
+  };
+
+  const hideConfirm = () => {
+    pendingConfirmCallback = null;
+    if (confirmEl) confirmEl.hidden = true;
+  };
+
+  const showConfirm = (targetMode) => {
+    const copy = getSizeSwitchConfirmCopy(targetMode);
+    if (confirmText) confirmText.textContent = copy.text;
+    if (confirmCancel) confirmCancel.textContent = copy.cancel;
+    if (confirmOk) confirmOk.textContent = copy.ok;
+    if (confirmEl) confirmEl.hidden = false;
+  };
+
   const setMode = (mode, { clearInactive = false } = {}) => {
     applySizeInputMode(form, mode, { clearInactive });
+    committedMode = mode;
+    hideConfirm();
     triggerUpdate();
   };
+
+  const requestModeSwitch = (targetMode) => {
+    if (targetMode === committedMode) return;
+
+    const wouldDiscard =
+      targetMode === "sqft" ? hasBedBathEntries(form) : hasSqftEntries(form);
+
+    if (!wouldDiscard) {
+      setMode(targetMode, { clearInactive: true });
+      return;
+    }
+
+    revertModeRadio(committedMode);
+    pendingConfirmCallback = () => setMode(targetMode, { clearInactive: true });
+    showConfirm(targetMode);
+  };
+
+  if (confirmOk) {
+    confirmOk.addEventListener("click", () => {
+      const confirm = pendingConfirmCallback;
+      hideConfirm();
+      if (typeof confirm === "function") confirm();
+    });
+  }
+
+  if (confirmCancel) {
+    confirmCancel.addEventListener("click", () => {
+      revertModeRadio(committedMode);
+      hideConfirm();
+    });
+  }
 
   form.querySelectorAll('input[name="size_input_mode"]').forEach((input) => {
     input.addEventListener("change", () => {
       if (!input.checked) return;
-      setMode(input.value, { clearInactive: true });
+      requestModeSwitch(input.value);
     });
   });
 
@@ -786,13 +869,15 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
     input.addEventListener("change", () => {
       if (!input.checked) return;
       if (input.value === "Office") {
-        setMode("sqft", { clearInactive: true });
+        requestModeSwitch("sqft");
       }
     });
   });
 
   const officeSelected = form.querySelector('input[name="property_type"][value="Office"]:checked');
-  applySizeInputMode(form, officeSelected ? "sqft" : getSizeInputMode(form));
+  const initialMode = officeSelected ? "sqft" : committedMode;
+  applySizeInputMode(form, initialMode);
+  committedMode = initialMode;
   triggerUpdate();
 }
 

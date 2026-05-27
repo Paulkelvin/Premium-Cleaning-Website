@@ -249,10 +249,6 @@ function getEstimateBadge(row) {
   return `<span class="admin-record-estimate">$${Number(row.estimated_total).toFixed(2)}</span>`;
 }
 
-function isRecordExpandedByDefault(status) {
-  return status !== "resolved";
-}
-
 function getDateGroupLabel(isoDate) {
   if (!isoDate) return "Earlier";
   const date = new Date(isoDate);
@@ -359,7 +355,7 @@ function renderRecord(table, row, { forceExpanded } = {}) {
   const status = row.status || "new";
   const title = getRowTitle(row);
   const summary = getRowSummary(table, row);
-  const expanded = forceExpanded ?? isRecordExpandedByDefault(status);
+  const expanded = forceExpanded === true;
   const bodyId = `record-body-${table}-${row.id}`;
   const estimateBadge =
     table !== "contact_submissions" ? getEstimateBadge(row) : "";
@@ -377,7 +373,7 @@ function renderRecord(table, row, { forceExpanded } = {}) {
     <article class="admin-record${expanded ? " is-expanded" : ""}" data-record-id="${escapeHtml(row.id)}" data-admin-record data-table="${table}">
       <div class="admin-record-head">
         <button type="button" class="admin-record-toggle" aria-expanded="${expanded}" aria-controls="${bodyId}">
-          <span class="admin-record-chevron" aria-hidden="true"><i data-lucide="chevron-down"></i></span>
+          <span class="admin-record-chevron" aria-hidden="true"></span>
           <span class="admin-record-title-wrap">
             <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
             <span class="admin-record-heading">
@@ -741,6 +737,8 @@ document.addEventListener("click", async (event) => {
 
   const toggle = event.target.closest(".admin-record-toggle");
   if (toggle) {
+    event.preventDefault();
+    event.stopPropagation();
     const record = toggle.closest("[data-admin-record]");
     if (record) {
       const expanded = !record.classList.contains("is-expanded");
