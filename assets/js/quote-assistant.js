@@ -162,7 +162,7 @@ function parseSqft(raw, bedrooms, bathrooms) {
   const parsed = parseInt(String(raw || "").replace(/,/g, ""), 10);
   if (parsed > 0) return parsed;
   const beds = parseInt(bedrooms, 10) || 2;
-  const baths = parseFloat(bathrooms) || 1;
+  const baths = parseInt(bathrooms, 10) || 1;
   return Math.round(beds * 450 + baths * 150 + 350);
 }
 
@@ -510,6 +510,20 @@ function buildSubmissionPayload(form, table) {
 
 const QUOTE_STEP_JOURNEY = ["Space", "Service", "Extras", "Contact", "Your estimate"];
 
+const SUBSTEP_CONFIG = {
+  0: ["property", "size"],
+  1: ["service_type", "frequency"]
+};
+
+const AUTO_ADVANCE_SUBSTEPS = new Set(["property", "service_type"]);
+
+const QUOTE_SUB_MESSAGES = {
+  "0-property": "Hi! What kind of space are we cleaning today?",
+  "0-size": "How big is the home?",
+  "1-service_type": "Perfect. Which service fits what you need?",
+  "1-frequency": "How often should we come?"
+};
+
 const QUOTE_PLAN_IMAGES = [
   "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85",
   "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=85",
@@ -529,11 +543,6 @@ function initQuoteSizeChips(form) {
       hidden: form.querySelector("#quoteBathrooms"),
       custom: form.querySelector("#quoteBathroomsCustom"),
       wrap: form.querySelector("#bathroomsCustomField")
-    },
-    square_feet: {
-      hidden: form.querySelector("#quoteSqft"),
-      custom: form.querySelector("#quoteSqftCustom"),
-      wrap: form.querySelector("#sqftCustomField")
     }
   };
 
@@ -544,8 +553,11 @@ function initQuoteSizeChips(form) {
 
     const syncValue = (value) => {
       if (value === "" || value == null) return;
-      config.hidden.value = value;
-      if (config.custom) config.custom.value = value;
+      const normalized = key === "bathrooms"
+        ? String(Math.max(1, parseInt(String(value), 10) || 0))
+        : String(parseInt(String(value), 10) || 0);
+      config.hidden.value = normalized;
+      if (config.custom) config.custom.value = normalized;
       form.dispatchEvent(new Event("change", { bubbles: true }));
     };
 
@@ -557,7 +569,7 @@ function initQuoteSizeChips(form) {
         if (chip.dataset.custom) {
           if (config.wrap) config.wrap.hidden = false;
           config.custom?.focus();
-          syncValue(config.custom?.value || config.hidden.value);
+          if (config.custom?.value) syncValue(config.custom.value);
           return;
         }
 
@@ -566,7 +578,9 @@ function initQuoteSizeChips(form) {
       });
     });
 
-    config.custom?.addEventListener("input", () => syncValue(config.custom.value));
+    config.custom?.addEventListener("input", () => {
+      if (config.custom.value !== "") syncValue(config.custom.value);
+    });
   });
 }
 
@@ -610,6 +624,11 @@ function initQuoteAssistant(formContainer = document) {
   const windowHead = root.querySelector(".quote-window-head");
   const assistantBubble = root.querySelector("#assistantBubble");
   const stepHeading = root.querySelector("#quoteStepHeading");
+  const substepProgress = root.querySelector("#quoteSubstepProgress");
+  const propertySummary = root.querySelector("#quotePropertySummary");
+  const propertySummaryText = root.querySelector("#quotePropertySummaryText");
+  const serviceSummary = root.querySelector("#quoteServiceSummary");
+  const serviceSummaryText = root.querySelector("#quoteServiceSummaryText");
   const calculatingState = root.querySelector("#quoteCalculatingState");
   const reviewReveal = root.querySelector("#quoteReviewReveal");
   let typewriterTimer = null;
@@ -746,8 +765,7 @@ function initQuoteAssistant(formContainer = document) {
     const bubble = root.querySelector("#assistantBubble");
     if (!bubbleText || !bubble) return;
 
-    const messages = isBooking ? bookMessages : quoteMessages;
-    const text = messages[stepIndex] || messages[0];
+    const text = getCoachMessage(stepIndex);
 
     if (typewriterTimer) clearInterval(typewriterTimer);
     bubbleText.textContent = "";
@@ -780,8 +798,254 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   let currentStepIndex = 0;
+  let currentSubStepIndex = 0;
   if (quoteContext?.startStep >= 1 && quoteContext.startStep <= steps.length) {
     currentStepIndex = quoteContext.startStep - 1;
+  }
+
+  function stepUsesSubsteps(stepIndex) {
+    return isQuoteStudio && !isBooking && Boolean(SUBSTEP_CONFIG[stepIndex]?.length);
+  }
+
+  function getSubSteps(stepEl) {
+    return stepEl ? [...stepEl.querySelectorAll(".quote-substep")] : [];
+  }
+
+  function getActiveSubStep() {
+    if (!stepUsesSubsteps(currentStepIndex)) return null;
+    const subSteps = getSubSteps(steps[currentStepIndex]);
+    return subSteps[currentSubStepIndex] || subSteps[0] || null;
+  }
+
+  function getCoachMessage(stepIndex) {
+    if (isBooking) return bookMessages[stepIndex] || bookMessages[0];
+    if (stepUsesSubsteps(stepIndex)) {
+      const subId = SUBSTEP_CONFIG[stepIndex]?.[currentSubStepIndex];
+      if (subId) {
+        return QUOTE_SUB_MESSAGES[`${stepIndex}-${subId}`] || quoteMessages[stepIndex];
+      }
+    }
+    return quoteMessages[stepIndex] || quoteMessages[0];
+  }
+
+  function updateChunkSummaries() {
+    const propertyType = form.querySelector('input[name="property_type"]:checked')?.value || "";
+    if (propertySummary && propertySummaryText) {
+      propertySummary.hidden = !propertyType || currentSubStepIndex === 0;
+      propertySummaryText.textContent = propertyType;
+    }
+
+    const serviceType = form.querySelector('input[name="service_type"]:checked')?.value || "";
+    if (serviceSummary && serviceSummaryText) {
+      serviceSummary.hidden = !serviceType || currentSubStepIndex === 0;
+      serviceSummaryText.textContent = serviceType;
+    }
+  }
+
+  function updateSubstepProgress() {
+    if (!substepProgress) return;
+    const usesSubsteps = stepUsesSubsteps(currentStepIndex);
+    substepProgress.hidden = !usesSubsteps;
+    substepProgress.setAttribute("aria-hidden", usesSubsteps ? "false" : "true");
+    if (!usesSubsteps) return;
+
+    const dots = substepProgress.querySelectorAll(".quote-substep-dot");
+    dots.forEach((dot, index) => {
+      dot.classList.toggle("is-active", index === currentSubStepIndex);
+      dot.classList.toggle("is-done", index < currentSubStepIndex);
+    });
+  }
+
+  function updateSubstepUI() {
+    if (!stepUsesSubsteps(currentStepIndex)) return;
+    const subSteps = getSubSteps(steps[currentStepIndex]);
+    subSteps.forEach((subStep, index) => {
+      subStep.classList.toggle("is-active", index === currentSubStepIndex);
+    });
+    updateSubstepProgress();
+    updateChunkSummaries();
+    remeasureExpandable();
+  }
+
+  function validateSizeChunk(silent = false) {
+    const beds = String(form.querySelector("#quoteBedrooms")?.value || "").trim();
+    const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value || "").trim();
+    const sqftRaw = String(form.querySelector("#quoteSqft")?.value || "").trim();
+    const baths = parseInt(bathsRaw, 10);
+    const sqft = parseInt(sqftRaw.replace(/,/g, ""), 10);
+
+    if (beds === "") {
+      if (!silent) {
+        showStudioToast(root, "Please select the number of bedrooms.", "error");
+        form.querySelector("[data-chip-group='bedrooms']")?.querySelector(".quote-chip")?.focus?.();
+      }
+      return false;
+    }
+    if (!Number.isInteger(baths) || baths < 1) {
+      if (!silent) {
+        showStudioToast(root, "Please select a whole number of bathrooms.", "error");
+        form.querySelector("[data-chip-group='bathrooms']")?.querySelector(".quote-chip")?.focus?.();
+      }
+      return false;
+    }
+    if (!Number.isInteger(sqft) || sqft < 200) {
+      if (!silent) {
+        showStudioToast(root, "Please enter your exact square footage (at least 200).", "error");
+        form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function validateSubStep(subEl, silent = false) {
+    if (!subEl) return true;
+    const subId = subEl.dataset.substep;
+
+    if (subId === "size") {
+      return validateSizeChunk(silent);
+    }
+
+    const seenRadios = new Set();
+    let firstError = null;
+
+    subEl.querySelectorAll("input, select, textarea").forEach((input) => {
+      if (firstError) return;
+      if (!input.required && input.type !== "checkbox") return;
+
+      if (input.type === "radio") {
+        if (seenRadios.has(input.name)) return;
+        seenRadios.add(input.name);
+        if (!subEl.querySelector(`input[name="${input.name}"]:checked`)) {
+          firstError = { message: `Please select ${getInputLabel(input).toLowerCase()}.`, input };
+        }
+        return;
+      }
+
+      const value = String(input.value || "").trim();
+      if (!value) {
+        firstError = { message: `Please enter your ${getInputLabel(input).toLowerCase()}.`, input };
+      }
+    });
+
+    if (firstError) {
+      if (!silent) {
+        showStudioToast(root, firstError.message, "error");
+        firstError.input?.focus?.({ preventScroll: true });
+      }
+      return false;
+    }
+    return true;
+  }
+
+  function updateNavState() {
+    if (!btnNext || currentStepIndex === steps.length - 1) return;
+
+    btnNext.classList.remove("is-ready");
+
+    if (currentStepIndex === 2) {
+      btnNext.classList.remove("is-hidden");
+      btnNext.disabled = false;
+      btnNext.removeAttribute("aria-disabled");
+      return;
+    }
+
+    if (stepUsesSubsteps(currentStepIndex)) {
+      const subSteps = getSubSteps(steps[currentStepIndex]);
+      const activeSub = subSteps[currentSubStepIndex];
+      const activeId = activeSub?.dataset.substep;
+
+      if (AUTO_ADVANCE_SUBSTEPS.has(activeId)) {
+        btnNext.classList.add("is-hidden");
+        btnNext.disabled = true;
+        btnNext.setAttribute("aria-disabled", "true");
+        return;
+      }
+
+      const valid = validateSubStep(activeSub, true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
+
+    if (currentStepIndex === 3) {
+      const valid = validateStep(steps[currentStepIndex], true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
+
+    btnNext.classList.remove("is-hidden");
+    btnNext.disabled = false;
+    btnNext.setAttribute("aria-disabled", "false");
+  }
+
+  function playSubstepCoach({ skipTypewriter = false } = {}) {
+    const bubbleText = root.querySelector("#assistantBubbleText");
+    const bubble = root.querySelector("#assistantBubble");
+    if (!bubbleText || !bubble) return;
+
+    const text = getCoachMessage(currentStepIndex);
+    if (typewriterTimer) clearInterval(typewriterTimer);
+
+    if (skipTypewriter) {
+      bubbleText.textContent = text;
+      bubble.classList.remove("is-typing");
+      setStepContentVisible(true);
+      remeasureExpandable();
+      return;
+    }
+
+    bubbleText.textContent = "";
+    bubble.classList.add("is-typing");
+    collapseExpandable();
+    if (formStage) formStage.classList.remove("is-revealed");
+
+    let index = 0;
+    typewriterTimer = setInterval(() => {
+      index += 1;
+      bubbleText.textContent = text.slice(0, index);
+      if (index >= text.length) {
+        clearInterval(typewriterTimer);
+        typewriterTimer = null;
+        bubble.classList.remove("is-typing");
+        setTimeout(() => {
+          setStepContentVisible(true);
+          remeasureExpandable();
+        }, 220);
+      }
+    }, 22);
+  }
+
+  function transitionSubStep(direction, { auto = false } = {}) {
+    if (!stepUsesSubsteps(currentStepIndex)) return;
+    const stepEl = steps[currentStepIndex];
+    const subSteps = getSubSteps(stepEl);
+    const nextIndex = currentSubStepIndex + direction;
+    if (nextIndex < 0 || nextIndex >= subSteps.length) return;
+
+    const currentSub = subSteps[currentSubStepIndex];
+    const nextSub = subSteps[nextIndex];
+    if (!currentSub || !nextSub) return;
+
+    if (direction > 0 && !validateSubStep(currentSub)) return;
+
+    currentSub.classList.add(direction > 0 ? "is-exiting-forward" : "is-exiting-back");
+    setTimeout(() => {
+      currentSub.classList.remove("is-active", "is-exiting-forward", "is-exiting-back");
+      currentSubStepIndex = nextIndex;
+      nextSub.classList.add("is-active", direction > 0 ? "is-entering-forward" : "is-entering-back");
+      updateSubstepUI();
+      updateNavState();
+      playSubstepCoach({ skipTypewriter: auto });
+      setTimeout(() => {
+        nextSub.classList.remove("is-entering-forward", "is-entering-back");
+      }, 360);
+    }, 240);
   }
 
   function updateStepDots() {
@@ -808,7 +1072,7 @@ function initQuoteAssistant(formContainer = document) {
 
   const dateInput = form.querySelector('input[name="preferred_date"]');
 
-  function validateStep(stepEl) {
+  function validateStep(stepEl, silent = false) {
     const seenRadios = new Set();
     const errors = [];
 
@@ -865,9 +1129,11 @@ function initQuoteAssistant(formContainer = document) {
 
     if (errors.length) {
       const first = errors[0];
-      showStudioToast(root, first.message, "error");
-      first.input?.focus?.({ preventScroll: true });
-      first.input?.closest(".book-date-scroll")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      if (!silent) {
+        showStudioToast(root, first.message, "error");
+        first.input?.focus?.({ preventScroll: true });
+        first.input?.closest(".book-date-scroll")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
       return false;
     }
     return true;
@@ -1072,6 +1338,7 @@ function initQuoteAssistant(formContainer = document) {
 
     if (!isQuoteStudio) {
       currentStepIndex = nextIndex;
+      currentSubStepIndex = 0;
       updateUI();
       playAssistantMessage(currentStepIndex);
       return;
@@ -1085,6 +1352,9 @@ function initQuoteAssistant(formContainer = document) {
     setTimeout(() => {
       currentStepEl.classList.remove("active", "is-exiting-forward", "is-exiting-back");
       currentStepIndex = nextIndex;
+      currentSubStepIndex = direction > 0
+        ? 0
+        : Math.max(0, getSubSteps(nextStepEl).length - 1);
       nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
       updateUI();
       playAssistantMessage(currentStepIndex);
@@ -1123,8 +1393,11 @@ function initQuoteAssistant(formContainer = document) {
 
     updateStepChrome();
     updatePlanPanel();
+    updateSubstepUI();
+    updateNavState();
 
-    if (btnBack) btnBack.style.display = currentStepIndex === 0 ? "none" : "inline-flex";
+    const showBack = currentStepIndex > 0 || (stepUsesSubsteps(currentStepIndex) && currentSubStepIndex > 0);
+    if (btnBack) btnBack.style.display = showBack ? "inline-flex" : "none";
 
     if (currentStepIndex === steps.length - 1) {
       if (btnNext) btnNext.style.display = "none";
@@ -1179,7 +1452,18 @@ function initQuoteAssistant(formContainer = document) {
 
   if (btnNext) {
     btnNext.addEventListener("click", () => {
-      if (!validateStep(steps[currentStepIndex])) return;
+      if (stepUsesSubsteps(currentStepIndex)) {
+        const subSteps = getSubSteps(steps[currentStepIndex]);
+        const activeSub = subSteps[currentSubStepIndex];
+        if (!validateSubStep(activeSub)) return;
+        if (currentSubStepIndex < subSteps.length - 1) {
+          transitionSubStep(1);
+          return;
+        }
+      } else if (!validateStep(steps[currentStepIndex])) {
+        return;
+      }
+
       if (currentStepIndex < steps.length - 1) {
         transitionToStep(currentStepIndex + 1, 1);
       }
@@ -1188,21 +1472,65 @@ function initQuoteAssistant(formContainer = document) {
 
   if (btnBack) {
     btnBack.addEventListener("click", () => {
+      if (stepUsesSubsteps(currentStepIndex) && currentSubStepIndex > 0) {
+        transitionSubStep(-1);
+        return;
+      }
       if (currentStepIndex > 0) {
         transitionToStep(currentStepIndex - 1, -1);
       }
     });
   }
 
-  form.addEventListener("change", () => {
+  propertySummary?.addEventListener("click", () => {
+    if (currentStepIndex !== 0 || currentSubStepIndex === 0) return;
+    currentSubStepIndex = 0;
+    updateSubstepUI();
+    updateNavState();
+    playSubstepCoach({ skipTypewriter: true });
+  });
+
+  serviceSummary?.addEventListener("click", () => {
+    if (currentStepIndex !== 1 || currentSubStepIndex === 0) return;
+    currentSubStepIndex = 0;
+    updateSubstepUI();
+    updateNavState();
+    playSubstepCoach({ skipTypewriter: true });
+  });
+
+  form.addEventListener("change", (event) => {
     updateLiveSummary();
     updatePlanPanel();
+    updateNavState();
     if (currentStepIndex === steps.length - 1) populateReview();
+
+    if (!isQuoteStudio || isBooking) return;
+
+    if (event.target.name === "property_type" && currentStepIndex === 0 && currentSubStepIndex === 0) {
+      if (!form.querySelector('input[name="property_type"]:checked')) return;
+      window.setTimeout(() => {
+        if (currentStepIndex === 0 && currentSubStepIndex === 0 && form.querySelector('input[name="property_type"]:checked')) {
+          updateChunkSummaries();
+          transitionSubStep(1, { auto: true });
+        }
+      }, 350);
+    }
+
+    if (event.target.name === "service_type" && currentStepIndex === 1 && currentSubStepIndex === 0) {
+      if (!form.querySelector('input[name="service_type"]:checked')) return;
+      window.setTimeout(() => {
+        if (currentStepIndex === 1 && currentSubStepIndex === 0 && form.querySelector('input[name="service_type"]:checked')) {
+          updateChunkSummaries();
+          transitionSubStep(1, { auto: true });
+        }
+      }, 350);
+    }
   });
 
   form.addEventListener("input", () => {
     updateLiveSummary();
     updatePlanPanel();
+    updateNavState();
     if (currentStepIndex === steps.length - 1) populateReview();
   });
 
