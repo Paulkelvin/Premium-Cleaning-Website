@@ -212,11 +212,9 @@ function applyGallery(items) {
 function applyServiceAreas(areas) {
   const target = document.querySelector("[data-service-area-list]");
   if (!target || !areas.length) return;
-  const area = areas[0];
-  const nearby = area.nearbyAreas || [];
+  const nearby = areas.flatMap((area) => area.nearbyAreas || []);
+  if (!nearby.length) return;
   target.innerHTML = `
-    <h3>Main region</h3>
-    <p>${area.name}, ${area.region}</p>
     <h3>Nearby areas served</h3>
     <ul class="feature-list">${nearby.map((item) => `<li>${item}</li>`).join("")}</ul>
   `;

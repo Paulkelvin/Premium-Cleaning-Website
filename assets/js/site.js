@@ -151,8 +151,9 @@ function initAccordions() {
   document.querySelectorAll(".faq-item").forEach((item) => {
     const trigger = item.querySelector(".faq-trigger");
     const panel = item.querySelector(".faq-panel");
-    if (!trigger || !panel) return;
+    if (!trigger || !panel || trigger.dataset.accordionBound === "true") return;
 
+    trigger.dataset.accordionBound = "true";
     trigger.addEventListener("click", () => {
       const isOpen = item.classList.contains("is-open");
       

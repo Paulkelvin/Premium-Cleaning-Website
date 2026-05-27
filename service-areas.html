@@ -29,41 +29,31 @@
     <section class="page-hero" style="padding: 40px 0;">
       <div class="section-inner">
         <p class="eyebrow"><i data-lucide="map"></i>Service areas</p>
-        <h1 style="max-width: 720px;">Premium cleaning across Austin and nearby communities.</h1>
+        <h1 style="max-width: 720px;">Premium cleaning across Austin &amp; nearby.</h1>
         <p>We serve homeowners, renters, property managers, and local businesses throughout the region.</p>
       </div>
     </section>
 
-    <section>
-      <div class="section-inner split">
+    <section class="areas-check-section">
+      <div class="section-inner areas-check-layout">
         <div class="fade-in-up">
           <div class="heading-accent-left">
             <p class="eyebrow">Local Coverage</p>
             <h2>Local cleaning with metro-area reach.</h2>
           </div>
-          <p>RS Cleaning Collective provides standard cleaning, deep cleaning, move-in/out turnovers, office cleaning, and custom routines across Austin and surrounding cities. Our team is fully insured, locally operated, and dedicated to delivering a seamless experience.</p>
-          <p style="margin-top:12px;">Not sure if your address is within our service boundary? Enter your ZIP code in our quote estimator or send us a message, and we will verify coverage instantly.</p>
-          <div class="cta-row" style="margin-top: 24px;">
-            <a class="button secondary" href="quote.html">Check availability <i data-lucide="search"></i></a>
-            <a class="button ghost" href="contact.html">Ask about my area</a>
-          </div>
+          <p>RS Cleaning Collective provides standard cleaning, deep cleaning, move-in/out turnovers, office cleaning, and custom routines across Austin and surrounding cities.</p>
         </div>
-
-        <div class="card flat-mint fade-in-up" data-service-area-list style="padding: 40px;">
-          <h3 style="display:flex; align-items:center; gap:8px; margin-bottom: 20px;"><i data-lucide="map-pin"></i>Main region</h3>
-          <p style="font-weight: 700; font-size: 1.25rem; color: var(--mint-dark); margin-bottom: 32px;">Austin, TX (All Neighborhoods)</p>
-          
-          <h3 style="display:flex; align-items:center; gap:8px; margin-bottom: 16px;"><i data-lucide="navigation"></i>Nearby areas served</h3>
-          <ul class="feature-list">
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Round Rock</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Cedar Park</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Pflugerville</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Lakeway</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Bee Cave</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Georgetown</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>Leander</li>
-            <li><i data-lucide="check" style="color:var(--mint); width:18px; height:18px;"></i>West Lake Hills</li>
-          </ul>
+        <div class="area-check-widget fade-in-up" data-area-check>
+          <h3>Check availability</h3>
+          <p class="area-check-lead">Enter your ZIP code or area name to see coverage and any travel fee before you quote.</p>
+          <div class="area-check-row">
+            <input type="text" class="area-check-input" data-area-check-input placeholder="ZIP or area — e.g. 78704 or Round Rock" autocomplete="postal-code">
+            <button type="button" class="button secondary area-check-submit" data-area-check-submit>Check <i data-lucide="search"></i></button>
+          </div>
+          <div class="area-check-suggest" data-area-check-suggest hidden></div>
+          <div class="area-check-result" data-area-check-result hidden></div>
+          <button type="button" class="button area-check-continue" data-area-check-continue hidden>Continue to quote <i data-lucide="arrow-right"></i></button>
+          <p class="area-check-alt"><a href="contact.html">Ask about my area</a></p>
         </div>
       </div>
     </section>
@@ -92,6 +82,10 @@
               <path d="M400,260 L180,390"/>
               <path d="M400,260 L120,260"/>
               <path d="M400,260 L180,130"/>
+              <path d="M400,260 L280,180"/>
+              <path d="M400,260 L520,180"/>
+              <path d="M400,260 L300,420"/>
+              <path d="M400,260 L500,420"/>
             </g>
             <a class="areas-map-bubble areas-map-bubble--center" href="quote.html">
               <circle cx="400" cy="260" r="52" class="areas-map-pulse"/>
@@ -107,6 +101,10 @@
             <a class="areas-map-bubble" href="quote.html"><circle cx="180" cy="390" r="32"/><text x="180" y="395" text-anchor="middle">Georgetown</text></a>
             <a class="areas-map-bubble" href="quote.html"><circle cx="120" cy="260" r="30"/><text x="120" y="265" text-anchor="middle">Leander</text></a>
             <a class="areas-map-bubble" href="quote.html"><circle cx="180" cy="130" r="30"/><text x="180" y="132" text-anchor="middle">West Lake</text></a>
+            <a class="areas-map-bubble" href="quote.html"><circle cx="280" cy="180" r="28"/><text x="280" y="185" text-anchor="middle">Buda</text></a>
+            <a class="areas-map-bubble" href="quote.html"><circle cx="520" cy="180" r="28"/><text x="520" y="185" text-anchor="middle">Manor</text></a>
+            <a class="areas-map-bubble" href="quote.html"><circle cx="300" cy="420" r="28"/><text x="300" y="425" text-anchor="middle">Kyle</text></a>
+            <a class="areas-map-bubble" href="quote.html"><circle cx="500" cy="420" r="28"/><text x="500" y="425" text-anchor="middle">Dripping Spgs</text></a>
           </svg>
         </div>
         <div class="areas-map-mobile fade-in-up" aria-label="Service areas around Austin">
@@ -127,6 +125,10 @@
               <a href="quote.html">Georgetown</a>
               <a href="quote.html">Leander</a>
               <a href="quote.html">West Lake</a>
+              <a href="quote.html">Buda</a>
+              <a href="quote.html">Kyle</a>
+              <a href="quote.html">Manor</a>
+              <a href="quote.html">Dripping Springs</a>
             </div>
           </div>
         </div>
@@ -185,8 +187,10 @@
     </div>
   </footer>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/service-areas-data.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
+  <script src="assets/js/service-areas-check.js"></script>
   <script src="assets/js/forms.js"></script>
 </body>
 </html>

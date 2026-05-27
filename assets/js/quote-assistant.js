@@ -51,6 +51,16 @@ const ADDON_SLUG_MAP = {
 
 const QUOTE_CONTEXT_KEY = "rs_cleaning_quote_context";
 
+function getServiceAreaMeta() {
+  const key = window.SERVICE_AREA_META_KEY || "rs_service_area_meta";
+  try {
+    const raw = sessionStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 const SERVICE_ALIASES = {
   "Move-in / Move-out": "Move-in/Move-out",
   "Move in/out": "Move-in/Move-out"
@@ -201,6 +211,10 @@ function calculateQuoteTotal(form) {
   const discount = PRICING_CONFIG.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
+  const areaMeta = getServiceAreaMeta();
+  const travelFee = areaMeta?.travelFee ? Number(areaMeta.travelFee) : 0;
+  subtotal += travelFee;
+
   return {
     total: Math.round(subtotal * 100) / 100,
     sqft,
@@ -209,7 +223,9 @@ function calculateQuoteTotal(form) {
     addons,
     basePrice,
     addonsPrice,
-    discount
+    discount,
+    travelFee,
+    areaName: areaMeta?.name || ""
   };
 }
 
@@ -576,12 +592,13 @@ function initQuoteAssistant(formContainer = document) {
   function scrollQuoteStepIntoView() {
     if (!isQuoteStudio || isBooking) return;
     const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
-    const scrollTarget = root.querySelector(".quote-form-stage") || root.querySelector(".quote-step.active") || root;
+    const scrollTarget = root.querySelector(".quote-window-chrome") || root;
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const top = scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
-        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-      });
+      const rect = scrollTarget.getBoundingClientRect();
+      const targetTop = rect.top + window.scrollY - headerHeight - 8;
+      if (rect.top < headerHeight + 8) {
+        window.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
+      }
     });
   }
 
@@ -966,9 +983,19 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     const liveTotalDisplay = root.querySelector("#liveCalculatedTotal");
+    const travelNote = root.querySelector("#reviewTravelNote");
     const totalValue = pricing.total || session?.estimated_total || 0;
     if (liveTotalDisplay) {
       liveTotalDisplay.textContent = showTotal ? formatMoney(totalValue) : "…";
+    }
+    if (travelNote) {
+      if (pricing.travelFee > 0) {
+        travelNote.hidden = false;
+        travelNote.textContent = `Includes $${pricing.travelFee.toFixed(0)} travel fee${pricing.areaName ? ` for ${pricing.areaName}` : ""}.`;
+      } else {
+        travelNote.hidden = true;
+        travelNote.textContent = "";
+      }
     }
 
     updatePaymentUI();
