@@ -475,6 +475,8 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
   }
 }
 
+window.initScrollReveal = initScrollReveal;
+
 // Expose accordion and magnifier updates for dynamically rendered items
 window.refreshInteractiveFeatures = () => {
   initAccordions();
@@ -515,36 +517,39 @@ function initHomepageBubbles() {
 
 // 8. Gallery Filtering
 function initGalleryFilters() {
-  const tabs = document.querySelectorAll('.gallery-filter-btn');
-  const cards = document.querySelectorAll('.gallery-card');
-  if (!tabs.length || !cards.length) return;
+  const filterWrap = document.querySelector(".gallery-filters");
+  if (!filterWrap || filterWrap.dataset.filtersInitialized) return;
+  filterWrap.dataset.filtersInitialized = "true";
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+  filterWrap.addEventListener("click", (event) => {
+    const tab = event.target.closest(".gallery-filter-btn");
+    if (!tab) return;
 
-      const filter = tab.dataset.filter;
-      
-      cards.forEach(card => {
-        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        if (filter === 'all' || card.dataset.category === filter) {
-          card.style.display = 'block';
-          // Trigger reflow
-          void card.offsetWidth;
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        } else {
-          card.style.opacity = '0';
-          card.style.transform = 'translateY(10px)';
-          setTimeout(() => {
-            if (card.style.opacity === '0') card.style.display = 'none';
-          }, 300);
-        }
-      });
+    filterWrap.querySelectorAll(".gallery-filter-btn").forEach((button) => {
+      button.classList.remove("active");
+    });
+    tab.classList.add("active");
+
+    const filter = tab.dataset.filter;
+    document.querySelectorAll(".gallery-card").forEach((card) => {
+      card.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+      if (filter === "all" || card.dataset.category === filter) {
+        card.style.display = "block";
+        void card.offsetWidth;
+        card.style.opacity = "1";
+        card.style.transform = "translateY(0)";
+      } else {
+        card.style.opacity = "0";
+        card.style.transform = "translateY(10px)";
+        setTimeout(() => {
+          if (card.style.opacity === "0") card.style.display = "none";
+        }, 300);
+      }
     });
   });
 }
+
+window.initGalleryFilters = initGalleryFilters;
 
 function initContactPage() {
   const form = document.getElementById("contactForm");

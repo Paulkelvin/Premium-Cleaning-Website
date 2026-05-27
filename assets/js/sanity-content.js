@@ -195,6 +195,7 @@ function applyTestimonials(testimonials) {
 }
 
 function applyGallery(items) {
+  if (window.GALLERY_ITEMS?.length) return;
   const list = document.querySelector("[data-gallery-list]");
   if (!list || !items.length) return;
   list.innerHTML = items.map((item) => `
