@@ -58,7 +58,7 @@
             <p class="services-story-rate">From $0.17/sq ft</p>
             <div class="services-story-actions">
               <a class="button ghost small" href="services/standard-cleaning.html">View details</a>
-              <a class="button secondary small" href="quote.html?service=standard-cleaning&step=2">Get estimate</a>
+              <a class="button secondary small" href="quote.html?service=standard-cleaning">Get estimate</a>
             </div>
           </article>
 
@@ -73,7 +73,7 @@
             <p class="services-story-rate">From $0.30/sq ft</p>
             <div class="services-story-actions">
               <a class="button ghost small" href="services/deep-cleaning.html">View details</a>
-              <a class="button secondary small" href="quote.html?service=deep-cleaning&step=2">Get estimate</a>
+              <a class="button secondary small" href="quote.html?service=deep-cleaning">Get estimate</a>
             </div>
           </article>
 
@@ -88,7 +88,7 @@
             <p class="services-story-rate">From $0.35/sq ft</p>
             <div class="services-story-actions">
               <a class="button ghost small" href="services/move-in-out-cleaning.html">View details</a>
-              <a class="button secondary small" href="quote.html?service=move-in-out-cleaning&step=2">Get estimate</a>
+              <a class="button secondary small" href="quote.html?service=move-in-out-cleaning">Get estimate</a>
             </div>
           </article>
 
@@ -103,14 +103,16 @@
             <p class="services-story-rate">From $0.20/sq ft</p>
             <div class="services-story-actions">
               <a class="button ghost small" href="services/office-cleaning.html">View details</a>
-              <a class="button secondary small" href="quote.html?service=office-cleaning&step=2">Get estimate</a>
+              <a class="button secondary small" href="quote.html?service=office-cleaning">Get estimate</a>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="band services-story-chooser">
+    <section class="band services-story-chooser geo-accent-band">
+      <div class="geo-pill home-deco-float" aria-hidden="true"></div>
+      <div class="geo-wedge home-deco-float home-deco-float--slow" aria-hidden="true"></div>
       <div class="section-inner">
         <div class="heading-centered fade-in-up" style="margin-bottom: 28px;">
           <p class="eyebrow">Not sure?</p>
@@ -284,11 +286,15 @@
         service = "deep-cleaning";
       }
 
-      if (frequency === "recurring") freq = "&frequency=Weekly";
+      if (frequency === "recurring") freq = "&frequency=Bi-weekly";
       else if (frequency === "monthly") freq = "&frequency=Monthly";
       else if (frequency === "once") freq = "&frequency=One-time";
 
-      window.location.href = `quote.html?service=${service}&step=2${freq}`;
+      let property = "House";
+      if (space === "office") property = "Office";
+      else if (space === "empty") property = "House";
+
+      window.location.href = `quote.html?service=${service}${freq}&property=${encodeURIComponent(property)}`;
     });
   </script>
 </body>

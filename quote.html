@@ -42,8 +42,16 @@
             <span class="quote-window-dots"><i></i><i></i><i></i></span>
             <span class="quote-window-title" id="quoteWindowTitle">Quote · Step 1 of 5</span>
           </div>
+          <div class="quote-step-dots" id="quoteStepDots" aria-label="Quote progress">
+            <span class="quote-step-dot is-active"></span>
+            <span class="quote-step-dot"></span>
+            <span class="quote-step-dot"></span>
+            <span class="quote-step-dot"></span>
+            <span class="quote-step-dot"></span>
+          </div>
           <header class="quote-app-header">
             <p class="quote-coach-line" id="assistantBubble" aria-live="polite" aria-atomic="true"><span id="assistantBubbleText"></span></p>
+            <p class="quote-prefill-chip" id="quotePrefillChip" hidden></p>
           </header>
 
           <div class="quote-app-body">
@@ -217,6 +225,7 @@
                       <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
                       <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Submit &amp; book <i data-lucide="arrow-right"></i></button>
                     </div>
+                    <p class="quote-nav-trust">No payment required · Estimate confirmed before service</p>
                   </form>
                 </div>
 
