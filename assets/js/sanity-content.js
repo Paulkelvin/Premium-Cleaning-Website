@@ -113,9 +113,11 @@ function applyPageHero(data) {
   if (!key || key === "home") return;
   const page = (data.pages || []).find((item) => item.slug === key);
   if (!page) return;
-  text(document.querySelector(".page-hero .eyebrow"), page.heroEyebrow);
-  text(document.querySelector(".page-hero h1"), page.heroTitle);
-  text(document.querySelector(".page-hero p:not(.eyebrow)"), page.heroCopy);
+  const heroRoot = document.querySelector(".page-hero, .hero--overlay");
+  if (!heroRoot) return;
+  text(heroRoot.querySelector(".eyebrow"), page.heroEyebrow);
+  text(heroRoot.querySelector("h1"), page.heroTitle);
+  text(heroRoot.querySelector(".hero-lead, p:not(.eyebrow)"), page.heroCopy);
   if (page.metaDescription) {
     let meta = document.querySelector("meta[name='description']");
     if (!meta) {

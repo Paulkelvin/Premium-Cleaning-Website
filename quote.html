@@ -28,183 +28,116 @@
   <main class="quote-studio">
     <div class="quote-studio-ambient" aria-hidden="true">
       <div class="quote-ambient-grid"></div>
+      <div class="geo-bubble"></div>
+      <div class="geo-spark"></div>
     </div>
 
     <section class="quote-studio-section">
       <div class="section-inner quote-studio-inner">
 
         <div class="quote-app quote-window" id="quoteAssistantCard">
+          <div class="quote-window-chrome" aria-hidden="true">
+            <span class="quote-window-dots"><i></i><i></i><i></i></span>
+            <span class="quote-window-title" id="quoteWindowTitle">Quote · Step 1 of 5</span>
+          </div>
           <header class="quote-app-header">
-            <nav class="quote-journey" id="quoteJourneyBar" aria-label="Quote progress">
-              <span class="quote-journey-step is-active" data-journey="0">Space</span>
-              <span class="quote-journey-step" data-journey="1">Service</span>
-              <span class="quote-journey-step" data-journey="2">Extras</span>
-              <span class="quote-journey-step" data-journey="3">Contact</span>
-              <span class="quote-journey-step" data-journey="4">Estimate</span>
-            </nav>
-            <p class="quote-coach-line" id="assistantBubble"><span id="assistantBubbleText"></span><span class="quote-type-cursor" aria-hidden="true"></span></p>
-            <div class="quote-plan-strip" id="quotePlanStrip" aria-live="polite">
-              <img class="quote-plan-strip-thumb" id="quotePlanStripThumb" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=120&q=80" alt="">
-              <span id="quotePlanStripText">Building your clean plan…</span>
-            </div>
-            <div class="quote-step-dots" id="quoteStepDots" hidden aria-hidden="true">
-              <span class="quote-step-dot is-active"></span>
-              <span class="quote-step-dot"></span>
-              <span class="quote-step-dot"></span>
-              <span class="quote-step-dot"></span>
-              <span class="quote-step-dot"></span>
-            </div>
-            <div class="quote-progress quote-progress--slim" hidden aria-hidden="true">
-              <div class="quote-progress-bar">
-                <div class="quote-progress-fill" id="quoteProgressFill"></div>
-              </div>
-            </div>
-            <p class="quote-step-kicker" id="quoteProgressText" hidden>Space</p>
+            <p class="quote-coach-line" id="assistantBubble"><span id="assistantBubbleText"></span></p>
           </header>
 
           <div class="quote-app-body">
             <div class="quote-app-main">
               <div class="quote-window-body">
-                <h2 class="quote-step-heading" id="quoteStepHeading">Your space</h2>
-                <div class="quote-substep-progress" id="quoteSubstepProgress" hidden aria-hidden="true">
-                  <span class="quote-substep-dot is-active"></span>
-                  <span class="quote-substep-dot"></span>
-                </div>
-
                 <div class="quote-window-expand">
                   <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests" novalidate>
-                    <div class="quote-form-stage">
+                    <div class="quote-form-stage is-revealed">
 
-                      <div class="quote-step active" data-step="1" data-step-title="Your space" data-has-substeps="true">
-                        <div class="quote-substep is-active" data-substep="property">
-                          <fieldset class="quote-fieldset quote-fieldset--compact">
-                            <legend class="quote-legend">Property type</legend>
-                            <div class="quote-option-grid quote-option-grid--4 quote-option-grid--compact">
-                              <label class="quote-option quote-option--compact">
-                                <input type="radio" name="property_type" value="House" required>
-                                <span class="quote-option-face"><i data-lucide="home"></i><em>House</em></span>
-                              </label>
-                              <label class="quote-option quote-option--compact">
-                                <input type="radio" name="property_type" value="Apartment">
-                                <span class="quote-option-face"><i data-lucide="building"></i><em>Apt</em></span>
-                              </label>
-                              <label class="quote-option quote-option--compact">
-                                <input type="radio" name="property_type" value="Office">
-                                <span class="quote-option-face"><i data-lucide="briefcase"></i><em>Office</em></span>
-                              </label>
-                              <label class="quote-option quote-option--compact">
-                                <input type="radio" name="property_type" value="Rental">
-                                <span class="quote-option-face"><i data-lucide="key"></i><em>Rental</em></span>
-                              </label>
-                            </div>
-                          </fieldset>
-                        </div>
-
-                        <div class="quote-substep" data-substep="size">
-                          <button type="button" class="quote-chunk-summary" id="quotePropertySummary" hidden>
-                            <span id="quotePropertySummaryText">House</span>
-                            <span class="quote-chunk-summary-action">Change</span>
-                          </button>
-                          <div class="quote-home-size">
-                            <p class="quote-field-label">Home size</p>
-                            <div class="quote-chip-group">
-                              <span class="quote-chip-sublabel">Beds</span>
-                              <div class="quote-chip-row" data-chip-group="bedrooms">
-                                <button type="button" class="quote-chip" data-value="0">0</button>
-                                <button type="button" class="quote-chip" data-value="1">1</button>
-                                <button type="button" class="quote-chip" data-value="2">2</button>
-                                <button type="button" class="quote-chip" data-value="3">3</button>
-                                <button type="button" class="quote-chip" data-value="4">4+</button>
-                                <button type="button" class="quote-chip quote-chip--custom" data-custom="bedrooms">Custom</button>
-                              </div>
-                              <label class="field quote-chip-custom-field" id="bedroomsCustomField" hidden>
-                                <input type="number" id="quoteBedroomsCustom" min="0" step="1" placeholder="3">
-                              </label>
-                            </div>
-                            <div class="quote-chip-group">
-                              <span class="quote-chip-sublabel">Baths</span>
-                              <div class="quote-chip-row" data-chip-group="bathrooms">
-                                <button type="button" class="quote-chip" data-value="1">1</button>
-                                <button type="button" class="quote-chip" data-value="2">2</button>
-                                <button type="button" class="quote-chip" data-value="3">3</button>
-                                <button type="button" class="quote-chip" data-value="4">4+</button>
-                                <button type="button" class="quote-chip quote-chip--custom" data-custom="bathrooms">Custom</button>
-                              </div>
-                              <label class="field quote-chip-custom-field" id="bathroomsCustomField" hidden>
-                                <input type="number" id="quoteBathroomsCustom" min="1" step="1" placeholder="2">
-                              </label>
-                            </div>
-                            <label class="field quote-sqft-field">
-                              <span class="quote-chip-sublabel">Square footage</span>
-                              <div class="quote-sqft-input-wrap">
-                                <input type="number" id="quoteSqft" name="square_feet" required min="200" inputmode="numeric" placeholder="1800" aria-describedby="quoteSqftHint">
-                                <span class="quote-sqft-suffix">sq ft</span>
-                              </div>
-                              <span class="quote-sqft-hint" id="quoteSqftHint">Enter your exact square footage</span>
+                      <div class="quote-step active" data-step="1">
+                        <fieldset class="quote-fieldset quote-fieldset--compact">
+                          <legend class="quote-legend">Property type</legend>
+                          <div class="quote-option-grid quote-option-grid--3 quote-option-grid--compact">
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="House" required>
+                              <span class="quote-option-face"><i data-lucide="home"></i><em>House</em></span>
+                            </label>
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="Apartment">
+                              <span class="quote-option-face"><i data-lucide="building"></i><em>Apt</em></span>
+                            </label>
+                            <label class="quote-option quote-option--compact">
+                              <input type="radio" name="property_type" value="Office">
+                              <span class="quote-option-face"><i data-lucide="briefcase"></i><em>Office</em></span>
                             </label>
                           </div>
-                          <div class="quote-sizer-inputs" aria-hidden="true">
-                            <input type="number" id="quoteBedrooms" name="bedrooms" min="0" required value="" tabindex="-1">
-                            <input type="number" id="quoteBathrooms" name="bathrooms" min="1" step="1" required value="" tabindex="-1">
-                          </div>
+                        </fieldset>
+                        <div class="quote-size-metrics">
+                          <label class="quote-metric-field">
+                            <span class="quote-metric-label">Beds</span>
+                            <div class="quote-metric-input-wrap">
+                              <input type="number" id="quoteBedrooms" name="bedrooms" min="0" step="1" required inputmode="numeric" placeholder="3" aria-label="Bedrooms">
+                            </div>
+                          </label>
+                          <label class="quote-metric-field">
+                            <span class="quote-metric-label">Baths</span>
+                            <div class="quote-metric-input-wrap">
+                              <input type="number" id="quoteBathrooms" name="bathrooms" min="1" step="1" required inputmode="numeric" placeholder="2" aria-label="Bathrooms">
+                            </div>
+                          </label>
+                          <label class="quote-metric-field quote-metric-field--sqft">
+                            <span class="quote-metric-label">Sq ft</span>
+                            <div class="quote-metric-input-wrap">
+                              <input type="number" id="quoteSqft" name="square_feet" required min="200" inputmode="numeric" placeholder="1800" aria-label="Square footage">
+                            </div>
+                          </label>
                         </div>
+                        <p class="quote-field-hint">Enter whole numbers for beds and baths, and your exact square footage.</p>
                       </div>
 
-                      <div class="quote-step" data-step="2" data-step-title="Service" data-has-substeps="true">
-                        <div class="quote-substep is-active" data-substep="service_type">
-                          <fieldset class="quote-fieldset">
-                            <legend class="quote-legend">Cleaning type</legend>
-                            <div class="quote-option-grid quote-option-grid--2">
-                              <div class="quote-option-cell">
-                                <label class="quote-option quote-option--wide">
-                                  <input type="radio" name="service_type" value="Standard cleaning" required>
-                                  <span class="quote-option-face"><i data-lucide="sparkles"></i><em>Standard<small>Regular upkeep</small></em></span>
-                                </label>
-                                <button type="button" class="quote-tip-trigger" aria-label="About standard cleaning" data-tip="Recurring upkeep for kitchens, bathrooms, floors, and high-touch surfaces. Ideal for maintaining a consistently clean home."><i data-lucide="info"></i></button>
-                              </div>
-                              <div class="quote-option-cell">
-                                <label class="quote-option quote-option--wide">
-                                  <input type="radio" name="service_type" value="Deep cleaning">
-                                  <span class="quote-option-face"><i data-lucide="layers"></i><em>Deep<small>Top-to-bottom</small></em></span>
-                                </label>
-                                <button type="button" class="quote-tip-trigger" aria-label="About deep cleaning" data-tip="A detailed reset for buildup, baseboards, fixtures, and often-missed areas. Great before events or seasonal refreshes."><i data-lucide="info"></i></button>
-                              </div>
-                              <div class="quote-option-cell">
-                                <label class="quote-option quote-option--wide">
-                                  <input type="radio" name="service_type" value="Move-in/Move-out">
-                                  <span class="quote-option-face"><i data-lucide="truck"></i><em>Move<small>Thorough reset</small></em></span>
-                                </label>
-                                <button type="button" class="quote-tip-trigger" aria-label="About move cleaning" data-tip="Empty-home detail for handoffs — cabinets, appliances, and full sanitization for landlords, buyers, and new tenants."><i data-lucide="info"></i></button>
-                              </div>
-                              <div class="quote-option-cell">
-                                <label class="quote-option quote-option--wide">
-                                  <input type="radio" name="service_type" value="Office cleaning">
-                                  <span class="quote-option-face"><i data-lucide="building-2"></i><em>Office<small>Commercial</small></em></span>
-                                </label>
-                                <button type="button" class="quote-tip-trigger" aria-label="About office cleaning" data-tip="Workspace-focused cleaning for desks, break areas, restrooms, and client-facing zones on a schedule that fits your business."><i data-lucide="info"></i></button>
-                              </div>
+                      <div class="quote-step" data-step="2" data-step-title="Service">
+                        <fieldset class="quote-fieldset quote-fieldset--compact">
+                          <legend class="quote-legend">Cleaning type</legend>
+                          <div class="quote-option-grid quote-option-grid--2">
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Standard cleaning" required>
+                                <span class="quote-option-face"><i data-lucide="sparkles"></i><em>Standard<small>Regular upkeep</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About standard cleaning" data-tip="Recurring upkeep for kitchens, bathrooms, floors, and high-touch surfaces. Ideal for maintaining a consistently clean home."><i data-lucide="info"></i></button>
                             </div>
-                          </fieldset>
-                        </div>
-                        <div class="quote-substep" data-substep="frequency">
-                          <button type="button" class="quote-chunk-summary" id="quoteServiceSummary" hidden>
-                            <span id="quoteServiceSummaryText">Standard cleaning</span>
-                            <span class="quote-chunk-summary-action">Change</span>
-                          </button>
-                          <fieldset class="quote-fieldset">
-                            <legend class="quote-legend">Frequency</legend>
-                            <div class="quote-pill-row">
-                              <label class="quote-pill"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
-                              <label class="quote-pill"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
-                              <label class="quote-pill"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
-                              <label class="quote-pill"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Deep cleaning">
+                                <span class="quote-option-face"><i data-lucide="layers"></i><em>Deep<small>Top-to-bottom</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About deep cleaning" data-tip="A detailed reset for buildup, baseboards, fixtures, and often-missed areas. Great before events or seasonal refreshes."><i data-lucide="info"></i></button>
                             </div>
-                          </fieldset>
-                        </div>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Move-in/Move-out">
+                                <span class="quote-option-face"><i data-lucide="truck"></i><em>Move<small>Thorough reset</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About move cleaning" data-tip="Empty-home detail for handoffs — cabinets, appliances, and full sanitization for landlords, buyers, and new tenants."><i data-lucide="info"></i></button>
+                            </div>
+                            <div class="quote-option-cell">
+                              <label class="quote-option quote-option--wide">
+                                <input type="radio" name="service_type" value="Office cleaning">
+                                <span class="quote-option-face"><i data-lucide="building-2"></i><em>Office<small>Commercial</small></em></span>
+                              </label>
+                              <button type="button" class="quote-tip-trigger" aria-label="About office cleaning" data-tip="Workspace-focused cleaning for desks, break areas, restrooms, and client-facing zones on a schedule that fits your business."><i data-lucide="info"></i></button>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <fieldset class="quote-fieldset quote-fieldset--compact">
+                          <legend class="quote-legend">Frequency</legend>
+                          <div class="quote-pill-row">
+                            <label class="quote-pill"><input type="radio" name="frequency" value="One-time" required><span>One-time</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Weekly"><span>Weekly</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Bi-weekly"><span>Bi-weekly</span></label>
+                            <label class="quote-pill"><input type="radio" name="frequency" value="Monthly"><span>Monthly</span></label>
+                          </div>
+                        </fieldset>
                       </div>
 
                       <div class="quote-step" data-step="3" data-step-title="Add-ons">
-                        <p class="quote-step-hint">Optional — skip if none needed.</p>
                         <div class="quote-addon-grid">
                           <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Carpet cleaning"><span>Carpet</span></label>
                           <label class="quote-pill quote-pill--check"><input type="checkbox" name="add_ons[]" value="Wash and fold"><span>Wash & fold</span></label>
@@ -239,7 +172,7 @@
                         </div>
                       </div>
 
-                      <div class="quote-step" data-step="5" data-step-title="Your estimate">
+                      <div class="quote-step" data-step="5">
                         <div id="quoteCalculatingState" class="quote-calculating">
                           <div class="quote-calculating-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
                           <p class="quote-calculating-text">Calculating your estimate…</p>
@@ -247,15 +180,21 @@
                         </div>
                         <div id="quoteReviewReveal" class="quote-review-reveal" hidden>
                           <div class="quote-estimate-card">
-                            <h3>Your clean plan</h3>
-                            <ul class="quote-plan-bullets">
-                              <li class="quote-plan-bullet"><i data-lucide="home"></i><div><span>Property</span><strong id="reviewProperty">—</strong></div></li>
-                              <li class="quote-plan-bullet"><i data-lucide="sparkles"></i><div><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div></li>
-                              <li class="quote-plan-bullet"><i data-lucide="layout-grid"></i><div><span>Size</span><strong id="reviewSize">—</strong></div></li>
-                              <li class="quote-plan-bullet"><i data-lucide="plus-circle"></i><div><span>Add-ons</span><strong id="reviewAddons">None</strong></div></li>
+                            <ul class="quote-plan-bullets quote-plan-bullets--compact">
+                              <li class="quote-plan-bullet">
+                                <i data-lucide="home"></i>
+                                <div><span>Property</span><strong id="reviewProperty">—</strong></div>
+                              </li>
+                              <li class="quote-plan-bullet">
+                                <i data-lucide="sparkles"></i>
+                                <div><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div>
+                              </li>
+                              <li class="quote-plan-bullet quote-plan-bullet--full">
+                                <i data-lucide="plus-circle"></i>
+                                <div><span>Add-ons</span><strong id="reviewAddons">None</strong></div>
+                              </li>
                             </ul>
-                            <div class="quote-estimate-hero">
-                              <p>Your space, clearly priced</p>
+                            <div class="quote-estimate-hero quote-estimate-hero--compact">
                               <strong id="liveCalculatedTotal">$0.00</strong>
                               <span>Confirmed before we arrive</span>
                             </div>
@@ -296,31 +235,6 @@
                 </div>
               </div>
             </div>
-
-            <aside class="quote-app-preview" id="quotePlanPanel" aria-label="Live clean plan preview">
-              <div class="quote-plan-image">
-                <img id="quotePlanImage" src="https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85" alt="Clean kitchen preview">
-              </div>
-              <div class="quote-plan-summary">
-                <h3>Your clean plan</h3>
-                <ul class="quote-preview-checklist">
-                  <li class="quote-check-item" id="planCheckSpace" data-check="pending">
-                    <span class="quote-check-icon" aria-hidden="true"></span>
-                    <div><span>Space</span><strong id="planPanelProperty">Tell us about your space</strong></div>
-                  </li>
-                  <li class="quote-check-item" id="planCheckService" data-check="pending">
-                    <span class="quote-check-icon" aria-hidden="true"></span>
-                    <div><span>Service</span><strong id="planPanelService">Pick your service next</strong></div>
-                  </li>
-                  <li class="quote-check-item" id="planCheckAddons" data-check="pending">
-                    <span class="quote-check-icon" aria-hidden="true"></span>
-                    <div><span>Add-ons</span><strong id="planPanelAddons">Optional</strong></div>
-                  </li>
-                </ul>
-              </div>
-              <p class="quote-plan-trust">No hidden fees · Insured crews</p>
-              <p class="quote-plan-teaser" id="quotePlanTeaser">Estimate unlocks on final step</p>
-            </aside>
           </div>
         </div>
 

@@ -265,13 +265,14 @@ function validatePhoneNumber(value) {
 }
 
 function ensureStudioToast(root) {
-  let toast = root.querySelector(".quote-studio-toast");
+  const header = root.querySelector(".quote-app-header") || root;
+  let toast = header.querySelector(".quote-studio-toast");
   if (!toast) {
     toast = document.createElement("div");
     toast.className = "quote-studio-toast";
     toast.setAttribute("role", "alert");
     toast.setAttribute("aria-live", "polite");
-    root.appendChild(toast);
+    header.insertBefore(toast, header.firstChild);
   }
   return toast;
 }
@@ -508,80 +509,9 @@ function buildSubmissionPayload(form, table) {
   return { payload, pricing };
 }
 
-const QUOTE_STEP_JOURNEY = ["Space", "Service", "Extras", "Contact", "Your estimate"];
-
-const SUBSTEP_CONFIG = {
-  0: ["property", "size"],
-  1: ["service_type", "frequency"]
-};
-
-const AUTO_ADVANCE_SUBSTEPS = new Set(["property", "service_type"]);
-
-const QUOTE_SUB_MESSAGES = {
-  "0-property": "Hi! What kind of space are we cleaning today?",
-  "0-size": "How big is the home?",
-  "1-service_type": "Perfect. Which service fits what you need?",
-  "1-frequency": "How often should we come?"
-};
-
-const QUOTE_PLAN_IMAGES = [
-  "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?auto=format&fit=crop&w=600&q=85",
-  "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=600&q=85",
-  "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=600&q=85",
-  "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=85",
-  "https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?auto=format&fit=crop&w=600&q=85"
-];
 
 function initQuoteSizeChips(form) {
-  const chipConfig = {
-    bedrooms: {
-      hidden: form.querySelector("#quoteBedrooms"),
-      custom: form.querySelector("#quoteBedroomsCustom"),
-      wrap: form.querySelector("#bedroomsCustomField")
-    },
-    bathrooms: {
-      hidden: form.querySelector("#quoteBathrooms"),
-      custom: form.querySelector("#quoteBathroomsCustom"),
-      wrap: form.querySelector("#bathroomsCustomField")
-    }
-  };
-
-  form.querySelectorAll("[data-chip-group]").forEach((group) => {
-    const key = group.getAttribute("data-chip-group");
-    const config = chipConfig[key];
-    if (!config?.hidden) return;
-
-    const syncValue = (value) => {
-      if (value === "" || value == null) return;
-      const normalized = key === "bathrooms"
-        ? String(Math.max(1, parseInt(String(value), 10) || 0))
-        : String(parseInt(String(value), 10) || 0);
-      config.hidden.value = normalized;
-      if (config.custom) config.custom.value = normalized;
-      form.dispatchEvent(new Event("change", { bubbles: true }));
-    };
-
-    group.querySelectorAll(".quote-chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        group.querySelectorAll(".quote-chip").forEach((node) => node.classList.remove("is-active"));
-        chip.classList.add("is-active");
-
-        if (chip.dataset.custom) {
-          if (config.wrap) config.wrap.hidden = false;
-          config.custom?.focus();
-          if (config.custom?.value) syncValue(config.custom.value);
-          return;
-        }
-
-        if (config.wrap) config.wrap.hidden = true;
-        syncValue(chip.dataset.value);
-      });
-    });
-
-    config.custom?.addEventListener("input", () => {
-      if (config.custom.value !== "") syncValue(config.custom.value);
-    });
-  });
+  if (!form.querySelector(".quote-size-metrics")) return;
 }
 
 function initQuoteAssistant(formContainer = document) {
@@ -600,8 +530,6 @@ function initQuoteAssistant(formContainer = document) {
   const btnNext = formContainer.querySelector("#btnQuoteNext");
   const btnBack = formContainer.querySelector("#btnQuoteBack");
   const btnSubmit = formContainer.querySelector("#btnQuoteSubmit");
-  const progressFill = formContainer.querySelector("#quoteProgressFill");
-  const progressText = formContainer.querySelector("#quoteProgressText");
 
   const liveSpace = formContainer.querySelector("#liveSpace");
   const liveService = formContainer.querySelector("#liveService");
@@ -618,17 +546,11 @@ function initQuoteAssistant(formContainer = document) {
   const reviewMethod = formContainer.querySelector("#reviewMethod");
   const reviewSchedule = formContainer.querySelector("#reviewSchedule");
   const root = form.closest("#quoteAssistantCard, #bookAssistantCard, .quote-window") || formContainer;
+  const windowTitle = root.querySelector("#quoteWindowTitle");
   const isQuoteStudio = root.classList.contains("quote-window");
   const formStage = root.querySelector(".quote-form-stage");
   const expandSection = root.querySelector(".quote-window-expand");
   const windowHead = root.querySelector(".quote-window-head");
-  const assistantBubble = root.querySelector("#assistantBubble");
-  const stepHeading = root.querySelector("#quoteStepHeading");
-  const substepProgress = root.querySelector("#quoteSubstepProgress");
-  const propertySummary = root.querySelector("#quotePropertySummary");
-  const propertySummaryText = root.querySelector("#quotePropertySummaryText");
-  const serviceSummary = root.querySelector("#quoteServiceSummary");
-  const serviceSummaryText = root.querySelector("#quoteServiceSummaryText");
   const calculatingState = root.querySelector("#quoteCalculatingState");
   const reviewReveal = root.querySelector("#quoteReviewReveal");
   let typewriterTimer = null;
@@ -636,95 +558,32 @@ function initQuoteAssistant(formContainer = document) {
   let reviewMsgTimer = null;
   let reviewAnimationStep = -1;
 
-  const planPanelImage = document.getElementById("quotePlanImage");
-  const planPanelProperty = document.getElementById("planPanelProperty");
-  const planPanelService = document.getElementById("planPanelService");
-  const planPanelAddons = document.getElementById("planPanelAddons");
-  const planPanelTeaser = document.getElementById("quotePlanTeaser");
-  const planStripText = document.getElementById("quotePlanStripText");
-  const planStripThumb = document.getElementById("quotePlanStripThumb");
-
-  function updatePlanPanel() {
-    if (!isQuoteStudio) return;
-
-    const data = new FormData(form);
-    const pType = data.get("property_type") || "";
-    const beds = data.get("bedrooms") || "";
-    const baths = data.get("bathrooms") || "";
-    const sqft = data.get("square_feet") || "";
-    const service = data.get("service_type") || "";
-    const freq = data.get("frequency") || "";
-    const addons = data.getAll("add_ons[]");
-
-    if (planPanelProperty) {
-      planPanelProperty.textContent = pType
-        ? `${pType} · ${beds} bed / ${baths} bath · ${sqft} sq ft`
-        : beds
-          ? `${beds} bed / ${baths} bath · ${sqft} sq ft`
-          : "Tell us about your space";
-    }
-
-    if (planPanelService) {
-      planPanelService.textContent = service
-        ? `${service}${freq ? ` · ${freq}` : ""}`
-        : "Pick your service next";
-    }
-
-    if (planPanelAddons) {
-      planPanelAddons.textContent = addons.length
-        ? `${addons.length} add-on${addons.length > 1 ? "s" : ""} selected`
-        : "Add-ons optional";
-    }
-
-    let image = QUOTE_PLAN_IMAGES[currentStepIndex] || QUOTE_PLAN_IMAGES[0];
-    if (service && (service.includes("Deep") || service.includes("Move")) && currentStepIndex >= 1) {
-      image = "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&w=600&q=80";
-    }
-
-    if (planPanelImage) planPanelImage.src = image;
-    if (planStripThumb) planStripThumb.src = image;
-
-    const stripParts = [];
-    if (pType || beds) stripParts.push(pType || `${beds} bed`);
-    if (service) stripParts.push(service);
-    if (planStripText) {
-      planStripText.textContent = stripParts.length
-        ? stripParts.join(" · ")
-        : "Building your clean plan…";
-    }
-
-    if (planPanelTeaser) {
-      planPanelTeaser.textContent = currentStepIndex >= steps.length - 1
-        ? "Your estimate is ready below"
-        : "Estimate unlocks on final step";
-    }
-
-    const checkSpace = document.getElementById("planCheckSpace");
-    const checkService = document.getElementById("planCheckService");
-    const checkAddons = document.getElementById("planCheckAddons");
-    const hasSpace = Boolean(pType || beds);
-    const hasService = Boolean(service);
-    if (checkSpace) checkSpace.dataset.check = hasSpace ? "done" : "pending";
-    if (checkService) checkService.dataset.check = hasService ? "done" : (currentStepIndex >= 1 ? "partial" : "pending");
-    if (checkAddons) checkAddons.dataset.check = addons.length ? "done" : (currentStepIndex >= 2 ? "partial" : "pending");
-
-    root.dataset.step = String(currentStepIndex + 1);
-  }
-
   const quoteContext = !isBooking ? getQuoteContext() : null;
   const quoteMessages = [
     quoteContext?.intent === "book"
       ? "Let's confirm your price first — then you'll pick a date and pay."
-      : "Hi! What kind of space are we cleaning today?",
-    "Perfect. Which service fits what you need?",
-    "Any extras you'd like us to include?",
-    "Almost done — how should we reach you?",
-    "Here's your estimate. Ready to book when you are."
+      : "Pick your property type, then enter beds, baths, and square footage.",
+    "Choose a cleaning type and how often.",
+    "Optional add-ons — tap any that apply, or skip.",
+    "Your contact details so we can send the estimate.",
+    "Review your total and submit."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",
     "Review your booking and choose how you'd like to pay."
   ];
+
+  function scrollQuoteStepIntoView() {
+    if (!isQuoteStudio || isBooking) return;
+    const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
+    const scrollTarget = root.querySelector(".quote-form-stage") || root.querySelector(".quote-step.active") || root;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const top = scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
+        window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+      });
+    });
+  }
 
   function collapseExpandable() {
     if (!expandSection || !isQuoteStudio) return;
@@ -756,11 +615,24 @@ function initQuoteAssistant(formContainer = document) {
   function setStepContentVisible(visible) {
     if (!isQuoteStudio) return;
     if (formStage) formStage.classList.toggle("is-revealed", visible);
-    if (visible) expandExpandable();
-    else collapseExpandable();
+    if (visible) {
+      if (isBooking) {
+        expandExpandable();
+        return;
+      }
+      root.classList.remove("is-compact");
+      root.classList.add("is-expanded");
+      if (expandSection) {
+        expandSection.style.maxHeight = "none";
+        expandSection.style.opacity = "1";
+        expandSection.style.pointerEvents = "auto";
+      }
+    } else if (isBooking) {
+      collapseExpandable();
+    }
   }
 
-  function playAssistantMessage(stepIndex) {
+  function playAssistantMessage(stepIndex, { instant = false } = {}) {
     const bubbleText = root.querySelector("#assistantBubbleText");
     const bubble = root.querySelector("#assistantBubble");
     if (!bubbleText || !bubble) return;
@@ -768,6 +640,19 @@ function initQuoteAssistant(formContainer = document) {
     const text = getCoachMessage(stepIndex);
 
     if (typewriterTimer) clearInterval(typewriterTimer);
+
+    if (instant || (isQuoteStudio && !isBooking)) {
+      bubbleText.textContent = text;
+      bubble.classList.remove("is-typing");
+      setStepContentVisible(true);
+      remeasureExpandable();
+      scrollQuoteStepIntoView();
+      if (table === "quote_requests" && stepIndex === steps.length - 1) {
+        showCalculatingReview();
+      }
+      return;
+    }
+
     bubbleText.textContent = "";
     bubble.classList.add("is-typing");
 
@@ -788,6 +673,7 @@ function initQuoteAssistant(formContainer = document) {
           setTimeout(() => {
             setStepContentVisible(true);
             remeasureExpandable();
+            scrollQuoteStepIntoView();
             if (table === "quote_requests" && stepIndex === steps.length - 1) {
               showCalculatingReview();
             }
@@ -798,140 +684,64 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   let currentStepIndex = 0;
-  let currentSubStepIndex = 0;
   if (quoteContext?.startStep >= 1 && quoteContext.startStep <= steps.length) {
     currentStepIndex = quoteContext.startStep - 1;
   }
 
-  function stepUsesSubsteps(stepIndex) {
-    return isQuoteStudio && !isBooking && Boolean(SUBSTEP_CONFIG[stepIndex]?.length);
-  }
-
-  function getSubSteps(stepEl) {
-    return stepEl ? [...stepEl.querySelectorAll(".quote-substep")] : [];
-  }
-
-  function getActiveSubStep() {
-    if (!stepUsesSubsteps(currentStepIndex)) return null;
-    const subSteps = getSubSteps(steps[currentStepIndex]);
-    return subSteps[currentSubStepIndex] || subSteps[0] || null;
-  }
-
   function getCoachMessage(stepIndex) {
     if (isBooking) return bookMessages[stepIndex] || bookMessages[0];
-    if (stepUsesSubsteps(stepIndex)) {
-      const subId = SUBSTEP_CONFIG[stepIndex]?.[currentSubStepIndex];
-      if (subId) {
-        return QUOTE_SUB_MESSAGES[`${stepIndex}-${subId}`] || quoteMessages[stepIndex];
-      }
-    }
     return quoteMessages[stepIndex] || quoteMessages[0];
   }
 
-  function updateChunkSummaries() {
-    const propertyType = form.querySelector('input[name="property_type"]:checked')?.value || "";
-    if (propertySummary && propertySummaryText) {
-      propertySummary.hidden = !propertyType || currentSubStepIndex === 0;
-      propertySummaryText.textContent = propertyType;
-    }
-
-    const serviceType = form.querySelector('input[name="service_type"]:checked')?.value || "";
-    if (serviceSummary && serviceSummaryText) {
-      serviceSummary.hidden = !serviceType || currentSubStepIndex === 0;
-      serviceSummaryText.textContent = serviceType;
-    }
-  }
-
-  function updateSubstepProgress() {
-    if (!substepProgress) return;
-    const usesSubsteps = stepUsesSubsteps(currentStepIndex);
-    substepProgress.hidden = !usesSubsteps;
-    substepProgress.setAttribute("aria-hidden", usesSubsteps ? "false" : "true");
-    if (!usesSubsteps) return;
-
-    const dots = substepProgress.querySelectorAll(".quote-substep-dot");
-    dots.forEach((dot, index) => {
-      dot.classList.toggle("is-active", index === currentSubStepIndex);
-      dot.classList.toggle("is-done", index < currentSubStepIndex);
-    });
-  }
-
-  function updateSubstepUI() {
-    if (!stepUsesSubsteps(currentStepIndex)) return;
-    const subSteps = getSubSteps(steps[currentStepIndex]);
-    subSteps.forEach((subStep, index) => {
-      subStep.classList.toggle("is-active", index === currentSubStepIndex);
-    });
-    updateSubstepProgress();
-    updateChunkSummaries();
-    remeasureExpandable();
-  }
-
-  function validateSizeChunk(silent = false) {
-    const beds = String(form.querySelector("#quoteBedrooms")?.value || "").trim();
-    const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value || "").trim();
-    const sqftRaw = String(form.querySelector("#quoteSqft")?.value || "").trim();
-    const baths = parseInt(bathsRaw, 10);
-    const sqft = parseInt(sqftRaw.replace(/,/g, ""), 10);
-
-    if (beds === "") {
-      if (!silent) {
-        showStudioToast(root, "Please select the number of bedrooms.", "error");
-        form.querySelector("[data-chip-group='bedrooms']")?.querySelector(".quote-chip")?.focus?.();
-      }
+  function validateSpaceStep(silent = false) {
+    const propertyType = form.querySelector('input[name="property_type"]:checked');
+    if (!propertyType) {
+      if (!silent) showStudioToast(root, "Please select a property type.", "error");
       return false;
     }
-    if (!Number.isInteger(baths) || baths < 1) {
-      if (!silent) {
-        showStudioToast(root, "Please select a whole number of bathrooms.", "error");
-        form.querySelector("[data-chip-group='bathrooms']")?.querySelector(".quote-chip")?.focus?.();
-      }
+    return validateSizeChunk(silent);
+  }
+
+  function validateServiceStep(silent = false) {
+    const serviceType = form.querySelector('input[name="service_type"]:checked');
+    const frequency = form.querySelector('input[name="frequency"]:checked');
+    if (!serviceType) {
+      if (!silent) showStudioToast(root, "Please select a cleaning type.", "error");
       return false;
     }
-    if (!Number.isInteger(sqft) || sqft < 200) {
-      if (!silent) {
-        showStudioToast(root, "Please enter your exact square footage (at least 200).", "error");
-        form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
-      }
+    if (!frequency) {
+      if (!silent) showStudioToast(root, "Please select a frequency.", "error");
       return false;
     }
     return true;
   }
 
-  function validateSubStep(subEl, silent = false) {
-    if (!subEl) return true;
-    const subId = subEl.dataset.substep;
+  function validateSizeChunk(silent = false) {
+    const bedsRaw = String(form.querySelector("#quoteBedrooms")?.value ?? "").trim();
+    const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value ?? "").trim();
+    const sqftRaw = String(form.querySelector("#quoteSqft")?.value ?? "").trim();
+    const beds = bedsRaw === "" ? NaN : parseInt(bedsRaw, 10);
+    const baths = bathsRaw === "" ? NaN : parseInt(bathsRaw, 10);
+    const sqft = sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10);
 
-    if (subId === "size") {
-      return validateSizeChunk(silent);
-    }
-
-    const seenRadios = new Set();
-    let firstError = null;
-
-    subEl.querySelectorAll("input, select, textarea").forEach((input) => {
-      if (firstError) return;
-      if (!input.required && input.type !== "checkbox") return;
-
-      if (input.type === "radio") {
-        if (seenRadios.has(input.name)) return;
-        seenRadios.add(input.name);
-        if (!subEl.querySelector(`input[name="${input.name}"]:checked`)) {
-          firstError = { message: `Please select ${getInputLabel(input).toLowerCase()}.`, input };
-        }
-        return;
-      }
-
-      const value = String(input.value || "").trim();
-      if (!value) {
-        firstError = { message: `Please enter your ${getInputLabel(input).toLowerCase()}.`, input };
-      }
-    });
-
-    if (firstError) {
+    if (!Number.isInteger(beds) || beds < 0) {
       if (!silent) {
-        showStudioToast(root, firstError.message, "error");
-        firstError.input?.focus?.({ preventScroll: true });
+        showStudioToast(root, "Enter the number of bedrooms.", "error");
+        form.querySelector("#quoteBedrooms")?.focus?.({ preventScroll: true });
+      }
+      return false;
+    }
+    if (!Number.isInteger(baths) || baths < 1) {
+      if (!silent) {
+        showStudioToast(root, "Enter a whole number of bathrooms (at least 1).", "error");
+        form.querySelector("#quoteBathrooms")?.focus?.({ preventScroll: true });
+      }
+      return false;
+    }
+    if (!Number.isInteger(sqft) || sqft < 200) {
+      if (!silent) {
+        showStudioToast(root, "Enter your square footage (at least 200).", "error");
+        form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
       }
       return false;
     }
@@ -950,19 +760,17 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
-    if (stepUsesSubsteps(currentStepIndex)) {
-      const subSteps = getSubSteps(steps[currentStepIndex]);
-      const activeSub = subSteps[currentSubStepIndex];
-      const activeId = activeSub?.dataset.substep;
+    if (!isBooking && currentStepIndex === 0) {
+      const valid = validateSpaceStep(true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
 
-      if (AUTO_ADVANCE_SUBSTEPS.has(activeId)) {
-        btnNext.classList.add("is-hidden");
-        btnNext.disabled = true;
-        btnNext.setAttribute("aria-disabled", "true");
-        return;
-      }
-
-      const valid = validateSubStep(activeSub, true);
+    if (!isBooking && currentStepIndex === 1) {
+      const valid = validateServiceStep(true);
       btnNext.classList.toggle("is-hidden", !valid);
       btnNext.classList.toggle("is-ready", valid);
       btnNext.disabled = !valid;
@@ -982,81 +790,6 @@ function initQuoteAssistant(formContainer = document) {
     btnNext.classList.remove("is-hidden");
     btnNext.disabled = false;
     btnNext.setAttribute("aria-disabled", "false");
-  }
-
-  function playSubstepCoach({ skipTypewriter = false } = {}) {
-    const bubbleText = root.querySelector("#assistantBubbleText");
-    const bubble = root.querySelector("#assistantBubble");
-    if (!bubbleText || !bubble) return;
-
-    const text = getCoachMessage(currentStepIndex);
-    if (typewriterTimer) clearInterval(typewriterTimer);
-
-    if (skipTypewriter) {
-      bubbleText.textContent = text;
-      bubble.classList.remove("is-typing");
-      setStepContentVisible(true);
-      remeasureExpandable();
-      return;
-    }
-
-    bubbleText.textContent = "";
-    bubble.classList.add("is-typing");
-    collapseExpandable();
-    if (formStage) formStage.classList.remove("is-revealed");
-
-    let index = 0;
-    typewriterTimer = setInterval(() => {
-      index += 1;
-      bubbleText.textContent = text.slice(0, index);
-      if (index >= text.length) {
-        clearInterval(typewriterTimer);
-        typewriterTimer = null;
-        bubble.classList.remove("is-typing");
-        setTimeout(() => {
-          setStepContentVisible(true);
-          remeasureExpandable();
-        }, 220);
-      }
-    }, 22);
-  }
-
-  function transitionSubStep(direction, { auto = false } = {}) {
-    if (!stepUsesSubsteps(currentStepIndex)) return;
-    const stepEl = steps[currentStepIndex];
-    const subSteps = getSubSteps(stepEl);
-    const nextIndex = currentSubStepIndex + direction;
-    if (nextIndex < 0 || nextIndex >= subSteps.length) return;
-
-    const currentSub = subSteps[currentSubStepIndex];
-    const nextSub = subSteps[nextIndex];
-    if (!currentSub || !nextSub) return;
-
-    if (direction > 0 && !validateSubStep(currentSub)) return;
-
-    currentSub.classList.add(direction > 0 ? "is-exiting-forward" : "is-exiting-back");
-    setTimeout(() => {
-      currentSub.classList.remove("is-active", "is-exiting-forward", "is-exiting-back");
-      currentSubStepIndex = nextIndex;
-      nextSub.classList.add("is-active", direction > 0 ? "is-entering-forward" : "is-entering-back");
-      updateSubstepUI();
-      updateNavState();
-      playSubstepCoach({ skipTypewriter: auto });
-      setTimeout(() => {
-        nextSub.classList.remove("is-entering-forward", "is-entering-back");
-      }, 360);
-    }, 240);
-  }
-
-  function updateStepDots() {
-    root.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
-      dot.classList.toggle("is-active", index === currentStepIndex);
-      dot.classList.toggle("is-done", index < currentStepIndex);
-    });
-    root.querySelectorAll(".quote-journey-step").forEach((step, index) => {
-      step.classList.toggle("is-active", index === currentStepIndex);
-      step.classList.toggle("is-done", index < currentStepIndex);
-    });
   }
 
   function showSuccessPanel(successState) {
@@ -1195,14 +928,22 @@ function initQuoteAssistant(formContainer = document) {
       : (session?.add_ons ? String(session.add_ons).split(",").map((v) => v.trim()).filter(Boolean).join(", ") : "None");
 
     const property = data.get("property_type") || session?.property_type || data.get("address") || "-";
-    if (reviewProperty) reviewProperty.textContent = property;
-    if (reviewService) reviewService.textContent = data.get("service_type") || session?.service_type || "-";
-    if (reviewFrequency) reviewFrequency.textContent = data.get("frequency") || session?.frequency || "-";
-
     const beds = data.get("bedrooms") || session?.bedrooms || "0";
     const baths = data.get("bathrooms") || session?.bathrooms || "0";
     const sqftRaw = data.get("square_feet") || session?.square_feet;
-    const sqftLabel = sqftRaw ? `${sqftRaw} sq ft` : `~${pricing.sqft} sq ft (est.)`;
+    const sqftLabel = sqftRaw ? `${sqftRaw} sq ft` : `~${pricing.sqft} sq ft`;
+    if (reviewProperty) {
+      if (isBooking && data.get("address")) {
+        reviewProperty.textContent = property;
+      } else if (!isBooking) {
+        reviewProperty.textContent = `${property} · ${beds} bed · ${baths} bath · ${sqftLabel}`;
+      } else {
+        reviewProperty.textContent = property;
+      }
+    }
+    if (reviewService) reviewService.textContent = data.get("service_type") || session?.service_type || "-";
+    if (reviewFrequency) reviewFrequency.textContent = data.get("frequency") || session?.frequency || "-";
+
     if (reviewSize) reviewSize.textContent = `${beds} bed / ${baths} bath / ${sqftLabel}`;
 
     if (reviewAddons) reviewAddons.textContent = addonText || "None";
@@ -1262,6 +1003,7 @@ function initQuoteAssistant(formContainer = document) {
     setTimeout(() => {
       totalRow?.classList.add("is-visible");
       animateCountUp(totalEl, pricing.total, 1300);
+      scrollQuoteStepIntoView();
     }, totalDelay);
   }
 
@@ -1313,24 +1055,16 @@ function initQuoteAssistant(formContainer = document) {
       reviewReveal.hidden = false;
       revealReviewProgressively();
       remeasureExpandable();
-    }, 1800);
+      scrollQuoteStepIntoView();
+    }, 1200);
   }
 
   function updateStepChrome() {
     const stepNum = currentStepIndex + 1;
-    if (progressFill) progressFill.style.width = `${(stepNum / steps.length) * 100}%`;
-    if (progressText) {
-      progressText.textContent = QUOTE_STEP_JOURNEY[currentStepIndex] || `Step ${stepNum} of ${steps.length}`;
+    if (windowTitle && isQuoteStudio && !isBooking) {
+      windowTitle.textContent = `Quote · Step ${stepNum} of ${steps.length}`;
     }
-    if (stepHeading) {
-      const activeStep = steps[currentStepIndex];
-      stepHeading.classList.remove("is-changing");
-      void stepHeading.offsetWidth;
-      stepHeading.textContent = activeStep?.dataset.stepTitle || `Step ${stepNum}`;
-      stepHeading.classList.add("is-changing");
-    }
-    root.classList.add("quote-window--pulse");
-    setTimeout(() => root.classList.remove("quote-window--pulse"), 500);
+    root.dataset.step = String(stepNum);
   }
 
   function transitionToStep(nextIndex, direction = 1) {
@@ -1338,7 +1072,6 @@ function initQuoteAssistant(formContainer = document) {
 
     if (!isQuoteStudio) {
       currentStepIndex = nextIndex;
-      currentSubStepIndex = 0;
       updateUI();
       playAssistantMessage(currentStepIndex);
       return;
@@ -1352,12 +1085,10 @@ function initQuoteAssistant(formContainer = document) {
     setTimeout(() => {
       currentStepEl.classList.remove("active", "is-exiting-forward", "is-exiting-back");
       currentStepIndex = nextIndex;
-      currentSubStepIndex = direction > 0
-        ? 0
-        : Math.max(0, getSubSteps(nextStepEl).length - 1);
       nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
       updateUI();
       playAssistantMessage(currentStepIndex);
+      scrollQuoteStepIntoView();
       setTimeout(() => {
         nextStepEl.classList.remove("is-entering-forward", "is-entering-back");
       }, 360);
@@ -1375,7 +1106,6 @@ function initQuoteAssistant(formContainer = document) {
           step.style.transform = "";
         }
       });
-      updateStepDots();
     } else {
       steps.forEach((step, index) => {
         if (index === currentStepIndex) {
@@ -1392,11 +1122,9 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     updateStepChrome();
-    updatePlanPanel();
-    updateSubstepUI();
     updateNavState();
 
-    const showBack = currentStepIndex > 0 || (stepUsesSubsteps(currentStepIndex) && currentSubStepIndex > 0);
+    const showBack = currentStepIndex > 0;
     if (btnBack) btnBack.style.display = showBack ? "inline-flex" : "none";
 
     if (currentStepIndex === steps.length - 1) {
@@ -1432,16 +1160,22 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   if (isQuoteStudio && formStage) {
-    formStage.classList.remove("is-revealed");
+    formStage.classList.add("is-revealed");
   }
-  if (isQuoteStudio) {
+  if (isQuoteStudio && !isBooking) {
+    root.classList.add("is-expanded");
+    if (expandSection) {
+      expandSection.style.maxHeight = "none";
+      expandSection.style.opacity = "1";
+      expandSection.style.pointerEvents = "auto";
+    }
+  } else if (isQuoteStudio && isBooking) {
     root.classList.add("is-compact");
     collapseExpandable();
   }
 
   updateUI();
   updateLiveSummary();
-  updatePlanPanel();
   initQuoteSizeChips(form);
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
     playAssistantMessage(currentStepIndex);
@@ -1452,14 +1186,10 @@ function initQuoteAssistant(formContainer = document) {
 
   if (btnNext) {
     btnNext.addEventListener("click", () => {
-      if (stepUsesSubsteps(currentStepIndex)) {
-        const subSteps = getSubSteps(steps[currentStepIndex]);
-        const activeSub = subSteps[currentSubStepIndex];
-        if (!validateSubStep(activeSub)) return;
-        if (currentSubStepIndex < subSteps.length - 1) {
-          transitionSubStep(1);
-          return;
-        }
+      if (!isBooking && currentStepIndex === 0) {
+        if (!validateSpaceStep()) return;
+      } else if (!isBooking && currentStepIndex === 1) {
+        if (!validateServiceStep()) return;
       } else if (!validateStep(steps[currentStepIndex])) {
         return;
       }
@@ -1472,64 +1202,20 @@ function initQuoteAssistant(formContainer = document) {
 
   if (btnBack) {
     btnBack.addEventListener("click", () => {
-      if (stepUsesSubsteps(currentStepIndex) && currentSubStepIndex > 0) {
-        transitionSubStep(-1);
-        return;
-      }
       if (currentStepIndex > 0) {
         transitionToStep(currentStepIndex - 1, -1);
       }
     });
   }
 
-  propertySummary?.addEventListener("click", () => {
-    if (currentStepIndex !== 0 || currentSubStepIndex === 0) return;
-    currentSubStepIndex = 0;
-    updateSubstepUI();
-    updateNavState();
-    playSubstepCoach({ skipTypewriter: true });
-  });
-
-  serviceSummary?.addEventListener("click", () => {
-    if (currentStepIndex !== 1 || currentSubStepIndex === 0) return;
-    currentSubStepIndex = 0;
-    updateSubstepUI();
-    updateNavState();
-    playSubstepCoach({ skipTypewriter: true });
-  });
-
-  form.addEventListener("change", (event) => {
+  form.addEventListener("change", () => {
     updateLiveSummary();
-    updatePlanPanel();
     updateNavState();
     if (currentStepIndex === steps.length - 1) populateReview();
-
-    if (!isQuoteStudio || isBooking) return;
-
-    if (event.target.name === "property_type" && currentStepIndex === 0 && currentSubStepIndex === 0) {
-      if (!form.querySelector('input[name="property_type"]:checked')) return;
-      window.setTimeout(() => {
-        if (currentStepIndex === 0 && currentSubStepIndex === 0 && form.querySelector('input[name="property_type"]:checked')) {
-          updateChunkSummaries();
-          transitionSubStep(1, { auto: true });
-        }
-      }, 350);
-    }
-
-    if (event.target.name === "service_type" && currentStepIndex === 1 && currentSubStepIndex === 0) {
-      if (!form.querySelector('input[name="service_type"]:checked')) return;
-      window.setTimeout(() => {
-        if (currentStepIndex === 1 && currentSubStepIndex === 0 && form.querySelector('input[name="service_type"]:checked')) {
-          updateChunkSummaries();
-          transitionSubStep(1, { auto: true });
-        }
-      }, 350);
-    }
   });
 
   form.addEventListener("input", () => {
     updateLiveSummary();
-    updatePlanPanel();
     updateNavState();
     if (currentStepIndex === steps.length - 1) populateReview();
   });
@@ -1691,11 +1377,11 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
   const quoteMessages = [
     quoteContext?.intent === "book"
       ? "Let's confirm your price first — then you'll pick a date and pay."
-      : "Hi! What kind of space are we cleaning today?",
-    "Perfect. Which service fits what you need?",
-    "Any extras you'd like us to include?",
-    "Almost done — how should we reach you?",
-    "Here's your estimate. Ready to book when you are."
+      : "Pick your property type, then enter beds, baths, and square footage.",
+    "Choose a cleaning type and how often.",
+    "Optional add-ons — tap any that apply, or skip.",
+    "Your contact details so we can send the estimate.",
+    "Review your total and submit."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",
