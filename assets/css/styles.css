@@ -752,8 +752,34 @@ section,
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 24px;
+}
+
+[data-gallery-list] {
+  width: 100%;
+  min-width: 0;
+}
+
+[data-gallery-list] .gallery-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+body[data-sanity-page="gallery"] [data-gallery-list] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+  body[data-sanity-page="gallery"] [data-gallery-list] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  body[data-sanity-page="gallery"] [data-gallery-list] {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .grid.two {
@@ -1042,6 +1068,8 @@ section,
 
 .gallery-card {
   padding: 20px 20px 18px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .gallery-card .gallery-pair {
@@ -3697,11 +3725,16 @@ body.admin-login-page {
 /* Interactive Before and After Comparison Slider */
 .gallery-slider {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   margin-bottom: 16px;
 }
 
 .gallery-slider .slider-container {
   aspect-ratio: 16 / 10;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -3709,11 +3742,10 @@ body.admin-login-page {
   user-select: none;
   cursor: ew-resize;
   border: 1px solid rgba(226, 232, 240, 0.8);
-  min-height: 300px;
 }
 
 body[data-sanity-page="home"] .gallery-slider .slider-container {
-  min-height: 360px;
+  aspect-ratio: 16 / 9;
 }
 
 .gallery-slider .slider-container .zoom-lens {
@@ -7679,7 +7711,7 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
   .gallery-page-hero-visual {
     position: absolute;
-    right: -16px;
+    right: 0;
     top: 50%;
     transform: translateY(-52%);
     width: min(48vw, 240px);
@@ -7717,7 +7749,7 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   }
 
   .gallery-page-hero-visual {
-    right: -24px;
+    right: 0;
     top: auto;
     bottom: 0;
     transform: none;
