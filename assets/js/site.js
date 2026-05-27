@@ -493,6 +493,11 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
   }
 
   document.querySelectorAll(`${REVEAL_SELECTORS}:not([data-reveal-observed])`).forEach((el) => {
+    if (el.matches("form, .service-chooser, [id$='Chooser']")) {
+      el.dataset.revealObserved = "true";
+      revealElement(el);
+      return;
+    }
     assignRevealStagger(el);
     el.dataset.revealObserved = "true";
     scrollRevealObserver.observe(el);
@@ -612,12 +617,23 @@ function initContactPage() {
   form.addEventListener("submit", () => syncFullName(), true);
 
   const params = new URLSearchParams(window.location.search);
-  if (params.get("inquiry") === "custom-quote" && inquirySelect) {
+  const inquiry = params.get("inquiry");
+
+  if (inquiry === "custom-quote" && inquirySelect) {
     const propertyOption = inquirySelect.querySelector('option[data-inquiry="property"]');
     if (propertyOption) propertyOption.selected = true;
     const textarea = form.querySelector('textarea[name="message"]');
     if (textarea && !textarea.value) {
       textarea.value = "I'd like a custom quote for my property. Please contact me to discuss scope and pricing.";
+    }
+  }
+
+  if (inquiry === "consultation" && inquirySelect) {
+    const consultationOption = inquirySelect.querySelector('option[data-inquiry="consultation"]');
+    if (consultationOption) consultationOption.selected = true;
+    const textarea = form.querySelector('textarea[name="message"]');
+    if (textarea && !textarea.value) {
+      textarea.placeholder = "Preferred days/times for a call, your space, or any questions…";
     }
   }
 }

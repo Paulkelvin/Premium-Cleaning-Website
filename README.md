@@ -8,8 +8,9 @@ A complete professional local-service website for a premium cleaning business. T
 - About Us
 - Services
 - Individual service detail pages
-- Get a Quote
-- Book Appointment / Schedule a Call
+- Get a Quote (instant estimate in minutes)
+- Schedule a Call / Contact (consultation and questions)
+- Book & Pay Online (via quote flow)
 - Before & After Gallery
 - Testimonials / Reviews
 - Service Areas
