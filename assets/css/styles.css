@@ -6580,6 +6580,29 @@ body.admin-login-page {
   max-width: 720px;
 }
 
+.services-story-hero .hero-content-wrap--overlay {
+  align-items: center;
+  min-height: 58vh;
+  padding: 56px 0;
+}
+
+.services-story-hero .hero-content--overlay {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.services-story-hero .hero-content--overlay .eyebrow,
+.services-story-hero .hero-actions {
+  justify-content: center;
+}
+
+.services-story-hero .hero-content--overlay h1,
+.services-story-hero .hero-content--overlay .hero-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .services-story-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6594,17 +6617,17 @@ body.admin-login-page {
 }
 
 .services-story-card .service-card-image-wrap {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 8.5;
 }
 
 .services-story-card h3,
 .services-story-card p {
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: 18px;
+  padding-right: 18px;
 }
 
 .services-story-for {
-  margin: 16px 20px 0;
+  margin: 12px 18px 0;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -6635,7 +6658,7 @@ body.admin-login-page {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 0 20px 20px;
+  padding: 0 18px 16px;
   margin-top: auto;
 }
 
