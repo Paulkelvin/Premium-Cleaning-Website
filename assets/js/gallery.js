@@ -6,20 +6,52 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
-function renderGalleryPair(item) {
+function galleryImageAttrs(index, role) {
+  if (index === 0) {
+    return 'decoding="async" fetchpriority="high" loading="eager"';
+  }
+  if (index === 1) {
+    return 'decoding="async" loading="eager"';
+  }
+  return 'decoding="async" loading="lazy"';
+}
+
+function preloadGalleryImages(items) {
+  if (window.matchMedia("(prefers-reduced-data: reduce)").matches) return;
+
+  const cache = window.__galleryPreloaded || (window.__galleryPreloaded = new Set());
+  items.slice(0, 3).forEach((item) => {
+    [item.beforeImageUrl, item.afterImageUrl].forEach((href) => {
+      if (!href || cache.has(href)) return;
+      cache.add(href);
+
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.as = "image";
+      link.href = href;
+      document.head.appendChild(link);
+
+      const img = new Image();
+      img.decoding = "async";
+      img.src = href;
+    });
+  });
+}
+
+function renderGallerySlider(item, index = 0) {
   return `
-    <div class="gallery-pair" role="button" tabindex="0" aria-label="View ${escapeHtml(item.title)} before and after comparison">
-      <div class="gallery-zoom-container">
-        <span class="gallery-pane-label">Before</span>
-        <img src="${escapeHtml(item.beforeImageUrl)}" alt="${escapeHtml(item.title)} before cleaning">
+    <div class="gallery-slider">
+      <div class="slider-container" data-comparison-slider>
+        <span class="case-badge">${escapeHtml(item.badge)}</span>
+        <img class="slider-img img-before" src="${escapeHtml(item.beforeImageUrl)}" alt="${escapeHtml(item.title)} before cleaning" ${galleryImageAttrs(index, "before")}>
+        <img class="slider-img img-after" src="${escapeHtml(item.afterImageUrl)}" alt="${escapeHtml(item.title)} after cleaning" ${galleryImageAttrs(index, "after")}>
+        <div class="slider-bar"></div>
+        <div class="slider-button">↔</div>
+        <span class="slider-label label-before">Before</span>
+        <span class="slider-label label-after">After</span>
+        <div class="slider-hint"><i data-lucide="chevrons-left-right" style="width:12px;height:12px;"></i> Slide</div>
+        <button type="button" class="slider-expand-btn" aria-label="Expand ${escapeHtml(item.title)} comparison"><i data-lucide="maximize-2"></i></button>
       </div>
-      <div class="gallery-zoom-container">
-        <span class="gallery-pane-label">After</span>
-        <img src="${escapeHtml(item.afterImageUrl)}" alt="${escapeHtml(item.title)} after cleaning">
-      </div>
-      <button type="button" class="gallery-expand-btn" aria-label="Expand ${escapeHtml(item.title)} comparison">
-        <i data-lucide="maximize-2"></i>
-      </button>
     </div>
   `;
 }
@@ -33,7 +65,7 @@ function renderGalleryCard(item, index) {
   return `
     <article class="card gallery-card fade-in-up${wipeClass}" data-category="${escapeHtml(item.category)}" data-gallery-id="${escapeHtml(item.id)}" style="--delay: ${(index % 5) * 0.1}s;">
       ${sparkle}
-      ${renderGalleryPair(item)}
+      ${renderGallerySlider(item, index)}
       <div class="case-meta">
         <h3>${escapeHtml(item.title)}</h3>
       </div>
@@ -63,6 +95,7 @@ function renderGallery(options = {}) {
     ? getHomeGalleryItems()
     : window.GALLERY_ITEMS;
 
+  preloadGalleryImages(items);
   list.innerHTML = items.map((item, index) => renderGalleryCard(item, index)).join("");
 
   const footer = document.querySelector("[data-gallery-footer]");
@@ -98,4 +131,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.renderGallery = renderGallery;
-window.renderGalleryPair = renderGalleryPair;
+window.renderGallerySlider = renderGallerySlider;
+window.renderGalleryPair = renderGallerySlider;

@@ -3701,14 +3701,23 @@ body.admin-login-page {
 }
 
 .gallery-slider .slider-container {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 10;
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 14px;
   box-shadow: var(--shadow-sm);
   user-select: none;
-  cursor: pointer;
+  cursor: ew-resize;
   border: 1px solid rgba(226, 232, 240, 0.8);
+  min-height: 300px;
+}
+
+body[data-sanity-page="home"] .gallery-slider .slider-container {
+  min-height: 360px;
+}
+
+.gallery-slider .slider-container .zoom-lens {
+  z-index: 6;
 }
 
 .gallery-slider .slider-img {

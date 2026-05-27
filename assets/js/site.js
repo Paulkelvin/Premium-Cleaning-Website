@@ -175,64 +175,84 @@ function initAccordions() {
   });
 }
 
-// Magnifier logic
-function initMagnifiers() {
-  document.querySelectorAll(".gallery-zoom-container").forEach((container) => {
-    if (container.querySelector(".zoom-lens")) return;
+// Magnifier logic — side-by-side containers and comparison sliders
+function initMagnifiers(root = document) {
+  root.querySelectorAll(".gallery-zoom-container").forEach((container) => {
+    if (container.dataset.magnifierInit) return;
 
     const img = container.querySelector("img");
     if (!img) return;
 
-    const lens = document.createElement("div");
-    lens.className = "zoom-lens";
-    lens.style.backgroundImage = `url('${img.src}')`;
-    container.appendChild(lens);
+    container.dataset.magnifierInit = "true";
+    attachZoomLens(container, () => img);
+  });
 
-    container.addEventListener("mousemove", (e) => {
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+  root.querySelectorAll("[data-comparison-slider], .lightbox-modal .slider-container").forEach((container) => {
+    if (container.dataset.magnifierInit) return;
 
-      // Keep lens inside container
-      lens.style.left = `${x - 70}px`;
-      lens.style.top = `${y - 70}px`;
+    const beforeImg = container.querySelector(".img-before");
+    const afterImg = container.querySelector(".img-after");
+    if (!beforeImg || !afterImg) return;
 
-      // Zoom calculations
-      const percentX = (x / rect.width) * 100;
-      const percentY = (y / rect.height) * 100;
-
-      lens.style.backgroundPosition = `${percentX}% ${percentY}%`;
-      lens.style.backgroundSize = `${rect.width * 2.2}px ${rect.height * 2.2}px`;
+    container.dataset.magnifierInit = "true";
+    attachZoomLens(container, (event, rect) => {
+      const bar = container.querySelector(".slider-bar");
+      const splitPercent = bar ? parseFloat(bar.style.left) || 50 : 50;
+      const splitX = (splitPercent / 100) * rect.width;
+      const x = event.clientX - rect.left;
+      return x < splitX ? afterImg : beforeImg;
     });
   });
 }
 
-// Open comparison Lightbox when clicking on gallery items
-function initLightboxTriggers() {
-  document.addEventListener("click", (e) => {
-    const expandBtn = e.target.closest(".gallery-expand-btn");
-    const pair = e.target.closest(".gallery-pair");
-    if (!pair) return;
-    if (expandBtn) {
-      e.stopPropagation();
+function attachZoomLens(container, getImageSource) {
+  const lens = document.createElement("div");
+  lens.className = "zoom-lens";
+  container.appendChild(lens);
+
+  const hideLens = () => {
+    lens.style.opacity = "0";
+    lens.style.transform = "scale(0)";
+  };
+
+  container.addEventListener("mousemove", (event) => {
+    if (event.buttons === 1) {
+      hideLens();
+      return;
     }
 
-    const imgs = pair.querySelectorAll("img");
-    if (imgs.length < 2) return;
+    const rect = container.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-    const card = pair.closest(".gallery-card") || pair.parentElement;
-    const title = card.querySelector("h3")?.textContent || "Before & After Reset";
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+      hideLens();
+      return;
+    }
 
-    openLightbox(imgs[0].src, imgs[1].src, title);
+    const img = typeof getImageSource === "function" && getImageSource.length >= 2
+      ? getImageSource(event, rect)
+      : getImageSource();
+
+    if (!img?.src) return;
+
+    lens.style.backgroundImage = `url('${img.src}')`;
+    lens.style.left = `${x - 70}px`;
+    lens.style.top = `${y - 70}px`;
+
+    const percentX = (x / rect.width) * 100;
+    const percentY = (y / rect.height) * 100;
+    lens.style.backgroundPosition = `${percentX}% ${percentY}%`;
+    lens.style.backgroundSize = `${rect.width * 2.2}px ${rect.height * 2.2}px`;
+    lens.style.opacity = "1";
+    lens.style.transform = "scale(1)";
   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    const pair = e.target.closest(".gallery-pair");
-    if (!pair || e.target.closest(".gallery-expand-btn")) return;
-    e.preventDefault();
-    pair.click();
-  });
+  container.addEventListener("mouseleave", hideLens);
+}
+
+function initLightboxTriggers() {
+  /* Slider containers handle expand/lightbox clicks in initOnPageSliders */
 }
 
 function initOnPageSliders() {
@@ -411,6 +431,7 @@ function openLightbox(beforeSrc, afterSrc, title) {
   modal.querySelector(".slider-bar").style.left = "50%";
   modal.querySelector(".slider-button").style.left = "50%";
 
+  initMagnifiers(modal);
   modal.classList.add("is-open");
 }
 

@@ -200,7 +200,7 @@ function applyGallery(items) {
   if (!list || !items.length) return;
   list.innerHTML = items.map((item) => `
     <article class="card gallery-card fade-in-up">
-      ${typeof window.renderGalleryPair === "function" ? window.renderGalleryPair(item) : ""}
+      ${typeof window.renderGallerySlider === "function" ? window.renderGallerySlider(item, 0) : ""}
       <div class="case-meta"><h3>${item.title}</h3></div>
       <p class="gallery-outcome">${item.description || ""}</p>
     </article>
