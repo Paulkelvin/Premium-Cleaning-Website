@@ -52,41 +52,49 @@
       </div>
     </aside>
 
-    <main class="admin-main">
+    <main class="admin-main" data-admin-main>
+      <div class="admin-loading" data-admin-loading hidden aria-hidden="true">
+        <span class="admin-loading-spinner"></span>
+        <span>Refreshing…</span>
+      </div>
+
       <header class="admin-topbar">
         <div class="admin-topbar-copy">
           <h1 data-admin-title>Dashboard</h1>
           <p data-admin-subtitle>Overview of leads, quotes, and bookings</p>
         </div>
         <div class="admin-topbar-meta">
+          <button class="admin-btn admin-btn--ghost admin-refresh-btn" type="button" data-admin-refresh title="Refresh data">
+            <i data-lucide="refresh-cw"></i> Refresh
+          </button>
           <span class="admin-live-pill"><span class="admin-live-dot"></span> Live</span>
-          <span class="admin-user-label">Admin</span>
+          <span class="admin-user-label" data-admin-user-label>Admin</span>
         </div>
       </header>
 
       <div class="admin-stats" data-view-content="dashboard">
-        <article class="admin-kpi">
+        <article class="admin-kpi admin-kpi--clickable" data-kpi-view="inbox" tabindex="0" role="button">
           <div class="admin-kpi-icon admin-kpi-icon--gold"><i data-lucide="bell"></i></div>
           <div class="admin-kpi-body">
             <strong data-count="new">0</strong>
             <span>New / unread</span>
           </div>
         </article>
-        <article class="admin-kpi">
+        <article class="admin-kpi admin-kpi--clickable" data-kpi-view="inbox" tabindex="0" role="button">
           <div class="admin-kpi-icon admin-kpi-icon--blue"><i data-lucide="mail"></i></div>
           <div class="admin-kpi-body">
             <strong data-count="contacts">0</strong>
             <span>Contact submissions</span>
           </div>
         </article>
-        <article class="admin-kpi">
+        <article class="admin-kpi admin-kpi--clickable" data-kpi-view="quotes" tabindex="0" role="button">
           <div class="admin-kpi-icon admin-kpi-icon--navy"><i data-lucide="file-text"></i></div>
           <div class="admin-kpi-body">
             <strong data-count="quotes">0</strong>
             <span>Quote requests</span>
           </div>
         </article>
-        <article class="admin-kpi">
+        <article class="admin-kpi admin-kpi--clickable" data-kpi-view="bookings" tabindex="0" role="button">
           <div class="admin-kpi-icon admin-kpi-icon--coral"><i data-lucide="calendar-check"></i></div>
           <div class="admin-kpi-body">
             <strong data-count="bookings">0</strong>
@@ -105,24 +113,81 @@
 
       <section class="admin-panel" data-view-content="inbox" hidden>
         <div class="admin-panel-head">
-          <h2>Contact submissions</h2>
-          <span>Full inquiry details from the contact form</span>
+          <div>
+            <h2>Contact submissions</h2>
+            <span data-admin-panel-meta="contact_submissions">Full inquiry details from the contact form</span>
+          </div>
+          <span class="admin-panel-count" data-admin-panel-count="contact_submissions"></span>
+        </div>
+        <div class="admin-toolbar" data-admin-toolbar="contact_submissions">
+          <label class="admin-toolbar-search">
+            <i data-lucide="search"></i>
+            <input type="search" placeholder="Search name, email, phone…" data-admin-search autocomplete="off">
+          </label>
+          <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <div class="admin-toolbar-actions">
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-expand-all>Expand all</button>
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-collapse-all>Collapse all</button>
+          </div>
         </div>
         <div data-admin-table="contact_submissions"></div>
       </section>
 
       <section class="admin-panel" data-view-content="quotes" hidden>
         <div class="admin-panel-head">
-          <h2>Quote requests</h2>
-          <span>Property details, add-ons, and estimates from the quote flow</span>
+          <div>
+            <h2>Quote requests</h2>
+            <span data-admin-panel-meta="quote_requests">Property details, add-ons, and estimates from the quote flow</span>
+          </div>
+          <span class="admin-panel-count" data-admin-panel-count="quote_requests"></span>
+        </div>
+        <div class="admin-toolbar" data-admin-toolbar="quote_requests">
+          <label class="admin-toolbar-search">
+            <i data-lucide="search"></i>
+            <input type="search" placeholder="Search name, email, phone…" data-admin-search autocomplete="off">
+          </label>
+          <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <div class="admin-toolbar-actions">
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-expand-all>Expand all</button>
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-collapse-all>Collapse all</button>
+          </div>
         </div>
         <div data-admin-table="quote_requests"></div>
       </section>
 
       <section class="admin-panel" data-view-content="bookings" hidden>
         <div class="admin-panel-head">
-          <h2>Bookings</h2>
-          <span>Scheduled appointments, payment info, and service scope</span>
+          <div>
+            <h2>Bookings</h2>
+            <span data-admin-panel-meta="bookings">Scheduled appointments, payment info, and service scope</span>
+          </div>
+          <span class="admin-panel-count" data-admin-panel-count="bookings"></span>
+        </div>
+        <div class="admin-toolbar" data-admin-toolbar="bookings">
+          <label class="admin-toolbar-search">
+            <i data-lucide="search"></i>
+            <input type="search" placeholder="Search name, email, phone…" data-admin-search autocomplete="off">
+          </label>
+          <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <div class="admin-toolbar-actions">
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-expand-all>Expand all</button>
+            <button class="admin-btn admin-btn--ghost" type="button" data-admin-collapse-all>Collapse all</button>
+          </div>
         </div>
         <div data-admin-table="bookings"></div>
       </section>

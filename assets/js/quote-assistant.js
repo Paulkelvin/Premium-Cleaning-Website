@@ -275,16 +275,37 @@ function parseSqft(raw, bedrooms, bathrooms) {
   return Math.round(beds * 450 + baths * 150 + 350);
 }
 
-function hasExplicitSpaceMetrics(form, session = null) {
+function readSpaceMetrics(form, session = null) {
   const bedsRaw = String(form.querySelector("#quoteBedrooms")?.value ?? session?.bedrooms ?? "").trim();
   const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value ?? session?.bathrooms ?? "").trim();
   const sqftRaw = String(form.querySelector("#quoteSqft")?.value ?? session?.square_feet ?? "").trim();
-  const beds = bedsRaw === "" ? NaN : parseInt(bedsRaw, 10);
-  const baths = bathsRaw === "" ? NaN : parseInt(bathsRaw, 10);
-  const sqft = sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10);
-  return Number.isInteger(beds) && beds >= 0
-    && Number.isInteger(baths) && baths >= 1
-    && Number.isInteger(sqft) && sqft >= 200;
+  return {
+    bedsRaw,
+    bathsRaw,
+    sqftRaw,
+    beds: bedsRaw === "" ? NaN : parseInt(bedsRaw, 10),
+    baths: bathsRaw === "" ? NaN : parseInt(bathsRaw, 10),
+    sqft: sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10)
+  };
+}
+
+function hasCompleteBedBathMetrics(form, session = null) {
+  const { beds, baths } = readSpaceMetrics(form, session);
+  return Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1;
+}
+
+function hasValidSpaceMetrics(form, session = null) {
+  const { sqftRaw, beds, baths, sqft } = readSpaceMetrics(form, session);
+  if (!Number.isInteger(beds) || beds < 0 || !Number.isInteger(baths) || baths < 1) {
+    return false;
+  }
+  if (sqftRaw === "") return true;
+  return Number.isInteger(sqft) && sqft >= 200;
+}
+
+/** @deprecated Use hasValidSpaceMetrics */
+function hasExplicitSpaceMetrics(form, session = null) {
+  return hasValidSpaceMetrics(form, session);
 }
 
 function hasPartialSpaceMetrics(form) {
@@ -308,9 +329,18 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
 
   if (parsedSqft > 0) {
     sqft = parsedSqft;
-  } else if (allowEstimate && hasPartialSpaceMetrics(form)) {
-    sqft = parseSqft("", data.get("bedrooms") || session?.bedrooms, data.get("bathrooms") || session?.bathrooms);
-  } else if (session?.square_feet && table === "bookings") {
+  } else {
+    const bedsVal = data.get("bedrooms") || session?.bedrooms;
+    const bathsVal = data.get("bathrooms") || session?.bathrooms;
+    const beds = bedsVal === "" || bedsVal == null ? NaN : parseInt(String(bedsVal), 10);
+    const baths = bathsVal === "" || bathsVal == null ? NaN : parseInt(String(bathsVal), 10);
+    if (Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1) {
+      sqft = parseSqft("", beds, baths);
+    } else if (allowEstimate && hasPartialSpaceMetrics(form)) {
+      sqft = parseSqft("", bedsVal, bathsVal);
+    }
+  }
+  if (sqft <= 0 && session?.square_feet && table === "bookings") {
     sqft = parseInt(String(session.square_feet), 10) || 0;
   }
   const freq = data.get("frequency") || session?.frequency || "One-time";
@@ -643,7 +673,13 @@ function buildSubmissionPayload(form, table) {
 
   payload.service_type = normalizeServiceType(payload.service_type);
   if (table !== "bookings" && !payload.square_feet) {
-    payload.square_feet = String(form.querySelector("#quoteSqft")?.value || "").trim();
+    const sqftInput = String(form.querySelector("#quoteSqft")?.value || "").trim();
+    if (sqftInput) {
+      payload.square_feet = sqftInput;
+    } else if (hasCompleteBedBathMetrics(form, session)) {
+      const { beds, baths } = readSpaceMetrics(form, session);
+      payload.square_feet = String(parseSqft("", beds, baths));
+    }
   }
   payload.estimated_total = pricing.total || payload.estimated_total || 0;
   payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
@@ -911,12 +947,7 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   function validateSizeChunk(silent = false) {
-    const bedsRaw = String(form.querySelector("#quoteBedrooms")?.value ?? "").trim();
-    const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value ?? "").trim();
-    const sqftRaw = String(form.querySelector("#quoteSqft")?.value ?? "").trim();
-    const beds = bedsRaw === "" ? NaN : parseInt(bedsRaw, 10);
-    const baths = bathsRaw === "" ? NaN : parseInt(bathsRaw, 10);
-    const sqft = sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10);
+    const { sqftRaw, beds, baths, sqft } = readSpaceMetrics(form);
 
     if (!Number.isInteger(beds) || beds < 0) {
       if (!silent) {
@@ -932,9 +963,9 @@ function initQuoteAssistant(formContainer = document) {
       }
       return false;
     }
-    if (!Number.isInteger(sqft) || sqft < 200) {
+    if (sqftRaw !== "" && (!Number.isInteger(sqft) || sqft < 200)) {
       if (!silent) {
-        showStudioToast(root, "Enter your square footage (at least 200).", "error");
+        showStudioToast(root, "Enter your square footage (at least 200), or leave blank to estimate from beds and baths.", "error");
         form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
       }
       return false;
@@ -1247,7 +1278,7 @@ function initQuoteAssistant(formContainer = document) {
     if (totalEl) totalEl.textContent = formatMoney(0);
     reviewReveal.classList.add("is-revealed");
 
-    if (!hasExplicitSpaceMetrics(form)) {
+    if (!hasValidSpaceMetrics(form)) {
       if (totalEl) totalEl.textContent = "—";
       rows.forEach((row) => row.classList.add("is-visible"));
       totalRow?.classList.add("is-visible");
