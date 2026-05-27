@@ -2994,8 +2994,8 @@ body.admin-login-page {
   opacity: 0;
   will-change: opacity, transform;
   transition:
-    opacity var(--reveal-duration, 1.35s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-    transform var(--reveal-duration, 1.35s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1));
+    opacity var(--reveal-duration, 0.82s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--reveal-duration, 0.82s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1));
   transition-delay: var(--delay, 0s);
 }
 
@@ -4419,8 +4419,8 @@ body.admin-login-page {
   opacity: 0;
   will-change: opacity, transform;
   transition:
-    opacity var(--reveal-duration, 1.35s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)),
-    transform var(--reveal-duration, 1.35s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)) !important;
+    opacity var(--reveal-duration, 0.82s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+    transform var(--reveal-duration, 0.82s) var(--reveal-ease, cubic-bezier(0.22, 1, 0.36, 1)) !important;
   transition-delay: var(--delay, 0s) !important;
 }
 
@@ -8617,7 +8617,7 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   }
 
   .gallery-page-hero-visual {
-    left: 36%;
+    left: 44%;
   }
 
   .gallery-page-hero-image {

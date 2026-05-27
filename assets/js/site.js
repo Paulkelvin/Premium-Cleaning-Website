@@ -455,7 +455,11 @@ function assignRevealStagger(el) {
   );
   const index = siblings.indexOf(el);
   if (index >= 0) {
-    el.style.setProperty("--delay", `${index * 0.18}s`);
+    const isGalleryList = parent.matches("[data-gallery-list]");
+    const step = isGalleryList ? 0.045 : 0.09;
+    const maxDelay = isGalleryList ? 0.24 : 0.54;
+    const delay = Math.min(index * step, maxDelay);
+    el.style.setProperty("--delay", `${delay}s`);
   }
 }
 
@@ -488,8 +492,8 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
         scrollRevealObserver.unobserve(entry.target);
       });
     }, {
-      threshold: 0.14,
-      rootMargin: "0px 0px -8% 0px",
+      threshold: 0.04,
+      rootMargin: "0px 0px 14% 0px",
     });
   }
 
@@ -508,7 +512,7 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
     document.querySelectorAll(`${REVEAL_SELECTORS}:not(.appeared)`).forEach((el) => {
       const rect = el.getBoundingClientRect();
       if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
-        window.setTimeout(() => revealElement(el), 120);
+        window.setTimeout(() => revealElement(el), 20);
       }
     });
   }
