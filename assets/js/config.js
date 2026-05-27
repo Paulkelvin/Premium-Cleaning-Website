@@ -6,7 +6,8 @@ window.CLEANCO_CONFIG = {
   serviceArea: "Austin, TX and nearby communities",
   supabaseUrl: "https://hbacogyhftngwoxenttv.supabase.co",
   supabaseAnonKey: "sb_publishable_jCivAQateqBu5rCK1IbmbQ_zNB4E39g",
-  adminEmail: "paulopackager@gmail.com", // Must match Supabase Auth user + supabase/schema.sql RLS policies
+  // Must match Supabase Auth users + supabase/schema.sql RLS policies (exact emails).
+  adminEmails: ["rs.cleaning@collective.com", "paulopackager@gmail.com"],
   // phone: fallback before Sanity loads — also edit Site Settings → Phone in Sanity Studio for live updates site-wide
   sanityProjectId: "hjrx2q9w",
   sanityDataset: "production",

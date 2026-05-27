@@ -1,6 +1,15 @@
 const adminConfig = window.CLEANCO_CONFIG || {};
 const adminHasSupabase = Boolean(adminConfig.supabaseUrl && adminConfig.supabaseAnonKey);
 
+function getAllowedAdminEmails() {
+  const list = adminConfig.adminEmails;
+  if (Array.isArray(list) && list.length) {
+    return list.map((entry) => String(entry).toLowerCase().trim()).filter(Boolean);
+  }
+  const single = String(adminConfig.adminEmail || "").toLowerCase().trim();
+  return single ? [single] : [];
+}
+
 const localTables = {
   contact_submissions: "cleanco_contact_submissions",
   quote_requests: "cleanco_quote_requests",
@@ -322,9 +331,9 @@ if (loginForm) {
       if (!response.ok) {
         throw new Error(body.error_description || body.msg || body.message || "Sign in failed");
       }
-      const adminEmail = String(adminConfig.adminEmail || "").toLowerCase();
+      const adminEmails = getAllowedAdminEmails();
       const signedInEmail = String(body.user?.email || email || "").toLowerCase();
-      if (adminEmail && signedInEmail !== adminEmail) {
+      if (adminEmails.length && !adminEmails.includes(signedInEmail)) {
         throw new Error("This account is not authorized for admin access.");
       }
       goToDashboard(body.access_token);

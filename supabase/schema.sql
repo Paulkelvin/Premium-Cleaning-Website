@@ -112,27 +112,27 @@ create policy "Allow public booking inserts" on bookings
 -- Admin-only reads/updates — must match Supabase Auth user email exactly.
 create policy "Allow admin contact reads" on contact_submissions
   for select to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
 
 create policy "Allow admin quote reads" on quote_requests
   for select to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
 
 create policy "Allow admin booking reads" on bookings
   for select to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
 
 create policy "Allow admin contact status updates" on contact_submissions
   for update to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
+  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
 
 create policy "Allow admin quote status updates" on quote_requests
   for update to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
+  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
 
 create policy "Allow admin booking status updates" on bookings
   for update to authenticated
-  using ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com')
-  with check ((auth.jwt() ->> 'email') = 'paulopackager@gmail.com');
+  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
+  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
