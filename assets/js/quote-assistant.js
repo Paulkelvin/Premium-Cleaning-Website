@@ -1,34 +1,59 @@
-const PRICING_CONFIG = {
-  rates: {
-    "Standard cleaning": 0.17,
-    "Deep cleaning": 0.30,
-    "Move-in/Move-out": 0.35,
-    "Post-construction": 0.40,
-    "Office cleaning": 0.20
-  },
-  addOns: {
-    "Carpet cleaning": 75,
-    "Wash and fold": 45,
-    "Laundry": 45,
-    "Inside oven": 25,
-    "Inside fridge": 25,
-    "Oven": 25,
-    "Fridge": 25,
-    "Cabinet interiors": 30,
-    "Inside cabinets": 30,
-    "Interior windows": 40,
-    "Windows": 40,
-    "Baseboards detail": 35,
-    "Junk removal": 95,
-    "Power washing": 120
-  },
-  frequencyDiscounts: {
-    "Weekly": 0.20,
-    "Bi-weekly": 0.15,
-    "Monthly": 0.10,
-    "One-time": 0.0
-  }
+function getPricingConfig() {
+  const cfg = window.CLEANCO_CONFIG?.pricing;
+  if (cfg?.rates && cfg?.addOns) return cfg;
+  return {
+    minimumJob: 100,
+    rates: {
+      "Standard cleaning": 0.17,
+      "Deep cleaning": 0.30,
+      "Move-in/Move-out": 0.35,
+      "Office cleaning": 0.20
+    },
+    addOns: {
+      "Carpet cleaning": 75,
+      "Wash and fold": 45,
+      "Inside oven": 25,
+      "Inside fridge": 25,
+      "Cabinet interiors": 30,
+      "Interior windows": 40,
+      "Junk removal": 95,
+      "Power washing": 120
+    },
+    frequencyDiscounts: {
+      "Weekly": 0.20,
+      "Bi-weekly": 0.15,
+      "Monthly": 0.10,
+      "One-time": 0.0
+    }
+  };
+}
+
+const ADDON_VALUE_ALIASES = {
+  oven: "Inside oven",
+  fridge: "Inside fridge",
+  windows: "Interior windows",
+  laundry: "Wash and fold",
+  "wash and fold": "Wash and fold",
+  "carpet refresh": "Carpet cleaning",
+  "carpet cleaning": "Carpet cleaning",
+  "inside cabinets": "Cabinet interiors",
+  "cabinet interiors": "Cabinet interiors",
+  "interior windows": "Interior windows",
+  "inside oven": "Inside oven",
+  "inside fridge": "Inside fridge",
+  "junk removal": "Junk removal",
+  "power washing": "Power washing"
 };
+
+function normalizeAddonValue(value) {
+  const trimmed = String(value || "").trim();
+  if (!trimmed) return "";
+  const canonical = ADDON_VALUE_ALIASES[trimmed.toLowerCase()];
+  if (canonical) return canonical;
+  const pricing = getPricingConfig();
+  if (pricing.addOns[trimmed]) return trimmed;
+  return trimmed;
+}
 
 const SERVICE_SLUG_MAP = {
   "standard-cleaning": "Standard cleaning",
@@ -95,7 +120,9 @@ function parseQuoteContextFromUrl() {
     });
   }
 
-  context.addons = [...new Set(context.addons)];
+  context.addons = [...new Set(context.addons.map(normalizeAddonValue))];
+  if (context.startStep >= 5) context.startStep = 4;
+  if (context.startStep < 0) context.startStep = 0;
   return context;
 }
 
@@ -124,8 +151,9 @@ function applyQuoteContextToForm(form, context) {
     setFormValue(form, "frequency", context.frequency);
   }
   context.addons.forEach((addon) => {
+    const normalized = normalizeAddonValue(addon);
     form.querySelectorAll('input[name="add_ons[]"]').forEach((input) => {
-      if (input.value === addon) input.checked = true;
+      if (input.value === normalized) input.checked = true;
     });
   });
 
@@ -145,12 +173,17 @@ function initQuoteContext() {
     urlContext.startStep
   );
 
-  const context = hasUrlContext ? urlContext : loadQuoteContext();
-  if (!context) return;
+  if (!hasUrlContext) {
+    try {
+      sessionStorage.removeItem(QUOTE_CONTEXT_KEY);
+    } catch {}
+    window.__quoteContext = null;
+    return;
+  }
 
-  if (hasUrlContext) saveQuoteContext(context);
-  applyQuoteContextToForm(form, context);
-  window.__quoteContext = context;
+  saveQuoteContext(urlContext);
+  applyQuoteContextToForm(form, urlContext);
+  window.__quoteContext = urlContext;
 }
 
 function getQuoteContext() {
@@ -195,20 +228,23 @@ function calculateQuoteTotal(form) {
     addons = String(session.add_ons).split(",").map((v) => v.trim()).filter(Boolean);
   }
 
-  if (!serviceType || !PRICING_CONFIG.rates[serviceType]) {
+  const pricingConfig = getPricingConfig();
+  if (!serviceType || !pricingConfig.rates[serviceType]) {
     return { total: 0, sqft, serviceType, freq, addons };
   }
 
-  let basePrice = sqft * PRICING_CONFIG.rates[serviceType];
-  if (basePrice > 0 && basePrice < 100) basePrice = 100;
+  let basePrice = sqft * pricingConfig.rates[serviceType];
+  const minimumJob = pricingConfig.minimumJob || 100;
+  if (basePrice > 0 && basePrice < minimumJob) basePrice = minimumJob;
 
   let addonsPrice = 0;
   addons.forEach((addon) => {
-    if (PRICING_CONFIG.addOns[addon]) addonsPrice += PRICING_CONFIG.addOns[addon];
+    const key = normalizeAddonValue(addon);
+    if (pricingConfig.addOns[key]) addonsPrice += pricingConfig.addOns[key];
   });
 
   let subtotal = basePrice + addonsPrice;
-  const discount = PRICING_CONFIG.frequencyDiscounts[freq] || 0;
+  const discount = pricingConfig.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
   const areaMeta = getServiceAreaMeta();
@@ -439,7 +475,10 @@ function setFormValue(form, name, value) {
 
 function setAddonValues(form, addOnsValue) {
   if (!addOnsValue) return;
-  const values = String(addOnsValue).split(",").map((v) => v.trim()).filter(Boolean);
+  const values = String(addOnsValue)
+    .split(",")
+    .map((v) => normalizeAddonValue(v))
+    .filter(Boolean);
   form.querySelectorAll('input[name="add_ons[]"]').forEach((input) => {
     input.checked = values.includes(input.value);
   });
@@ -455,7 +494,8 @@ function initQuotePrefill() {
   const bookFormWrap = document.getElementById("bookFormWrap");
 
   if (!session) {
-    window.location.replace("quote.html?intent=book");
+    if (noQuoteGate) noQuoteGate.hidden = false;
+    if (bookFormWrap) bookFormWrap.hidden = true;
     return;
   }
 
@@ -540,7 +580,14 @@ function initQuoteAssistant(formContainer = document) {
   if (isBooking) {
     const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
     const bookFormWrap = document.getElementById("bookFormWrap");
-    if (!session && bookFormWrap?.hidden) return;
+    const noQuoteGate = document.getElementById("bookNoQuoteGate");
+    if (!session) {
+      if (noQuoteGate) noQuoteGate.hidden = false;
+      if (bookFormWrap) bookFormWrap.hidden = true;
+      return;
+    }
+    if (noQuoteGate) noQuoteGate.hidden = true;
+    if (bookFormWrap) bookFormWrap.hidden = false;
   }
   const steps = form.querySelectorAll(".quote-step");
   const btnNext = formContainer.querySelector("#btnQuoteNext");
@@ -562,6 +609,7 @@ function initQuoteAssistant(formContainer = document) {
   const reviewMethod = formContainer.querySelector("#reviewMethod");
   const reviewSchedule = formContainer.querySelector("#reviewSchedule");
   const root = form.closest("#quoteAssistantCard, #bookAssistantCard, .quote-window") || formContainer;
+  const assistantBubble = root.querySelector("#assistantBubble");
   const windowTitle = root.querySelector("#quoteWindowTitle");
   const isQuoteStudio = root.classList.contains("quote-window");
   const formStage = root.querySelector(".quote-form-stage");
@@ -592,7 +640,7 @@ function initQuoteAssistant(formContainer = document) {
   function scrollQuoteStepIntoView() {
     if (!isQuoteStudio || isBooking) return;
     const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
-    const scrollTarget = root.querySelector(".quote-window-chrome") || root;
+    const scrollTarget = root.querySelector(".quote-form-stage") || root.querySelector(".quote-window-chrome") || root;
     requestAnimationFrame(() => {
       const rect = scrollTarget.getBoundingClientRect();
       const targetTop = rect.top + window.scrollY - headerHeight - 8;
@@ -729,6 +777,21 @@ function initQuoteAssistant(formContainer = document) {
     if (!frequency) {
       if (!silent) showStudioToast(root, "Please select a frequency.", "error");
       return false;
+    }
+    return true;
+  }
+
+  function validateAllQuoteSteps(silent = false) {
+    if (isBooking) {
+      for (let i = 0; i < steps.length; i += 1) {
+        if (!validateStep(steps[i], silent)) return false;
+      }
+      return true;
+    }
+    if (!validateSpaceStep(silent)) return false;
+    if (!validateServiceStep(silent)) return false;
+    for (let i = 2; i < steps.length; i += 1) {
+      if (!validateStep(steps[i], silent)) return false;
     }
     return true;
   }
@@ -1250,7 +1313,7 @@ function initQuoteAssistant(formContainer = document) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (!validateStep(steps[currentStepIndex])) return;
+    if (!validateAllQuoteSteps()) return;
 
     const defaultSubmitLabel = isBooking
       ? (btnSubmit?.innerHTML || "Confirm booking")
@@ -1357,9 +1420,13 @@ function initQuoteAssistant(formContainer = document) {
       console.error("Submission error:", err);
       if (stateEl) {
         stateEl.className = "form-state error";
-        stateEl.textContent = `Could not submit: ${err.message}`;
+        stateEl.textContent = typeof window.mapSubmissionError === "function"
+          ? window.mapSubmissionError(err)
+          : `Could not submit: ${err.message}`;
       }
-      showStudioToast(root, `Could not submit: ${err.message}`, "error");
+      showStudioToast(root, typeof window.mapSubmissionError === "function"
+        ? window.mapSubmissionError(err)
+        : `Could not submit: ${err.message}`, "error");
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;

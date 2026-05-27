@@ -32,7 +32,16 @@ for (let file of files) {
   }
 }
 
-// 3. Copy assets and services directories
+// 3. Copy SEO / static root files
+const rootStaticFiles = ['sitemap.xml', 'robots.txt'];
+for (const file of rootStaticFiles) {
+  const src = path.join(__dirname, file);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, path.join(distPath, file));
+  }
+}
+
+// 4. Copy assets and services directories
 const dirsToCopy = ['assets', 'services'];
 for (let dir of dirsToCopy) {
   const srcDir = path.join(__dirname, dir);

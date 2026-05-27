@@ -322,6 +322,11 @@ if (loginForm) {
       if (!response.ok) {
         throw new Error(body.error_description || body.msg || body.message || "Sign in failed");
       }
+      const adminEmail = String(adminConfig.adminEmail || "").toLowerCase();
+      const signedInEmail = String(body.user?.email || email || "").toLowerCase();
+      if (adminEmail && signedInEmail !== adminEmail) {
+        throw new Error("This account is not authorized for admin access.");
+      }
       goToDashboard(body.access_token);
     } catch (error) {
       console.error(error);

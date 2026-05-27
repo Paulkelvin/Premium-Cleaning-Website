@@ -7203,8 +7203,7 @@ body.admin-login-page {
 
 @media (max-width: 900px) {
   .hero-split--conversion,
-  .contact-hero-split,
-  .contact-details-grid {
+  .contact-hero-split {
     grid-template-columns: 1fr;
   }
 
@@ -9689,5 +9688,48 @@ html {
 
   .about-trust-point span {
     font-size: clamp(0.68rem, 2.2vw, 0.8rem);
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.contact-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.service-area-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.service-area-card h3 {
+  margin-bottom: 6px;
+}
+
+.service-area-region {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .quote-page .quote-app {
+    overflow: visible;
   }
 }

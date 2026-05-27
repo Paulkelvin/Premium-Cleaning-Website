@@ -6,7 +6,7 @@
   <title>Cleaning Services | RS Cleaning Collective</title>
   <meta name="description" content="Standard, deep, move-out, and office cleaning in Austin. Build your quote in minutes with transparent per-sq-ft pricing.">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
 </head>
 <body data-sanity-page="services">
   <header class="site-header">
@@ -286,6 +286,7 @@
 
       if (frequency === "recurring") freq = "&frequency=Weekly";
       else if (frequency === "monthly") freq = "&frequency=Monthly";
+      else if (frequency === "once") freq = "&frequency=One-time";
 
       window.location.href = `quote.html?service=${service}&step=2${freq}`;
     });

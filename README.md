@@ -68,3 +68,11 @@ node local-server.js
 Then open `http://127.0.0.1:4173/admin-login.html`.
 
 If `http://127.0.0.1:4173` shows `Not found`, stop the old terminal process running the server and start it again with `npm run serve`. The local server maps `/` to `index.html`.
+
+## Production deploy
+
+```powershell
+npm run build
+```
+
+Deploy the `dist/` folder (Cloudflare Pages uses `wrangler.jsonc`). See **`DELIVERY.md`** for Supabase RLS migration, admin handoff, and Sanity content checklist.

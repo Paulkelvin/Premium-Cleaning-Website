@@ -6,7 +6,7 @@
   <title>Book Appointment | RS Cleaning Collective</title>
   <meta name="description" content="Complete your cleaning booking with RS Cleaning Collective. Your quote carries over automatically.">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
 </head>
 <body class="book-page" data-sanity-page="book">
   <header class="site-header">
@@ -40,6 +40,8 @@
 
     <section class="quote-studio-section">
       <div class="section-inner quote-studio-inner">
+        <h1 class="visually-hidden" data-studio-title>Book your cleaning appointment</h1>
+        <p class="visually-hidden" data-studio-copy>Your quote carries over automatically — pick a date, address, and payment preference.</p>
 
         <div class="quote-window" id="bookAssistantCard">
           <div class="quote-avatar-wrap">
@@ -47,14 +49,14 @@
             <span class="quote-avatar-status" aria-hidden="true"></span>
           </div>
 
-          <div id="bookNoQuoteGate" class="book-no-quote-gate" hidden>
+          <div id="bookNoQuoteGate" class="book-no-quote-gate">
             <div class="book-no-quote-icon"><i data-lucide="clipboard-list"></i></div>
             <h2>Start with your quote</h2>
             <p>Get an instant estimate first — your service, contact details, and pricing carry over here automatically.</p>
             <a href="quote.html?intent=book" class="button">Get estimate in minutes <i data-lucide="arrow-right"></i></a>
           </div>
 
-          <div class="quote-window-body" id="bookFormWrap">
+          <div class="quote-window-body" id="bookFormWrap" hidden>
             <div class="quote-window-head">
               <div class="quote-step-dots" id="quoteStepDots" aria-hidden="true">
                 <span class="quote-step-dot is-active"></span>

@@ -66,6 +66,29 @@ Use this for About, Contact, Service Areas, Privacy Policy, and Terms of Service
 
 ### testimonial
 
+- customerName, serviceType, location, quote, rating, displayOrder
+- **avatar** (image upload — customer photo)
+
+### galleryItem
+
+- title, slug, serviceType, category, badge, description, displayOrder
+- **beforeImage**, **afterImage** (image uploads)
+
+### service
+
+- title, slug, shortDescription, overview, includedItems, etc.
+- **heroImage** (image upload)
+
+### homePage
+
+- hero fields + **heroImage** (image upload)
+- serviceCards[].**image**, howItWorksSteps[].**image**
+
+### page
+
+- hero fields + **heroImage**
+- sections[].**image**
+
 - customerName
 - serviceType
 - quote

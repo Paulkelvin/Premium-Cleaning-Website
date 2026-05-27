@@ -2,6 +2,14 @@
   const widget = document.querySelector("[data-area-check]");
   if (!widget || !window.SERVICE_AREAS) return;
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   const input = widget.querySelector("[data-area-check-input]");
   const submitBtn = widget.querySelector("[data-area-check-submit]");
   const resultEl = widget.querySelector("[data-area-check-result]");
@@ -102,9 +110,9 @@
 
     if (match.fuzzy && match.score <= 2) {
       suggestEl.hidden = false;
-      suggestEl.innerHTML = `Did you mean <button type="button" class="area-check-suggest-btn" data-suggest="${match.area.name}">${match.area.name}</button>?`;
+      suggestEl.innerHTML = `Did you mean <button type="button" class="area-check-suggest-btn" data-suggest="${escapeHtml(match.area.name)}">${escapeHtml(match.area.name)}</button>?`;
       resultEl.className = "area-check-result area-check-result--suggest";
-      resultEl.innerHTML = `<strong>Almost matched</strong><p>We found a close match for “${raw}”. Tap the suggestion or try your ZIP code.</p>`;
+      resultEl.innerHTML = `<strong>Almost matched</strong><p>We found a close match for “${escapeHtml(raw)}”. Tap the suggestion or try your ZIP code.</p>`;
       return;
     }
 
@@ -115,7 +123,7 @@
       : "No travel fee for this area.";
     const tierClass = area.tier === "primary" ? "area-check-result--ok" : "area-check-result--extended";
     resultEl.className = `area-check-result ${tierClass}`;
-    resultEl.innerHTML = `<strong>${area.name} — we serve your area</strong><p>${feeNote}</p>`;
+    resultEl.innerHTML = `<strong>${escapeHtml(area.name)} — we serve your area</strong><p>${feeNote}</p>`;
     continueBtn.hidden = false;
   }
 

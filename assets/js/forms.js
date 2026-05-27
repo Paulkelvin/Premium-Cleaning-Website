@@ -30,6 +30,20 @@ function sanitizePayload(table, payload) {
   return clean;
 }
 
+function mapSubmissionError(error) {
+  const raw = String(error?.message || error || "");
+  if (raw.includes("row-level security") || raw.includes("RLS")) {
+    return "We could not save your request yet. Please call or email us directly.";
+  }
+  if (raw.includes("Invalid API key")) {
+    return "Our form service is being updated. Please try again shortly or contact us directly.";
+  }
+  if (raw.includes("Failed to fetch") || raw.includes("NetworkError")) {
+    return "Network error — check your connection and try again.";
+  }
+  return "Something went wrong sending your message. Please try again or contact us directly.";
+}
+
 async function supabaseInsert(table, payload) {
   const body = sanitizePayload(table, payload);
   const rowId = crypto.randomUUID();
@@ -115,6 +129,7 @@ function clearQuoteSession() {
   } catch {}
 }
 
+window.mapSubmissionError = mapSubmissionError;
 window.supabaseInsert = supabaseInsert;
 window.buildFormPayload = formPayload;
 window.sanitizePayloadForTable = sanitizePayload;
@@ -127,6 +142,11 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
     event.preventDefault();
     const table = form.getAttribute("data-table");
     const submit = form.querySelector("button[type='submit']");
+    const honeypot = form.querySelector("[name='company_website']");
+    if (honeypot?.value) {
+      showState(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
+      return;
+    }
     submit.disabled = true;
     showState(form, "loading", "Sending...");
 
@@ -138,7 +158,7 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
       showState(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
     } catch (error) {
       console.error(error);
-      showState(form, "error", `Could not send yet: ${error.message}`);
+      showState(form, "error", mapSubmissionError(error));
     } finally {
       submit.disabled = false;
     }

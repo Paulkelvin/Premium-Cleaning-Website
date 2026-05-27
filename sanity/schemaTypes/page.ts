@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {imageField} from './fields'
 
 export const page = defineType({
   name: 'page',
@@ -11,17 +12,20 @@ export const page = defineType({
     defineField({name: 'heroEyebrow', title: 'Hero Eyebrow', type: 'string'}),
     defineField({name: 'heroTitle', title: 'Hero Title', type: 'text'}),
     defineField({name: 'heroCopy', title: 'Hero Copy', type: 'text'}),
+    imageField('heroImage', 'Hero image'),
     defineField({
       name: 'sections',
       title: 'Page Sections',
       type: 'array',
-      of: [{type: 'object', fields: [
-        defineField({name: 'eyebrow', title: 'Eyebrow', type: 'string'}),
-        defineField({name: 'title', title: 'Title', type: 'string'}),
-        defineField({name: 'body', title: 'Body', type: 'text'}),
-        defineField({name: 'imageUrl', title: 'Image URL', type: 'url'})
-      ]}]
-    })
-  ]
+      of: [{
+        type: 'object',
+        fields: [
+          defineField({name: 'eyebrow', title: 'Eyebrow', type: 'string'}),
+          defineField({name: 'title', title: 'Title', type: 'string'}),
+          defineField({name: 'body', title: 'Body', type: 'text'}),
+          imageField('image', 'Section image'),
+        ],
+      }],
+    }),
+  ],
 })
-

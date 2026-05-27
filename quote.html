@@ -6,7 +6,7 @@
   <title>Get a Quote | RS Cleaning Collective</title>
   <meta name="description" content="Get your cleaning estimate in minutes with RS Cleaning Collective.">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
 </head>
 <body class="quote-page" data-sanity-page="quote">
   <header class="site-header">
@@ -34,6 +34,8 @@
 
     <section class="quote-studio-section">
       <div class="section-inner quote-studio-inner">
+        <h1 class="visually-hidden" data-studio-title>Get a cleaning quote in minutes</h1>
+        <p class="quote-studio-intro visually-hidden" data-studio-copy>Share a few details and we will confirm scope, timing, and pricing before your appointment.</p>
 
         <div class="quote-app quote-window" id="quoteAssistantCard">
           <div class="quote-window-chrome" aria-hidden="true">
@@ -41,7 +43,7 @@
             <span class="quote-window-title" id="quoteWindowTitle">Quote · Step 1 of 5</span>
           </div>
           <header class="quote-app-header">
-            <p class="quote-coach-line" id="assistantBubble"><span id="assistantBubbleText"></span></p>
+            <p class="quote-coach-line" id="assistantBubble" aria-live="polite" aria-atomic="true"><span id="assistantBubbleText"></span></p>
           </header>
 
           <div class="quote-app-body">
