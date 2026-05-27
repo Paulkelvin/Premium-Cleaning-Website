@@ -210,8 +210,12 @@ function initMagnifiers() {
 // Open comparison Lightbox when clicking on gallery items
 function initLightboxTriggers() {
   document.addEventListener("click", (e) => {
+    const expandBtn = e.target.closest(".gallery-expand-btn");
     const pair = e.target.closest(".gallery-pair");
     if (!pair) return;
+    if (expandBtn) {
+      e.stopPropagation();
+    }
 
     const imgs = pair.querySelectorAll("img");
     if (imgs.length < 2) return;
@@ -220,6 +224,14 @@ function initLightboxTriggers() {
     const title = card.querySelector("h3")?.textContent || "Before & After Reset";
 
     openLightbox(imgs[0].src, imgs[1].src, title);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const pair = e.target.closest(".gallery-pair");
+    if (!pair || e.target.closest(".gallery-expand-btn")) return;
+    e.preventDefault();
+    pair.click();
   });
 }
 

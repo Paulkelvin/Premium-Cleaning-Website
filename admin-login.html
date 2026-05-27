@@ -7,34 +7,34 @@
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="admin-shell">
+<body class="admin-shell admin-login-page">
   <div class="admin-login-wrapper">
-    <form class="card form-grid admin-login-card" data-admin-login>
-      <div class="field full" style="text-align: center;">
-        <a class="brand" href="index.html" style="justify-content: center; margin-bottom: 20px;">
-          <span class="brand-mark">RS</span>
-          <span>RS Cleaning Collective</span>
-        </a>
-        <h1 style="font-size: 1.6rem;">Welcome back</h1>
-        <p style="font-size: 0.94rem;">Sign in to manage leads and bookings.</p>
+    <form class="admin-login-card" data-admin-login>
+      <div class="admin-login-brand">
+        <span class="admin-login-mark">RS</span>
+        <div>
+          <strong>RS Cleaning Collective</strong>
+          <span>Admin workspace</span>
+        </div>
       </div>
-      <label class="field full">Email
-        <input type="email" name="email" required placeholder="admin@example.com">
+      <h1>Sign in</h1>
+      <p class="admin-login-lead">Manage leads, quotes, and bookings.</p>
+      <label class="admin-login-field">
+        <span>Email</span>
+        <input type="email" name="email" required placeholder="admin@example.com" autocomplete="username">
       </label>
-      <label class="field full">Password
-        <input type="password" name="password" required placeholder="••••••••">
+      <label class="admin-login-field">
+        <span>Password</span>
+        <input type="password" name="password" required placeholder="••••••••" autocomplete="current-password">
       </label>
-      <div class="field full">
-        <button class="button" type="submit" style="width: 100%;">
-          <i data-lucide="lock"></i> Sign in
-        </button>
-        <div data-form-state class="form-state" role="status"></div>
-      </div>
+      <button class="button admin-login-submit" type="submit">
+        <i data-lucide="lock"></i> Sign in
+      </button>
+      <div data-form-state class="form-state admin-login-state" role="status"></div>
     </form>
   </div>
   <script src="assets/js/config.js"></script>
   <script src="assets/js/admin.js"></script>
   <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>
-  <script src="assets/js/quote-assistant.js"></script>
 </body>
 </html>

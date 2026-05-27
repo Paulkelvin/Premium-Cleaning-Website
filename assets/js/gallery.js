@@ -6,6 +6,24 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function renderGalleryPair(item) {
+  return `
+    <div class="gallery-pair" role="button" tabindex="0" aria-label="View ${escapeHtml(item.title)} before and after comparison">
+      <div class="gallery-zoom-container">
+        <span class="gallery-pane-label">Before</span>
+        <img src="${escapeHtml(item.beforeImageUrl)}" alt="${escapeHtml(item.title)} before cleaning">
+      </div>
+      <div class="gallery-zoom-container">
+        <span class="gallery-pane-label">After</span>
+        <img src="${escapeHtml(item.afterImageUrl)}" alt="${escapeHtml(item.title)} after cleaning">
+      </div>
+      <button type="button" class="gallery-expand-btn" aria-label="Expand ${escapeHtml(item.title)} comparison">
+        <i data-lucide="maximize-2"></i>
+      </button>
+    </div>
+  `;
+}
+
 function renderGalleryCard(item, index) {
   const wipeClass = index === 0 ? " wipe-reveal" : "";
   const sparkle = index === 0
@@ -15,22 +33,9 @@ function renderGalleryCard(item, index) {
   return `
     <article class="card gallery-card fade-in-up${wipeClass}" data-category="${escapeHtml(item.category)}" data-gallery-id="${escapeHtml(item.id)}" style="--delay: ${(index % 5) * 0.1}s;">
       ${sparkle}
-      <div class="gallery-slider">
-        <div class="slider-container">
-          <span class="case-badge">${escapeHtml(item.badge)}</span>
-          <img class="slider-img img-before" src="${escapeHtml(item.beforeImageUrl)}" alt="${escapeHtml(item.title)} before">
-          <img class="slider-img img-after" src="${escapeHtml(item.afterImageUrl)}" alt="${escapeHtml(item.title)} after">
-          <div class="slider-bar"></div>
-          <div class="slider-button">↔</div>
-          <span class="slider-label label-before">Before</span>
-          <span class="slider-label label-after">After</span>
-          <div class="slider-hint"><i data-lucide="chevrons-left-right" style="width:12px;height:12px;"></i> Slide</div>
-          <button class="slider-expand-btn" aria-label="Expand image comparison"><i data-lucide="maximize-2"></i></button>
-        </div>
-      </div>
+      ${renderGalleryPair(item)}
       <div class="case-meta">
         <h3>${escapeHtml(item.title)}</h3>
-        <span class="case-metric">Project ${item.set} · Set ${item.letter.toUpperCase()}</span>
       </div>
       <p class="gallery-outcome">${escapeHtml(item.description)}</p>
     </article>
@@ -66,9 +71,6 @@ function renderGallery(options = {}) {
     const shown = items.length;
     const remaining = total - shown;
     footer.hidden = !options.showSeeMore || remaining <= 0;
-
-    const countEl = footer.querySelector("[data-gallery-count]");
-    if (countEl) countEl.textContent = String(total);
   }
 
   if (typeof window.refreshInteractiveFeatures === "function") {
@@ -96,3 +98,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.renderGallery = renderGallery;
+window.renderGalleryPair = renderGalleryPair;

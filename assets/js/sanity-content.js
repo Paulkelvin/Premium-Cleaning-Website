@@ -200,19 +200,8 @@ function applyGallery(items) {
   if (!list || !items.length) return;
   list.innerHTML = items.map((item) => `
     <article class="card gallery-card fade-in-up">
-      <div class="gallery-slider">
-        <div class="slider-container">
-          <img class="slider-img img-before" src="${item.beforeImageUrl}" alt="${item.title} before">
-          <img class="slider-img img-after" src="${item.afterImageUrl}" alt="${item.title} after">
-          <div class="slider-bar"></div>
-          <div class="slider-button">↔</div>
-          <span class="slider-label label-before">Before</span>
-          <span class="slider-label label-after">After</span>
-          <div class="slider-hint"><i data-lucide="chevrons-left-right" style="width:12px;height:12px;"></i> Slide</div>
-          <button class="slider-expand-btn" aria-label="Expand image comparison"><i data-lucide="maximize-2"></i></button>
-        </div>
-      </div>
-      <h3>${item.title}</h3>
+      ${typeof window.renderGalleryPair === "function" ? window.renderGalleryPair(item) : ""}
+      <div class="case-meta"><h3>${item.title}</h3></div>
       <p class="gallery-outcome">${item.description || ""}</p>
     </article>
   `).join("");
