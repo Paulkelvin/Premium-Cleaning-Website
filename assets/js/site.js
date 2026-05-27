@@ -200,7 +200,7 @@ function initMagnifiers(root = document) {
       const splitPercent = bar ? parseFloat(bar.style.left) || 50 : 50;
       const splitX = (splitPercent / 100) * rect.width;
       const x = event.clientX - rect.left;
-      return x < splitX ? afterImg : beforeImg;
+      return x < splitX ? beforeImg : afterImg;
     });
   });
 }
@@ -278,7 +278,7 @@ function initOnPageSliders() {
       if (x > rect.width) x = rect.width;
       const percent = (x / rect.width) * 100;
 
-      afterImg.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+      afterImg.style.clipPath = `polygon(${percent}% 0, 100% 0, 100% 100%, ${percent}% 100%)`;
       bar.style.left = `${percent}%`;
       button.style.left = `${percent}%`;
     };
@@ -395,7 +395,7 @@ function openLightbox(beforeSrc, afterSrc, title) {
       if (x > rect.width) x = rect.width;
       const percent = (x / rect.width) * 100;
 
-      afterImg.style.clipPath = `polygon(0 0, ${percent}% 0, ${percent}% 100%, 0 100%)`;
+      afterImg.style.clipPath = `polygon(${percent}% 0, 100% 0, 100% 100%, ${percent}% 100%)`;
       bar.style.left = `${percent}%`;
       button.style.left = `${percent}%`;
     };
@@ -426,7 +426,7 @@ function openLightbox(beforeSrc, afterSrc, title) {
   
   const afterImg = modal.querySelector(".img-after");
   afterImg.src = afterSrc;
-  afterImg.style.clipPath = "polygon(0 0, 50% 0, 50% 100%, 0 100%)";
+  afterImg.style.clipPath = "polygon(50% 0, 100% 0, 100% 100%, 50% 100%)";
   
   modal.querySelector(".slider-bar").style.left = "50%";
   modal.querySelector(".slider-button").style.left = "50%";
