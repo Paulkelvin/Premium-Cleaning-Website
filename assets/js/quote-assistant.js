@@ -745,7 +745,7 @@ function buildSubmissionPayload(form, table) {
       payload.bedrooms = "";
       payload.bathrooms = "";
     } else {
-      const { beds, baths, bedsRaw, bathsRaw } = readSpaceMetrics(form, session);
+      const { beds, baths, bedsRaw, bathsRaw } = readSpaceMetrics(form);
       payload.bedrooms = bedsRaw;
       payload.bathrooms = bathsRaw;
       payload.square_feet = String(parseSqft("", beds, baths));
@@ -954,7 +954,7 @@ function initQuoteAssistant(formContainer = document) {
   const quoteMessages = [
     quoteContext?.intent === "book"
       ? "Let's confirm your price first — then you'll pick a date and pay."
-      : "Pick your property type, then enter beds, baths, and square footage.",
+      : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
     "Your contact details so we can send the estimate.",
@@ -1930,7 +1930,7 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
   const quoteMessages = [
     quoteContext?.intent === "book"
       ? "Let's confirm your price first — then you'll pick a date and pay."
-      : "Pick your property type, then enter beds, baths, and square footage.",
+      : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
     "Your contact details so we can send the estimate.",
