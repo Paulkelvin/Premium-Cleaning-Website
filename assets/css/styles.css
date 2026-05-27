@@ -9033,7 +9033,29 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
 .quote-page .quote-studio-ambient .quote-ambient-grid {
   display: block;
-  opacity: 0.35;
+  opacity: 0.48;
+}
+
+.quote-page .quote-studio-inner {
+  position: relative;
+}
+
+.quote-page .quote-studio-inner::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 80px;
+  transform: translateX(-50%);
+  width: min(920px, 94vw);
+  height: 480px;
+  background: radial-gradient(ellipse at 50% 30%, rgba(15, 79, 207, 0.1) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.quote-page .quote-app {
+  position: relative;
+  z-index: 1;
 }
 
 .quote-app {
@@ -9238,6 +9260,130 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   padding: 18px 16px 0;
 }
 
+/* Quote page — content canvas, section cards, footer dock */
+.quote-page .quote-app-main .quote-window-body {
+  padding: 14px 14px 0;
+  background: #f4f7fb;
+}
+
+.quote-page .quote-app-canvas {
+  margin: 0 2px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, transparent 100%);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.quote-page .quote-form-stage {
+  margin: 0;
+  padding: 14px 12px 16px;
+  min-height: 280px;
+  background: var(--white);
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  box-shadow:
+    0 2px 10px rgba(11, 19, 36, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.quote-page .quote-app[data-step="1"] .quote-app-canvas {
+  border-left: 3px solid rgba(15, 79, 207, 0.4);
+}
+
+.quote-page .quote-app[data-step="2"] .quote-app-canvas {
+  border-left: 3px solid rgba(212, 168, 83, 0.55);
+}
+
+.quote-page .quote-app[data-step="3"] .quote-app-canvas {
+  border-left: 3px solid rgba(46, 160, 130, 0.5);
+}
+
+.quote-page .quote-app[data-step="4"] .quote-app-canvas {
+  border-left: 3px solid rgba(15, 79, 207, 0.35);
+}
+
+.quote-page .quote-app[data-step="5"] .quote-app-canvas {
+  border-left: 3px solid rgba(212, 168, 83, 0.45);
+}
+
+.quote-page .quote-step.active > .quote-fieldset,
+.quote-page .quote-step.active > .quote-size-metrics,
+.quote-page .quote-step.active > .quote-field-hint,
+.quote-page .quote-step.active > .quote-input-row,
+.quote-page .quote-step.active > .quote-contact-prefs,
+.quote-page .quote-step.active > .quote-addon-grid,
+.quote-page .quote-step.active > .field,
+.quote-page .quote-step.active > #quoteCalculatingState,
+.quote-page .quote-step.active > #quoteReviewReveal {
+  margin-bottom: 10px;
+}
+
+.quote-page .quote-fieldset {
+  margin: 0 0 10px;
+  padding: 12px 12px 10px;
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  background: #fcfdff;
+  box-shadow: 0 2px 8px rgba(11, 19, 36, 0.04);
+}
+
+.quote-page .quote-fieldset + .quote-fieldset {
+  margin-top: 0;
+}
+
+.quote-page .quote-size-metrics,
+.quote-page .quote-size-mode {
+  margin-bottom: 10px;
+}
+
+.quote-page .quote-size-metrics {
+  padding: 12px;
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  background: #fcfdff;
+  box-shadow: 0 2px 8px rgba(11, 19, 36, 0.04);
+}
+
+.quote-page .quote-fieldset .quote-size-mode {
+  margin-bottom: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.quote-page .quote-field-hint {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(15, 79, 207, 0.05);
+  border: 1px dashed rgba(15, 79, 207, 0.12);
+}
+
+.quote-page .quote-calculating {
+  padding: 24px 16px;
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  background: #fcfdff;
+  box-shadow: 0 2px 8px rgba(11, 19, 36, 0.04);
+}
+
+.quote-page .quote-estimate-card {
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  background: #fcfdff;
+  box-shadow: 0 2px 8px rgba(11, 19, 36, 0.04);
+}
+
+.quote-page .quote-window-body > .quote-success-panel {
+  margin: 12px 14px 16px;
+  padding: 24px 18px;
+  border: 1px solid rgba(15, 79, 207, 0.12);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 4px 16px rgba(11, 19, 36, 0.06);
+}
+
 .quote-app-main .quote-step-heading {
   display: none;
 }
@@ -9331,6 +9477,23 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   background: transparent;
 }
 
+.quote-page .quote-app-footer {
+  margin: 10px 0 0;
+  padding: 14px 16px 10px;
+  background: linear-gradient(180deg, #eef2f8 0%, #f4f7fb 100%);
+  border-top: 1px solid rgba(15, 79, 207, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 -4px 14px rgba(11, 19, 36, 0.05);
+}
+
+.quote-page .quote-nav-trust {
+  margin: 0;
+  padding: 8px 16px 14px;
+  background: linear-gradient(180deg, #f4f7fb 0%, #eef2f8 100%);
+  border-top: 1px solid rgba(15, 79, 207, 0.06);
+}
+
 .quote-app-footer .button {
   flex: 1;
   min-width: 120px;
@@ -9343,11 +9506,75 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   max-height: none !important;
 }
 
-.quote-size-metrics {
+.quote-size-mode {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quote-size-mode-option {
+  display: block;
+  cursor: pointer;
+}
+
+.quote-size-mode-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.quote-size-mode-option span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 79, 207, 0.14);
+  background: var(--white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quote-size-mode-option input:checked + span {
+  border-color: var(--mint);
+  background: rgba(15, 79, 207, 0.08);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(15, 79, 207, 0.1);
+}
+
+.quote-size-mode-option input:focus-visible + span {
+  outline: 2px solid var(--mint);
+  outline-offset: 2px;
+}
+
+.quote-size-metrics {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-top: 10px;
+}
+
+.quote-size-group[data-size-group="beds_baths"] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.quote-size-group[data-size-group="sqft"] {
+  display: block;
+}
+
+.quote-size-metrics.is-sqft-only .quote-size-group[data-size-group="beds_baths"] {
+  display: none;
+}
+
+.quote-size-metrics.is-beds-baths-only .quote-size-group[data-size-group="sqft"] {
+  display: none;
 }
 
 .quote-metric-field {
@@ -9429,6 +9656,10 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   scroll-margin-top: calc(var(--header-height, 72px) + 16px);
   padding-bottom: 14px;
   min-height: 280px;
+}
+
+.quote-page .quote-form {
+  background: transparent;
 }
 
 .quote-plan-bullets--compact {
@@ -10148,8 +10379,12 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
     padding: 6px 2px;
   }
 
-  .quote-size-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .quote-size-mode {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-size-group[data-size-group="beds_baths"] {
+    grid-template-columns: 1fr 1fr;
     gap: 6px;
   }
 
@@ -10158,12 +10393,27 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
     padding: 0 8px;
   }
 
-  .quote-app-footer {
+  .quote-page .quote-app-main .quote-window-body {
+    padding: 10px 10px 0;
+  }
+
+  .quote-page .quote-form-stage {
+    padding: 12px 10px 14px;
+  }
+
+  .quote-page .quote-fieldset {
+    padding: 10px 10px 8px;
+  }
+
+  .quote-app-footer,
+  .quote-page .quote-app-footer {
     position: sticky;
     bottom: 0;
     z-index: 10;
     padding-bottom: max(12px, env(safe-area-inset-bottom));
-    box-shadow: 0 -6px 24px rgba(11, 19, 36, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.92),
+      0 -6px 24px rgba(11, 19, 36, 0.08);
   }
 
   .contact-contact-row {

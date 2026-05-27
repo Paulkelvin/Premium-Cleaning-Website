@@ -275,6 +275,10 @@ function parseSqft(raw, bedrooms, bathrooms) {
   return Math.round(beds * 450 + baths * 150 + 350);
 }
 
+function getSizeInputMode(form) {
+  return form.querySelector('input[name="size_input_mode"]:checked')?.value || "beds_baths";
+}
+
 function readSpaceMetrics(form, session = null) {
   const bedsRaw = String(form.querySelector("#quoteBedrooms")?.value ?? session?.bedrooms ?? "").trim();
   const bathsRaw = String(form.querySelector("#quoteBathrooms")?.value ?? session?.bathrooms ?? "").trim();
@@ -294,13 +298,68 @@ function hasCompleteBedBathMetrics(form, session = null) {
   return Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1;
 }
 
-function hasValidSpaceMetrics(form, session = null) {
-  const { sqftRaw, beds, baths, sqft } = readSpaceMetrics(form, session);
-  if (!Number.isInteger(beds) || beds < 0 || !Number.isInteger(baths) || baths < 1) {
-    return false;
-  }
-  if (sqftRaw === "") return true;
+function hasCompleteSqftMetrics(form, session = null) {
+  const { sqft } = readSpaceMetrics(form, session);
   return Number.isInteger(sqft) && sqft >= 200;
+}
+
+function hasValidSpaceMetrics(form, session = null) {
+  const mode = session?.size_input_mode || getSizeInputMode(form);
+  if (mode === "sqft") return hasCompleteSqftMetrics(form, session);
+  return hasCompleteBedBathMetrics(form, session);
+}
+
+function inferSizeInputModeFromSession(session) {
+  if (!session) return "beds_baths";
+  const sqftRaw = String(session.square_feet || "").trim();
+  const bedsRaw = String(session.bedrooms ?? "").trim();
+  const bathsRaw = String(session.bathrooms ?? "").trim();
+  const sqft = sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10);
+  const hasBedsBaths = bedsRaw !== "" && bathsRaw !== "";
+  if (Number.isInteger(sqft) && sqft >= 200 && !hasBedsBaths) return "sqft";
+  if (hasBedsBaths) return "beds_baths";
+  if (Number.isInteger(sqft) && sqft >= 200) return "sqft";
+  return "beds_baths";
+}
+
+function applySizeInputMode(form, mode, { clearInactive = false } = {}) {
+  const metrics = form.querySelector("#quoteSizeMetrics");
+  const bedsGroup = form.querySelector('[data-size-group="beds_baths"]');
+  const sqftGroup = form.querySelector('[data-size-group="sqft"]');
+  const bedsInput = form.querySelector("#quoteBedrooms");
+  const bathsInput = form.querySelector("#quoteBathrooms");
+  const sqftInput = form.querySelector("#quoteSqft");
+  const hint = form.querySelector("[data-quote-size-hint]");
+  const modeInput = form.querySelector(`input[name="size_input_mode"][value="${mode}"]`);
+
+  if (modeInput) modeInput.checked = true;
+
+  const isSqft = mode === "sqft";
+  if (metrics) {
+    metrics.classList.toggle("is-sqft-only", isSqft);
+    metrics.classList.toggle("is-beds-baths-only", !isSqft);
+  }
+  if (bedsGroup) bedsGroup.hidden = isSqft;
+  if (sqftGroup) sqftGroup.hidden = !isSqft;
+
+  if (clearInactive) {
+    if (isSqft) {
+      if (bedsInput) bedsInput.value = "";
+      if (bathsInput) bathsInput.value = "";
+    } else if (sqftInput) {
+      sqftInput.value = "";
+    }
+  }
+
+  if (bedsInput) bedsInput.disabled = isSqft;
+  if (bathsInput) bathsInput.disabled = isSqft;
+  if (sqftInput) sqftInput.disabled = !isSqft;
+
+  if (hint) {
+    hint.textContent = isSqft
+      ? "Enter your square footage (at least 200). We'll use that for your estimate."
+      : "Enter bedrooms and bathrooms—we'll estimate square footage for your quote.";
+  }
 }
 
 /** @deprecated Use hasValidSpaceMetrics */
@@ -323,22 +382,23 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
     : null;
 
   const serviceType = normalizeServiceType(data.get("service_type") || session?.service_type);
+  const sizeMode = session?.size_input_mode || getSizeInputMode(form);
+  const bedsVal = data.get("bedrooms") || session?.bedrooms;
+  const bathsVal = data.get("bathrooms") || session?.bathrooms;
   const rawSqft = data.get("square_feet") || session?.square_feet;
   const parsedSqft = parseInt(String(rawSqft || "").replace(/,/g, ""), 10);
+  const beds = bedsVal === "" || bedsVal == null ? NaN : parseInt(String(bedsVal), 10);
+  const baths = bathsVal === "" || bathsVal == null ? NaN : parseInt(String(bathsVal), 10);
   let sqft = 0;
 
-  if (parsedSqft > 0) {
+  if (sizeMode === "sqft") {
+    if (parsedSqft > 0) sqft = parsedSqft;
+  } else if (Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1) {
+    sqft = parseSqft("", beds, baths);
+  } else if (allowEstimate && hasPartialSpaceMetrics(form)) {
+    sqft = parseSqft("", bedsVal, bathsVal);
+  } else if (parsedSqft > 0) {
     sqft = parsedSqft;
-  } else {
-    const bedsVal = data.get("bedrooms") || session?.bedrooms;
-    const bathsVal = data.get("bathrooms") || session?.bathrooms;
-    const beds = bedsVal === "" || bedsVal == null ? NaN : parseInt(String(bedsVal), 10);
-    const baths = bathsVal === "" || bathsVal == null ? NaN : parseInt(String(bathsVal), 10);
-    if (Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1) {
-      sqft = parseSqft("", beds, baths);
-    } else if (allowEstimate && hasPartialSpaceMetrics(form)) {
-      sqft = parseSqft("", bedsVal, bathsVal);
-    }
   }
   if (sqft <= 0 && session?.square_feet && table === "bookings") {
     sqft = parseInt(String(session.square_feet), 10) || 0;
@@ -634,6 +694,10 @@ function initQuotePrefill() {
   setFormValue(form, "frequency", session.frequency);
   setAddonValues(form, session.add_ons);
 
+  if (form.querySelector('input[name="size_input_mode"]')) {
+    applySizeInputMode(form, inferSizeInputModeFromSession(session));
+  }
+
   if (banner) {
     banner.hidden = false;
     const totalEl = banner.querySelector("[data-prefill-total]");
@@ -672,12 +736,18 @@ function buildSubmissionPayload(form, table) {
   }
 
   payload.service_type = normalizeServiceType(payload.service_type);
-  if (table !== "bookings" && !payload.square_feet) {
-    const sqftInput = String(form.querySelector("#quoteSqft")?.value || "").trim();
-    if (sqftInput) {
-      payload.square_feet = sqftInput;
-    } else if (hasCompleteBedBathMetrics(form, session)) {
-      const { beds, baths } = readSpaceMetrics(form, session);
+  delete payload.size_input_mode;
+
+  if (table !== "bookings") {
+    const sizeMode = getSizeInputMode(form);
+    if (sizeMode === "sqft") {
+      payload.square_feet = String(form.querySelector("#quoteSqft")?.value || "").trim();
+      payload.bedrooms = "";
+      payload.bathrooms = "";
+    } else {
+      const { beds, baths, bedsRaw, bathsRaw } = readSpaceMetrics(form, session);
+      payload.bedrooms = bedsRaw;
+      payload.bathrooms = bathsRaw;
       payload.square_feet = String(parseSqft("", beds, baths));
     }
   }
@@ -693,8 +763,37 @@ function buildSubmissionPayload(form, table) {
 }
 
 
-function initQuoteSizeChips(form) {
+function initQuoteSizeMode(form, { onUpdate } = {}) {
   if (!form.querySelector(".quote-size-metrics")) return;
+
+  const triggerUpdate = () => {
+    if (typeof onUpdate === "function") onUpdate();
+  };
+
+  const setMode = (mode, { clearInactive = false } = {}) => {
+    applySizeInputMode(form, mode, { clearInactive });
+    triggerUpdate();
+  };
+
+  form.querySelectorAll('input[name="size_input_mode"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!input.checked) return;
+      setMode(input.value, { clearInactive: true });
+    });
+  });
+
+  form.querySelectorAll('input[name="property_type"]').forEach((input) => {
+    input.addEventListener("change", () => {
+      if (!input.checked) return;
+      if (input.value === "Office") {
+        setMode("sqft", { clearInactive: true });
+      }
+    });
+  });
+
+  const officeSelected = form.querySelector('input[name="property_type"][value="Office"]:checked');
+  applySizeInputMode(form, officeSelected ? "sqft" : getSizeInputMode(form));
+  triggerUpdate();
 }
 
 const CALC_DELAY_MS_MIN = 2500;
@@ -947,7 +1046,19 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   function validateSizeChunk(silent = false) {
-    const { sqftRaw, beds, baths, sqft } = readSpaceMetrics(form);
+    const mode = getSizeInputMode(form);
+    const { beds, baths, sqft } = readSpaceMetrics(form);
+
+    if (mode === "sqft") {
+      if (!Number.isInteger(sqft) || sqft < 200) {
+        if (!silent) {
+          showStudioToast(root, "Enter your square footage (at least 200).", "error");
+          form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
+        }
+        return false;
+      }
+      return true;
+    }
 
     if (!Number.isInteger(beds) || beds < 0) {
       if (!silent) {
@@ -960,13 +1071,6 @@ function initQuoteAssistant(formContainer = document) {
       if (!silent) {
         showStudioToast(root, "Enter a whole number of bathrooms (at least 1).", "error");
         form.querySelector("#quoteBathrooms")?.focus?.({ preventScroll: true });
-      }
-      return false;
-    }
-    if (sqftRaw !== "" && (!Number.isInteger(sqft) || sqft < 200)) {
-      if (!silent) {
-        showStudioToast(root, "Enter your square footage (at least 200), or leave blank to estimate from beds and baths.", "error");
-        form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
       }
       return false;
     }
@@ -1163,15 +1267,23 @@ function initQuoteAssistant(formContainer = document) {
     const data = new FormData(form);
     const pricing = calculateQuoteTotal(form, { allowEstimate: true });
     const pType = data.get("property_type") || "";
-    const beds = data.get("bedrooms") || "0";
-    const baths = data.get("bathrooms") || "0";
+    const mode = getSizeInputMode(form);
+    const beds = data.get("bedrooms") || "";
+    const baths = data.get("bathrooms") || "";
     const sType = data.get("service_type") || "Pending...";
     const freq = data.get("frequency") || "-";
     const addons = data.getAll("add_ons[]");
 
     let spaceText = "Pending...";
-    if (pType) spaceText = `${pType} • ${beds} bed, ${baths} bath`;
-    else if (beds !== "0") spaceText = `${beds} bed, ${baths} bath • ~${pricing.sqft} sq ft`;
+    if (pType && mode === "sqft" && pricing.sqft > 0) {
+      spaceText = `${pType} • ${pricing.sqft} sq ft`;
+    } else if (pType && hasCompleteBedBathMetrics(form)) {
+      spaceText = `${pType} • ${beds} bed, ${baths} bath • ~${pricing.sqft} sq ft (est.)`;
+    } else if (mode === "sqft" && pricing.sqft > 0) {
+      spaceText = `${pricing.sqft} sq ft`;
+    } else if (hasCompleteBedBathMetrics(form)) {
+      spaceText = `${beds} bed, ${baths} bath • ~${pricing.sqft} sq ft (est.)`;
+    }
 
     if (liveSpace) liveSpace.textContent = spaceText;
     if (liveService) liveService.textContent = sType;
@@ -1181,7 +1293,7 @@ function initQuoteAssistant(formContainer = document) {
     if (liveScope) {
       if (sType.includes("Deep") || sType.includes("Move")) liveScope.textContent = "Heavy reset scope";
       else if (addons.length > 2) liveScope.textContent = "Detailed scope";
-      else if (pType || beds !== "0") liveScope.textContent = "Standard scope";
+      else if (pType || hasValidSpaceMetrics(form)) liveScope.textContent = "Standard scope";
       else liveScope.textContent = "Calculating...";
     }
 
@@ -1201,15 +1313,23 @@ function initQuoteAssistant(formContainer = document) {
       : (session?.add_ons ? String(session.add_ons).split(",").map((v) => v.trim()).filter(Boolean).join(", ") : "None");
 
     const property = data.get("property_type") || session?.property_type || data.get("address") || "-";
-    const beds = data.get("bedrooms") || session?.bedrooms || "0";
-    const baths = data.get("bathrooms") || session?.bathrooms || "0";
+    const beds = data.get("bedrooms") || session?.bedrooms || "";
+    const baths = data.get("bathrooms") || session?.bathrooms || "";
     const sqftRaw = data.get("square_feet") || session?.square_feet;
-    const sqftLabel = sqftRaw ? `${sqftRaw} sq ft` : `~${pricing.sqft} sq ft`;
+    const sizeMode = isBooking ? inferSizeInputModeFromSession(session) : getSizeInputMode(form);
+    const sqftLabel =
+      sizeMode === "sqft" && sqftRaw
+        ? `${sqftRaw} sq ft`
+        : `~${pricing.sqft} sq ft (estimated)`;
     if (reviewProperty) {
       if (isBooking && data.get("address")) {
         reviewProperty.textContent = property;
       } else if (!isBooking) {
-        reviewProperty.textContent = `${property} · ${beds} bed · ${baths} bath · ${sqftLabel}`;
+        const sizePart =
+          sizeMode === "sqft"
+            ? sqftLabel
+            : `${beds} bed · ${baths} bath · ${sqftLabel}`;
+        reviewProperty.textContent = `${property} · ${sizePart}`;
       } else {
         reviewProperty.textContent = property;
       }
@@ -1217,7 +1337,12 @@ function initQuoteAssistant(formContainer = document) {
     if (reviewService) reviewService.textContent = data.get("service_type") || session?.service_type || "-";
     if (reviewFrequency) reviewFrequency.textContent = data.get("frequency") || session?.frequency || "-";
 
-    if (reviewSize) reviewSize.textContent = `${beds} bed / ${baths} bath / ${sqftLabel}`;
+    if (reviewSize) {
+      reviewSize.textContent =
+        sizeMode === "sqft"
+          ? sqftLabel
+          : `${beds} bed / ${baths} bath / ${sqftLabel}`;
+    }
 
     if (reviewAddons) reviewAddons.textContent = addonText || "None";
 
@@ -1489,7 +1614,13 @@ function initQuoteAssistant(formContainer = document) {
 
   updateUI();
   updateLiveSummary();
-  initQuoteSizeChips(form);
+  initQuoteSizeMode(form, {
+    onUpdate: () => {
+      updateLiveSummary();
+      updateNavState();
+      if (currentStepIndex === steps.length - 1) populateReview();
+    }
+  });
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
     playAssistantMessage(currentStepIndex);
     initPhoneFormatting(form);
@@ -1583,7 +1714,8 @@ function initQuoteAssistant(formContainer = document) {
         const sessionData = {
           ...payload,
           quote_id: result.id,
-          estimated_total: pricing.total
+          estimated_total: pricing.total,
+          size_input_mode: getSizeInputMode(form)
         };
         if (typeof window.saveQuoteSession === "function") {
           window.saveQuoteSession(sessionData);

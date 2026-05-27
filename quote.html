@@ -59,6 +59,7 @@
               <div class="quote-window-body">
                 <div class="quote-window-expand">
                   <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests" novalidate>
+                    <div class="quote-app-canvas">
                     <div class="quote-form-stage is-revealed">
 
                       <div class="quote-step active" data-step="1">
@@ -79,27 +80,44 @@
                             </label>
                           </div>
                         </fieldset>
-                        <div class="quote-size-metrics">
-                          <label class="quote-metric-field">
-                            <span class="quote-metric-label">Beds</span>
-                            <div class="quote-metric-input-wrap">
-                              <input type="number" id="quoteBedrooms" name="bedrooms" min="0" step="1" required inputmode="numeric" placeholder="3" aria-label="Bedrooms">
-                            </div>
-                          </label>
-                          <label class="quote-metric-field">
-                            <span class="quote-metric-label">Baths</span>
-                            <div class="quote-metric-input-wrap">
-                              <input type="number" id="quoteBathrooms" name="bathrooms" min="1" step="1" required inputmode="numeric" placeholder="2" aria-label="Bathrooms">
-                            </div>
-                          </label>
-                          <label class="quote-metric-field quote-metric-field--sqft">
-                            <span class="quote-metric-label">Sq ft</span>
-                            <div class="quote-metric-input-wrap">
-                              <input type="number" id="quoteSqft" name="square_feet" min="200" inputmode="numeric" placeholder="1800 (optional)" aria-label="Square footage (optional)">
-                            </div>
-                          </label>
+                        <fieldset class="quote-fieldset quote-fieldset--compact">
+                          <legend class="quote-legend">Home size</legend>
+                          <div class="quote-size-mode" role="radiogroup" aria-label="How to size your property">
+                            <label class="quote-size-mode-option">
+                              <input type="radio" name="size_input_mode" value="beds_baths" checked>
+                              <span>Beds &amp; baths</span>
+                            </label>
+                            <label class="quote-size-mode-option">
+                              <input type="radio" name="size_input_mode" value="sqft">
+                              <span>Square footage</span>
+                            </label>
+                          </div>
+                        </fieldset>
+                        <div class="quote-size-metrics is-beds-baths-only" id="quoteSizeMetrics">
+                          <div class="quote-size-group" data-size-group="beds_baths">
+                            <label class="quote-metric-field">
+                              <span class="quote-metric-label">Beds</span>
+                              <div class="quote-metric-input-wrap">
+                                <input type="number" id="quoteBedrooms" name="bedrooms" min="0" step="1" inputmode="numeric" placeholder="3" aria-label="Bedrooms">
+                              </div>
+                            </label>
+                            <label class="quote-metric-field">
+                              <span class="quote-metric-label">Baths</span>
+                              <div class="quote-metric-input-wrap">
+                                <input type="number" id="quoteBathrooms" name="bathrooms" min="1" step="1" inputmode="numeric" placeholder="2" aria-label="Bathrooms">
+                              </div>
+                            </label>
+                          </div>
+                          <div class="quote-size-group quote-size-group--sqft" data-size-group="sqft" hidden>
+                            <label class="quote-metric-field quote-metric-field--sqft">
+                              <span class="quote-metric-label">Sq ft</span>
+                              <div class="quote-metric-input-wrap">
+                                <input type="number" id="quoteSqft" name="square_feet" min="200" inputmode="numeric" placeholder="1800" aria-label="Square footage">
+                              </div>
+                            </label>
+                          </div>
                         </div>
-                        <p class="quote-field-hint">Enter beds and baths to continue. Square footage is optional—we'll estimate from beds and baths if you skip it.</p>
+                        <p class="quote-field-hint" data-quote-size-hint>Choose one way to size your home—we'll calculate the rest.</p>
                       </div>
 
                       <div class="quote-step" data-step="2" data-step-title="Service">
@@ -218,6 +236,7 @@
                         </div>
                       </div>
 
+                    </div>
                     </div>
 
                     <div class="quote-app-footer quote-form-nav">
