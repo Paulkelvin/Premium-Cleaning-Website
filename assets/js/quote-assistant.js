@@ -947,10 +947,13 @@ function initQuoteAssistant(formContainer = document) {
   const stepDots = root.querySelector("#quoteStepDots");
   const consoleProgress = root.querySelector("#quoteConsoleProgress");
   const prefillChip = root.querySelector("#quotePrefillChip");
-  const stepScrollAnchor = root.querySelector(".quote-app-main")
-    || root.querySelector(".quote-window-body")
-    || formStage
-    || root;
+  const stepScrollAnchor = isQuoteConsole
+    ? root
+    : (root.querySelector(".quote-window-head")
+      || root.querySelector(".quote-app-main")
+      || root.querySelector(".quote-window-body")
+      || formStage
+      || root);
   let typewriterTimer = null;
   let reviewRevealTimer = null;
   let reviewMsgTimer = null;
