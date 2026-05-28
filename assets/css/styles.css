@@ -11388,6 +11388,12 @@ html {
   gap: 10px;
 }
 
+.quote-get-estimate {
+  margin-top: 2px;
+  width: 100%;
+  justify-content: center;
+}
+
 .quote-step[data-step="4"].is-review-focus .quote-contact-entry {
   display: none;
 }

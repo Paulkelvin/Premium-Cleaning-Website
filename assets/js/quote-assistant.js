@@ -947,6 +947,7 @@ function initQuoteAssistant(formContainer = document) {
   const finalQuoteStep = !isBooking ? root.querySelector('.quote-step[data-step="4"]') : null;
   const contactEntry = root.querySelector("#quoteContactEntry");
   const editContactBtn = root.querySelector("#quoteEditContactBtn");
+  const btnGetEstimate = root.querySelector("#btnGetEstimate");
   const consentInput = root.querySelector('input[name="consent"]');
   const stepDots = root.querySelector("#quoteStepDots");
   const consoleProgress = root.querySelector("#quoteConsoleProgress");
@@ -965,6 +966,7 @@ function initQuoteAssistant(formContainer = document) {
   let coachInitialPaint = true;
   let isStepTransitioning = false;
   let currentStepIndex = 0;
+  let quoteDraft = null;
 
   const quoteContext = !isBooking ? getQuoteContext() : null;
   const quoteMessages = [
@@ -1045,7 +1047,21 @@ function initQuoteAssistant(formContainer = document) {
     btnSubmit.setAttribute("aria-disabled", enabled ? "false" : "true");
   }
 
-  function maybeStartFinalReview() {
+  function setGetEstimateEnabled(enabled) {
+    if (!btnGetEstimate || isBooking || !isQuoteConsole) return;
+    btnGetEstimate.disabled = !enabled;
+    btnGetEstimate.setAttribute("aria-disabled", enabled ? "false" : "true");
+  }
+
+  function invalidateQuoteDraft() {
+    quoteDraft = null;
+    setSubmitEnabledForFinalStep(false);
+    if (liveEstimate && currentStepIndex === steps.length - 1) {
+      liveEstimate.textContent = "Complete contact details, then get your estimate";
+    }
+  }
+
+  async function maybeStartFinalReview() {
     if (!isQuoteConsole || currentStepIndex !== steps.length - 1) return;
     if (!isFinalContactInfoComplete()) {
       if (reviewRevealTimer) clearTimeout(reviewRevealTimer);
@@ -1059,8 +1075,42 @@ function initQuoteAssistant(formContainer = document) {
       setFinalReviewFocus(false);
       setQuoteSubmitPreparing(false);
       setSubmitEnabledForFinalStep(false);
-      if (liveEstimate) liveEstimate.textContent = "Complete contact details to view estimate";
+      if (liveEstimate) liveEstimate.textContent = "Complete contact details, then get your estimate";
       return;
+    }
+    if (btnGetEstimate) {
+      btnGetEstimate.disabled = true;
+      btnGetEstimate.setAttribute("aria-busy", "true");
+      btnGetEstimate.innerHTML = `Saving quote... <i data-lucide="loader-circle"></i>`;
+      if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
+    }
+    try {
+      const { payload, pricing } = buildSubmissionPayload(form, table);
+      payload.consent = false;
+      if (typeof window.supabaseInsert !== "function") {
+        throw new Error("Form service unavailable. Please refresh and try again.");
+      }
+      const result = await window.supabaseInsert(table, payload);
+      quoteDraft = { id: result.id, pricing };
+      if (typeof window.saveQuoteSession === "function") {
+        window.saveQuoteSession({
+          ...payload,
+          quote_id: result.id,
+          estimated_total: pricing.total,
+          size_input_mode: getSizeInputMode(form)
+        });
+      }
+    } catch (err) {
+      console.error("Estimate capture failed:", err);
+      showStudioToast(root, mapSubmissionError(err), "error");
+      invalidateQuoteDraft();
+      return;
+    } finally {
+      if (btnGetEstimate) {
+        btnGetEstimate.removeAttribute("aria-busy");
+        btnGetEstimate.innerHTML = `Get my estimate <i data-lucide="sparkles"></i>`;
+        if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
+      }
     }
     showCalculatingReview();
   }
@@ -1129,9 +1179,6 @@ function initQuoteAssistant(formContainer = document) {
       setStepContentVisible(true);
       remeasureExpandable();
       scrollQuoteStepIntoView({ behavior: scrollBehavior });
-      if (table === "quote_requests" && stepIndex === steps.length - 1) {
-        maybeStartFinalReview();
-      }
     };
 
     if (instant || (coachInitialPaint && isQuoteStudio && !isBooking)) {
@@ -1167,9 +1214,6 @@ function initQuoteAssistant(formContainer = document) {
             setStepContentVisible(true);
             remeasureExpandable();
             scrollQuoteStepIntoView({ behavior: scrollBehavior });
-            if (table === "quote_requests" && stepIndex === steps.length - 1) {
-              maybeStartFinalReview();
-            }
           }, 280);
         }
       }
@@ -1817,6 +1861,7 @@ function initQuoteAssistant(formContainer = document) {
       if (btnNext) btnNext.style.display = "none";
       if (btnSubmit) btnSubmit.style.display = "inline-flex";
       if (isQuoteConsole) setSubmitEnabledForFinalStep(false);
+      if (isQuoteConsole) setGetEstimateEnabled(isFinalContactInfoComplete());
       if (!(isQuoteStudio && table === "quote_requests")) {
         populateReview(true);
         if (isBooking) updatePaymentUI();
@@ -1824,6 +1869,7 @@ function initQuoteAssistant(formContainer = document) {
     } else {
       setFinalReviewFocus(false);
       setSubmitEnabledForFinalStep(true);
+      setGetEstimateEnabled(true);
       if (btnNext) btnNext.style.display = "inline-flex";
       if (btnSubmit) {
         btnSubmit.style.display = "none";
@@ -1931,28 +1977,40 @@ function initQuoteAssistant(formContainer = document) {
   if (editContactBtn) {
     editContactBtn.addEventListener("click", () => {
       setFinalReviewFocus(false);
-      setSubmitEnabledForFinalStep(false);
-      if (liveEstimate) liveEstimate.textContent = "Complete contact details to view estimate";
+      invalidateQuoteDraft();
+      setGetEstimateEnabled(isFinalContactInfoComplete());
       contactEntry?.querySelector('input[name="full_name"]')?.focus?.({ preventScroll: true });
       scrollQuoteStepIntoView();
     });
   }
 
-  form.addEventListener("change", () => {
+  if (btnGetEstimate) {
+    btnGetEstimate.addEventListener("click", async () => {
+      await maybeStartFinalReview();
+    });
+  }
+
+  form.addEventListener("change", (event) => {
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {
       populateReview();
-      maybeStartFinalReview();
+      setGetEstimateEnabled(isFinalContactInfoComplete());
+      if (event?.target?.matches?.('input[name="full_name"], input[name="phone"], input[name="email"], input[name="preferred_contact"]')) {
+        invalidateQuoteDraft();
+      }
     }
   });
 
-  form.addEventListener("input", () => {
+  form.addEventListener("input", (event) => {
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {
       populateReview();
-      maybeStartFinalReview();
+      setGetEstimateEnabled(isFinalContactInfoComplete());
+      if (event?.target?.matches?.('input[name="full_name"], input[name="phone"], input[name="email"]')) {
+        invalidateQuoteDraft();
+      }
     }
   });
 
@@ -1967,11 +2025,16 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
+    if (!isBooking && isQuoteConsole && currentStepIndex === steps.length - 1 && !quoteDraft?.id) {
+      showStudioToast(root, "Tap 'Get my estimate' first.", "error");
+      return;
+    }
+
     if (!validateAllQuoteSteps()) return;
 
     const defaultSubmitLabel = isBooking
       ? (btnSubmit?.innerHTML || "Confirm booking")
-      : `Submit quote & book <i data-lucide="arrow-right"></i>`;
+      : (quoteSubmitIdleLabel || `Submit quote <i data-lucide="arrow-right"></i>`);
 
     if (btnSubmit) {
       btnSubmit.disabled = true;
@@ -1985,18 +2048,28 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     try {
-      if (typeof window.supabaseInsert !== "function") {
-        throw new Error("Form service unavailable. Please refresh and try again.");
-      }
-
       const { payload, pricing } = buildSubmissionPayload(form, table);
-
+      let result = { id: quoteDraft?.id };
       if (table === "bookings") {
+        if (typeof window.supabaseInsert !== "function") {
+          throw new Error("Form service unavailable. Please refresh and try again.");
+        }
         const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
         if (session?.quote_id) payload.quote_id = session.quote_id;
+        result = await window.supabaseInsert(table, payload);
+      } else if (table === "quote_requests") {
+        if (!result.id) {
+          if (typeof window.supabaseInsert !== "function") {
+            throw new Error("Form service unavailable. Please refresh and try again.");
+          }
+          result = await window.supabaseInsert(table, payload);
+        }
+      } else {
+        if (typeof window.supabaseInsert !== "function") {
+          throw new Error("Form service unavailable. Please refresh and try again.");
+        }
+        result = await window.supabaseInsert(table, payload);
       }
-
-      const result = await window.supabaseInsert(table, payload);
 
       if (table === "quote_requests") {
         const sessionData = {
