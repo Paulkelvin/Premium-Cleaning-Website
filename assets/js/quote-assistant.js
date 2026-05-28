@@ -947,6 +947,10 @@ function initQuoteAssistant(formContainer = document) {
   const stepDots = root.querySelector("#quoteStepDots");
   const consoleProgress = root.querySelector("#quoteConsoleProgress");
   const prefillChip = root.querySelector("#quotePrefillChip");
+  const stepScrollAnchor = root.querySelector(".quote-app-main")
+    || root.querySelector(".quote-window-body")
+    || formStage
+    || root;
   let typewriterTimer = null;
   let reviewRevealTimer = null;
   let reviewMsgTimer = null;
@@ -981,17 +985,31 @@ function initQuoteAssistant(formContainer = document) {
     if (typeof lucide !== "undefined") lucide.createIcons({ root: btnSubmit.parentElement });
   }
 
-  function scrollQuoteStepIntoView() {
-    if (!isQuoteStudio || isBooking) return;
-    const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
-    const scrollTarget = root.querySelector(".quote-form-stage") || root.querySelector(".quote-window-chrome") || root;
+  function getQuoteHeaderOffset() {
+    return parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
+  }
+
+  function scrollElementToQuoteTop(element, { behavior = "smooth", extraOffset = 8 } = {}) {
+    if (!element) return;
+    const headerHeight = getQuoteHeaderOffset();
     requestAnimationFrame(() => {
-      const rect = scrollTarget.getBoundingClientRect();
-      const targetTop = rect.top + window.scrollY - headerHeight - 8;
-      if (rect.top < headerHeight + 8) {
-        window.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
+      const rect = element.getBoundingClientRect();
+      const targetTop = Math.max(0, rect.top + window.scrollY - headerHeight - extraOffset);
+      if (Math.abs(window.scrollY - targetTop) > 2) {
+        window.scrollTo({ top: targetTop, behavior });
       }
     });
+  }
+
+  function scrollQuoteStepIntoView({ behavior = "smooth" } = {}) {
+    if (!isQuoteStudio || isBooking) return;
+    scrollElementToQuoteTop(stepScrollAnchor, { behavior, extraOffset: 8 });
+  }
+
+  function scrollQuoteEstimateIntoView({ behavior = "smooth" } = {}) {
+    if (!isQuoteStudio || isBooking || !reviewReveal || reviewReveal.hidden) return;
+    const estimateTarget = reviewReveal.querySelector(".quote-estimate-hero, .quote-review-total") || reviewReveal;
+    scrollElementToQuoteTop(estimateTarget, { behavior, extraOffset: 12 });
   }
 
   function collapseExpandable() {
@@ -1047,6 +1065,8 @@ function initQuoteAssistant(formContainer = document) {
     if (!bubbleText || !bubble) return;
 
     const text = getCoachMessage(stepIndex);
+    const shouldAutoScroll = instant || (coachInitialPaint && isQuoteStudio && !isBooking);
+    const scrollBehavior = shouldAutoScroll ? "auto" : "smooth";
 
     if (typewriterTimer) clearInterval(typewriterTimer);
 
@@ -1055,7 +1075,7 @@ function initQuoteAssistant(formContainer = document) {
       bubble.classList.remove("is-typing", "is-fading");
       setStepContentVisible(true);
       remeasureExpandable();
-      scrollQuoteStepIntoView();
+      scrollQuoteStepIntoView({ behavior: scrollBehavior });
       if (table === "quote_requests" && stepIndex === steps.length - 1) {
         showCalculatingReview();
       }
@@ -1093,7 +1113,7 @@ function initQuoteAssistant(formContainer = document) {
           setTimeout(() => {
             setStepContentVisible(true);
             remeasureExpandable();
-            scrollQuoteStepIntoView();
+            scrollQuoteStepIntoView({ behavior: scrollBehavior });
             if (table === "quote_requests" && stepIndex === steps.length - 1) {
               showCalculatingReview();
             }
@@ -1521,12 +1541,14 @@ function initQuoteAssistant(formContainer = document) {
       if (!hasValidSpaceMetrics(form)) {
         if (totalEl) totalEl.textContent = "—";
         reviewReveal.hidden = false;
+        scrollQuoteEstimateIntoView();
         return;
       }
 
       if (totalEl) totalEl.textContent = formatMoney(0);
       animateCountUp(totalEl, pricing.total, 1300);
       reviewReveal.hidden = false;
+      scrollQuoteEstimateIntoView();
       return;
     }
 
@@ -1539,6 +1561,7 @@ function initQuoteAssistant(formContainer = document) {
       if (totalEl) totalEl.textContent = "—";
       rows.forEach((row) => row.classList.add("is-visible"));
       totalRow?.classList.add("is-visible");
+      scrollQuoteEstimateIntoView();
       return;
     }
 
@@ -1550,7 +1573,7 @@ function initQuoteAssistant(formContainer = document) {
     setTimeout(() => {
       totalRow?.classList.add("is-visible");
       animateCountUp(totalEl, pricing.total, 1300);
-      scrollQuoteStepIntoView();
+      scrollQuoteEstimateIntoView();
     }, totalDelay);
   }
 
@@ -1633,7 +1656,6 @@ function initQuoteAssistant(formContainer = document) {
       revealReviewProgressively();
       if (!isQuoteConsole) {
         remeasureExpandable();
-        scrollQuoteStepIntoView();
       }
     }, calcDelay);
   }
@@ -1682,7 +1704,6 @@ function initQuoteAssistant(formContainer = document) {
       nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
       updateUI();
       playAssistantMessage(currentStepIndex);
-      scrollQuoteStepIntoView();
       setTimeout(() => {
         nextStepEl.classList.remove("is-entering-forward", "is-entering-back");
         isStepTransitioning = false;
