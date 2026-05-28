@@ -944,6 +944,9 @@ function initQuoteAssistant(formContainer = document) {
   const windowHead = root.querySelector(".quote-window-head");
   const calculatingState = root.querySelector("#quoteCalculatingState");
   const reviewReveal = root.querySelector("#quoteReviewReveal");
+  const finalQuoteStep = !isBooking ? root.querySelector('.quote-step[data-step="4"]') : null;
+  const contactEntry = root.querySelector("#quoteContactEntry");
+  const editContactBtn = root.querySelector("#quoteEditContactBtn");
   const stepDots = root.querySelector("#quoteStepDots");
   const consoleProgress = root.querySelector("#quoteConsoleProgress");
   const prefillChip = root.querySelector("#quotePrefillChip");
@@ -1013,6 +1016,13 @@ function initQuoteAssistant(formContainer = document) {
     if (!isQuoteStudio || isBooking || !reviewReveal || reviewReveal.hidden) return;
     const estimateTarget = reviewReveal.querySelector(".quote-estimate-hero, .quote-review-total") || reviewReveal;
     scrollElementToQuoteTop(estimateTarget, { behavior, extraOffset: 12 });
+  }
+
+  function setFinalReviewFocus(enabled) {
+    if (!finalQuoteStep || !isQuoteConsole) return;
+    const focusOn = Boolean(enabled);
+    finalQuoteStep.classList.toggle("is-review-focus", focusOn);
+    if (contactEntry) contactEntry.setAttribute("aria-hidden", focusOn ? "true" : "false");
   }
 
   function collapseExpandable() {
@@ -1540,6 +1550,7 @@ function initQuoteAssistant(formContainer = document) {
     if (isQuoteConsole) {
       if (totalPanel) totalPanel.classList.remove("is-calculating");
       if (liveEstimate) liveEstimate.textContent = "Confirmed before we arrive";
+      setFinalReviewFocus(true);
 
       if (!hasValidSpaceMetrics(form)) {
         if (totalEl) totalEl.textContent = "—";
@@ -1610,6 +1621,7 @@ function initQuoteAssistant(formContainer = document) {
     } else {
       calculatingState.hidden = false;
     }
+    setFinalReviewFocus(false);
     reviewReveal.hidden = true;
     reviewReveal.classList.remove("is-revealed");
     setQuoteSubmitPreparing(true);
@@ -1754,6 +1766,7 @@ function initQuoteAssistant(formContainer = document) {
         if (isBooking) updatePaymentUI();
       }
     } else {
+      setFinalReviewFocus(false);
       if (btnNext) btnNext.style.display = "inline-flex";
       if (btnSubmit) {
         btnSubmit.style.display = "none";
@@ -1855,6 +1868,14 @@ function initQuoteAssistant(formContainer = document) {
       if (currentStepIndex > 0) {
         transitionToStep(currentStepIndex - 1, -1);
       }
+    });
+  }
+
+  if (editContactBtn) {
+    editContactBtn.addEventListener("click", () => {
+      setFinalReviewFocus(false);
+      contactEntry?.querySelector('input[name="full_name"]')?.focus?.({ preventScroll: true });
+      scrollQuoteStepIntoView();
     });
   }
 

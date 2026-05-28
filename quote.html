@@ -209,29 +209,35 @@
                       </div>
 
                       <div class="quote-step" data-step="4" data-step-title="Contact &amp; review">
-                        <label class="field">Full name
-                          <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
-                        </label>
-                        <div class="quote-input-row quote-input-row--2">
-                          <label class="field">Phone
-                            <input name="phone" type="tel" inputmode="tel" required autocomplete="tel" placeholder="(555) 000-0000" maxlength="14">
+                        <div class="quote-contact-entry" id="quoteContactEntry">
+                          <label class="field">Full name
+                            <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
                           </label>
-                          <label class="field">Email
-                            <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
-                          </label>
-                        </div>
-                        <div class="quote-contact-prefs">
-                          <p class="quote-field-label">Preferred contact</p>
-                          <div class="quote-pill-row">
-                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
-                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Phone"><span>Phone</span></label>
-                            <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
+                          <div class="quote-input-row quote-input-row--2">
+                            <label class="field">Phone
+                              <input name="phone" type="tel" inputmode="tel" required autocomplete="tel" placeholder="(555) 000-0000" maxlength="14">
+                            </label>
+                            <label class="field">Email
+                              <input name="email" type="email" required autocomplete="email" placeholder="jane@example.com">
+                            </label>
+                          </div>
+                          <div class="quote-contact-prefs">
+                            <p class="quote-field-label">Preferred contact</p>
+                            <div class="quote-pill-row">
+                              <label class="quote-pill"><input type="radio" name="preferred_contact" value="Email" required><span>Email</span></label>
+                              <label class="quote-pill"><input type="radio" name="preferred_contact" value="Phone"><span>Phone</span></label>
+                              <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
+                            </div>
                           </div>
                         </div>
                         <div id="quoteCalculatingState" class="quote-calculating quote-calculating--inline" hidden aria-hidden="true">
                           <p class="quote-calculating-text">Calculating…</p>
                         </div>
                         <div id="quoteReviewReveal" class="quote-review-reveal quote-review-reveal--compact" hidden>
+                          <div class="quote-review-focus-head">
+                            <p class="quote-review-focus-copy">Your estimate is ready. Confirm consent and submit to continue.</p>
+                            <button type="button" class="quote-review-edit-link" id="quoteEditContactBtn">Edit contact details</button>
+                          </div>
                           <label class="field check quote-consent">
                             <input name="consent" type="checkbox" required>
                             <span>I agree to be contacted about my quote.</span>

@@ -182,13 +182,13 @@ h3 {
 }
 
 .site-header .brand-logo {
-  background: linear-gradient(160deg, rgba(32, 48, 74, 0.42), rgba(23, 36, 58, 0.34));
-  border: 1px solid rgba(151, 176, 220, 0.34);
+  background: #090e0d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 11px;
   padding: 4px 8px;
   box-shadow:
-    0 3px 10px rgba(13, 20, 34, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 3px 10px rgba(13, 20, 34, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .brand-apparel-photo {
@@ -11362,6 +11362,51 @@ html {
   box-shadow: none;
 }
 
+.quote-contact-entry {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-step[data-step="4"].is-review-focus .quote-contact-entry {
+  display: none;
+}
+
+.quote-review-focus-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+}
+
+.quote-review-focus-copy {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: #4f5f74;
+}
+
+.quote-review-edit-link {
+  border: none;
+  background: transparent;
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.quote-review-edit-link:hover {
+  color: #0c57de;
+}
+
+.quote-review-edit-link:focus-visible {
+  outline: 2px solid rgba(15, 79, 207, 0.45);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .quote-review-reveal--compact .quote-consent {
   margin: 0;
   padding: 10px 10px 8px;
@@ -11381,6 +11426,12 @@ html {
 @media (max-width: 860px) {
   .quote-console-total-panel {
     margin-top: 10px;
+  }
+
+  .quote-review-focus-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
 
