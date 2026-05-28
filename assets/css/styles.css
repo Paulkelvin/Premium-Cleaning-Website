@@ -192,8 +192,20 @@ h3 {
 }
 
 .brand-apparel-photo {
-  object-fit: contain;
-  background: linear-gradient(165deg, #f6f8fb 0%, #eef2f7 100%);
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  background: transparent;
+}
+
+.about-story-origin .image-frame.frame-arch {
+  min-height: 240px;
+}
+
+.about-story-origin .image-arch.brand-apparel-photo {
+  max-height: 250px;
 }
 
 .site-nav {
@@ -4677,6 +4689,14 @@ body.admin-login-page {
   .about-trust-grid {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .about-story-origin .image-frame.frame-arch {
+    min-height: 210px;
+  }
+
+  .about-story-origin .image-arch.brand-apparel-photo {
+    max-height: 220px;
   }
 }
 
