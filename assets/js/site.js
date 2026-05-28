@@ -690,7 +690,7 @@ function initSiteMeta() {
   if (document.querySelector('link[rel="icon"]')) return;
   const link = document.createElement("link");
   link.rel = "icon";
-  link.type = "image/png";
-  link.href = siteAssetPath("rscleaningcollective-logo.PNG");
+  link.type = "image/jpeg";
+  link.href = siteAssetPath("favicon.jpeg");
   document.head.appendChild(link);
 }
