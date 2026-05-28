@@ -5818,6 +5818,7 @@ body.admin-login-page {
 
 .quote-step {
   display: none;
+  transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1), transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .quote-step.active {
@@ -11449,6 +11450,15 @@ html {
 
   .quote-page .quote-app.quote-console {
     border-radius: 16px;
+    touch-action: pan-y;
+    overscroll-behavior-x: none;
+  }
+
+  .quote-page .quote-app.quote-console .quote-app-main,
+  .quote-page .quote-app.quote-console .quote-window-body,
+  .quote-page .quote-app.quote-console .quote-window-expand,
+  .quote-page .quote-app.quote-console .quote-form-stage {
+    overflow-x: clip;
   }
 
   .quote-page .quote-app-body.quote-console-body {
