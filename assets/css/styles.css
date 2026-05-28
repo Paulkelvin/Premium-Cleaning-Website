@@ -160,17 +160,35 @@ h3 {
   max-width: min(200px, 42vw);
   object-fit: contain;
   flex-shrink: 0;
+  filter:
+    drop-shadow(0 1px 1px rgba(9, 14, 13, 0.45))
+    drop-shadow(0 0 8px rgba(15, 79, 207, 0.2));
 }
 
 .brand-logo--admin {
   height: 40px;
   max-width: 40px;
-  border-radius: 10px;
+  filter:
+    drop-shadow(0 1px 1px rgba(9, 14, 13, 0.5))
+    drop-shadow(0 0 6px rgba(15, 79, 207, 0.16));
 }
 
 .site-footer .brand-logo {
   height: 48px;
   max-width: 180px;
+  filter:
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.22))
+    drop-shadow(0 0 8px rgba(15, 79, 207, 0.22));
+}
+
+.site-header .brand-logo {
+  background: linear-gradient(160deg, rgba(12, 20, 36, 0.92), rgba(22, 34, 56, 0.9));
+  border: 1px solid rgba(212, 168, 83, 0.35);
+  border-radius: 11px;
+  padding: 4px 8px;
+  box-shadow:
+    0 4px 14px rgba(9, 14, 13, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .brand-apparel-photo {
@@ -6074,10 +6092,10 @@ body.admin-login-page {
 }
 
 .quote-pill input:checked + span {
-  background: var(--mint);
+  background: var(--mint-light);
   border-color: var(--mint);
-  color: var(--white);
-  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.2);
+  color: var(--mint-dark);
+  box-shadow: 0 4px 12px rgba(15, 79, 207, 0.12), inset 0 0 0 1px rgba(15, 79, 207, 0.08);
 }
 
 .quote-input-row {
@@ -9259,13 +9277,19 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 .quote-page .quote-option input:checked + .quote-option-face {
   border-color: var(--mint);
   background: linear-gradient(180deg, rgba(238, 244, 252, 0.98), rgba(255, 255, 255, 1));
+  color: var(--blue);
   box-shadow: 0 10px 24px rgba(15, 79, 207, 0.14), inset 0 0 0 1px rgba(15, 79, 207, 0.1);
+}
+
+.quote-page .quote-option input:checked + .quote-option-face em {
+  color: var(--blue);
 }
 
 .quote-page .quote-pill input:checked + span {
   border-color: var(--mint);
-  background: var(--mint-light);
-  box-shadow: 0 4px 14px rgba(15, 79, 207, 0.12);
+  background: linear-gradient(180deg, rgba(238, 244, 252, 0.98), rgba(255, 255, 255, 1));
+  color: var(--blue);
+  box-shadow: 0 4px 14px rgba(15, 79, 207, 0.12), inset 0 0 0 1px rgba(15, 79, 207, 0.1);
 }
 
 .quote-journey {
@@ -9641,9 +9665,9 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
 .quote-size-mode-option input:checked + span {
   border-color: var(--mint);
-  background: rgba(15, 79, 207, 0.08);
-  color: var(--ink);
-  box-shadow: 0 0 0 3px rgba(15, 79, 207, 0.1);
+  background: linear-gradient(180deg, rgba(238, 244, 252, 0.98), rgba(255, 255, 255, 1));
+  color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(15, 79, 207, 0.1), inset 0 0 0 1px rgba(15, 79, 207, 0.08);
 }
 
 .quote-size-mode-option input:focus-visible + span {
@@ -10794,7 +10818,7 @@ html {
 }
 
 .quote-page .quote-studio {
-  padding: 4px 0 18px;
+  padding: 2px 0 12px;
   min-height: auto;
 }
 
@@ -10804,7 +10828,7 @@ html {
 
 .quote-page .quote-app.quote-console {
   max-height: none !important;
-  min-height: min(640px, calc(100dvh - var(--header-height) - 42px));
+  min-height: min(620px, calc(100dvh - var(--header-height) - 30px));
   border-radius: 22px;
   border: 1px solid rgba(15, 79, 207, 0.12);
   background: #fff;
@@ -10871,71 +10895,82 @@ html {
 
 .quote-console-body {
   display: grid;
-  grid-template-columns: minmax(250px, 320px) 1fr;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
   min-height: 0;
 }
 
 .quote-console-summary {
-  padding: 18px;
-  border-right: 1px solid rgba(15, 79, 207, 0.08);
-  background: linear-gradient(180deg, #f8fbff 0%, #f4f8fe 100%);
+  padding: 14px 0 10px 16px;
+  margin: 8px 0 10px 0;
+  border-right: 1px solid rgba(15, 79, 207, 0.1);
+  background: transparent;
 }
 
 .quote-console-summary h3 {
-  margin: 0 0 12px;
-  font-size: 0.9rem;
-  color: var(--navy);
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
 .quote-console-summary-list {
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 6px;
 }
 
 .quote-console-summary-list div {
-  padding: 10px 11px;
-  border: 1px solid rgba(15, 79, 207, 0.1);
-  border-radius: 12px;
-  background: #fff;
+  padding: 4px 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: none;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
 }
 
 .quote-console-summary-list dt {
-  margin: 0 0 3px;
-  font-size: 0.7rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-weight: 700;
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #5d6d82;
+  font-weight: 600;
 }
 
 .quote-console-summary-list dd {
   margin: 0;
-  font-size: 0.86rem;
-  color: var(--ink);
+  font-size: 0.8rem;
+  color: var(--navy);
   font-weight: 600;
   line-height: 1.35;
 }
 
 .quote-console-estimate-note {
-  margin-top: 14px;
-  padding: 11px;
-  border-radius: 12px;
-  background: rgba(15, 79, 207, 0.07);
-  border: 1px dashed rgba(15, 79, 207, 0.2);
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(15, 79, 207, 0.05);
+  border: 1px dashed rgba(15, 79, 207, 0.16);
 }
 
 .quote-console-estimate-note strong {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--blue);
 }
 
 .quote-console-estimate-note p {
-  margin: 5px 0 0;
-  font-size: 0.8rem;
+  margin: 4px 0 0;
+  font-size: 0.74rem;
   color: var(--muted);
   line-height: 1.4;
 }
@@ -10964,7 +10999,7 @@ html {
 }
 
 .quote-page .quote-app-main .quote-window-body {
-  padding: 10px 18px 0;
+  padding: 6px 16px 0;
   background: #fff;
 }
 
@@ -10972,7 +11007,7 @@ html {
   border: 1px solid rgba(15, 79, 207, 0.08);
   border-radius: 14px;
   background: #fff;
-  padding: 14px 14px 12px;
+  padding: 12px 12px 10px;
   min-height: 0;
 }
 
@@ -11016,23 +11051,31 @@ html {
   background: #fff;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 860px) {
   .quote-page .quote-app.quote-console {
     min-height: 0;
   }
 
-  .quote-console-body {
+  .quote-page .quote-app-body.quote-console-body {
     grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .quote-console-summary {
     border-right: none;
     border-bottom: 1px solid rgba(15, 79, 207, 0.08);
-    padding-bottom: 14px;
+    padding: 10px 12px 12px;
+    margin: 0;
   }
 
   .quote-console-summary-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+  }
+
+  .quote-console-summary-list div {
+    grid-template-columns: 82px minmax(0, 1fr);
+    padding: 0;
   }
 }
 
@@ -11080,12 +11123,13 @@ html {
 }
 
 .quote-console-summary-list div {
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: none;
+  box-shadow: none;
 }
 
 .quote-console-summary-list div:hover {
-  border-color: rgba(15, 79, 207, 0.2);
-  box-shadow: 0 4px 14px rgba(15, 79, 207, 0.06);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .quote-console-summary-list dd {
@@ -11112,5 +11156,538 @@ html {
 @media (prefers-reduced-motion: reduce) {
   .quote-console-summary-list div {
     transition: none;
+  }
+}
+
+/* ================================================================
+   QUOTE CONSOLE DESKTOP LAYOUT FIX (override legacy quote-page rules)
+   ================================================================ */
+
+.quote-page .quote-app.quote-console {
+  max-height: none !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.quote-page .quote-app-body.quote-console-body {
+  display: grid !important;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+}
+
+.quote-page .quote-app.quote-console .quote-app-main {
+  overflow: visible !important;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 861px) {
+  .quote-page .quote-studio {
+    padding: 0 0 8px;
+  }
+
+  .quote-page .quote-studio-ambient {
+    display: none;
+  }
+
+  .quote-console-head {
+    padding: 12px 18px 10px;
+  }
+
+  .quote-console-summary {
+    padding: 12px 14px 12px 18px;
+    margin: 0;
+  }
+
+  .quote-page .quote-app-header {
+    padding: 8px 14px 4px;
+  }
+
+  .quote-page .quote-coach-line {
+    font-size: 0.78rem;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .quote-page .quote-step-dots {
+    display: none;
+  }
+
+  .quote-page .quote-app-main .quote-window-body {
+    padding: 4px 14px 0;
+  }
+
+  .quote-page .quote-form-stage {
+    padding: 10px 10px 8px;
+    border: none;
+    box-shadow: none;
+  }
+
+  .quote-page .quote-fieldset {
+    margin-bottom: 6px;
+    padding: 8px 8px 6px;
+  }
+
+  .quote-page .quote-app-footer {
+    margin: 6px 0 0;
+    padding: 8px 14px 6px;
+  }
+
+  .quote-page .quote-nav-trust,
+  .quote-page .quote-console-foot {
+    display: none;
+  }
+
+  .quote-page .quote-form-stage {
+    min-height: 0 !important;
+  }
+}
+
+.quote-console-summary-list div {
+  transition: none;
+  box-shadow: none;
+}
+
+.quote-console-summary-list div:hover {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* ================================================================
+   QUOTE CONSOLE — sidebar estimate + visual polish
+   ================================================================ */
+
+.quote-page .quote-app.quote-console .quote-app-canvas {
+  border-left: none !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.quote-page .quote-app.quote-console[data-step="1"] .quote-window-chrome,
+.quote-page .quote-app.quote-console[data-step="2"] .quote-window-chrome,
+.quote-page .quote-app.quote-console[data-step="3"] .quote-window-chrome,
+.quote-page .quote-app.quote-console[data-step="4"] .quote-window-chrome,
+.quote-page .quote-app.quote-console[data-step="5"] .quote-window-chrome {
+  background: linear-gradient(180deg, rgba(238, 244, 252, 0.75), rgba(255, 255, 255, 1));
+}
+
+.quote-page .quote-app.quote-console {
+  border-radius: 20px;
+  border-color: rgba(15, 79, 207, 0.1);
+  box-shadow:
+    0 1px 2px rgba(11, 19, 36, 0.04),
+    0 12px 32px rgba(11, 19, 36, 0.1);
+}
+
+.quote-console-head {
+  background: linear-gradient(180deg, #f7faff 0%, #fff 100%);
+}
+
+.quote-console-summary {
+  display: flex;
+  flex-direction: column;
+  border-right-color: rgba(15, 79, 207, 0.08);
+}
+
+.quote-console-total-panel {
+  margin-top: auto;
+  padding: 14px 12px 12px;
+  border-radius: 14px;
+  background: linear-gradient(165deg, rgba(15, 79, 207, 0.06) 0%, rgba(255, 255, 255, 0.95) 55%);
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.quote-console-total-panel.is-calculating {
+  border-color: rgba(15, 79, 207, 0.22);
+  background: linear-gradient(165deg, rgba(15, 79, 207, 0.1) 0%, rgba(255, 255, 255, 0.98) 60%);
+}
+
+.quote-console-total-kicker {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.quote-console-total-amount {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(1.55rem, 2.4vw, 1.85rem);
+  line-height: 1.1;
+  color: var(--navy);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.quote-console-total-status {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: #5d6d82;
+}
+
+.quote-console-total-panel.is-calculating .quote-console-total-status {
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.quote-console-travel-note {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #5d6d82;
+}
+
+.quote-page .quote-app.quote-console .quote-calculating--inline,
+.quote-page .quote-app.quote-console .quote-estimate-card {
+  display: none !important;
+}
+
+.quote-review-reveal--compact {
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.quote-review-reveal--compact .quote-consent {
+  margin: 0;
+  padding: 10px 10px 8px;
+  border-radius: 12px;
+  background: rgba(15, 79, 207, 0.04);
+  border: 1px solid rgba(15, 79, 207, 0.08);
+}
+
+.quote-page .quote-app.quote-console .quote-app-main .quote-window-body {
+  background: #fff;
+}
+
+.quote-page .quote-app.quote-console .quote-app-header {
+  border-bottom-color: rgba(15, 79, 207, 0.06);
+}
+
+@media (max-width: 860px) {
+  .quote-console-total-panel {
+    margin-top: 10px;
+  }
+}
+
+/* ================================================================
+   QUOTE CONSOLE — mobile responsiveness hardening
+   ================================================================ */
+@media (max-width: 860px) {
+  .quote-page .quote-app.quote-console,
+  .quote-page .quote-app-main,
+  .quote-page .quote-form,
+  .quote-page .quote-form-stage,
+  .quote-page .quote-step {
+    min-width: 0;
+  }
+
+  .quote-page .quote-app.quote-console {
+    border-radius: 16px;
+  }
+
+  .quote-page .quote-app-body.quote-console-body {
+    grid-template-columns: 1fr;
+    gap: 0;
+    overflow-x: clip;
+  }
+
+  .quote-page .quote-console-summary {
+    padding: 10px 12px 12px;
+    margin: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(15, 79, 207, 0.08);
+  }
+
+  .quote-page .quote-console-summary-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+  }
+
+  .quote-page .quote-console-summary-list div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .quote-page .quote-console-summary-list dt,
+  .quote-page .quote-console-summary-list dd {
+    overflow-wrap: anywhere;
+  }
+
+  .quote-page .quote-app-main .quote-window-body {
+    padding: 8px 12px 0;
+  }
+
+  .quote-page .quote-form-stage {
+    padding: 10px 10px 12px;
+  }
+
+  .quote-page .quote-option-grid--2 {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-page .quote-pill-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .quote-page .quote-pill span {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .quote-page .quote-studio {
+    padding: 4px 0 14px;
+  }
+
+  .quote-page .quote-app.quote-console {
+    border-radius: 14px;
+  }
+
+  .quote-page .quote-console-head {
+    padding: 12px 10px 10px;
+    gap: 10px;
+  }
+
+  .quote-page .quote-console-title {
+    font-size: 1rem;
+  }
+
+  .quote-page .quote-console-meta {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .quote-page .quote-console-step {
+    text-align: left;
+    margin-bottom: 6px;
+  }
+
+  .quote-page .quote-console-summary {
+    padding: 10px;
+  }
+
+  .quote-page .quote-console-summary-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .quote-page .quote-app-header,
+  .quote-page .quote-step-dots,
+  .quote-page .quote-app-main .quote-window-body,
+  .quote-page .quote-app-footer,
+  .quote-page .quote-nav-trust,
+  .quote-page .quote-app-studio-foot {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .quote-page .quote-app-main .quote-window-body {
+    padding-top: 6px;
+    padding-bottom: 72px;
+  }
+
+  .quote-page .quote-form-stage {
+    padding: 10px 8px 10px;
+    border-radius: 12px;
+  }
+
+  .quote-page .quote-fieldset {
+    padding: 8px 6px 6px;
+  }
+
+  .quote-page .quote-option-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .quote-page .quote-size-group[data-size-group="beds_baths"] {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-page .quote-input-row--2 {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-page .quote-app-footer .button {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .quote-page .quote-form-nav {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 8px;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+
+  .quote-page .quote-nav-back,
+  .quote-page .quote-nav-next,
+  .quote-page .quote-nav-submit {
+    min-height: 44px;
+    padding: 10px 12px;
+    margin-left: 0;
+    white-space: normal;
+    justify-content: center;
+  }
+
+  .quote-page .quote-nav-back {
+    grid-column: 1;
+  }
+
+  .quote-page .quote-nav-next,
+  .quote-page .quote-nav-submit {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 420px) {
+  .quote-page .quote-option-grid--3,
+  .quote-page .quote-addon-grid,
+  .quote-page .quote-pill-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ================================================================
+   QUOTE CONSOLE — mobile flow + summary card refresh
+   ================================================================ */
+.quote-page .quote-console-summary {
+  padding: 14px;
+  border-right-color: rgba(15, 79, 207, 0.1);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    0 8px 20px rgba(9, 29, 60, 0.07);
+}
+
+.quote-page .quote-console-summary h3 {
+  margin: 0 0 12px;
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  color: #4e6380;
+}
+
+.quote-page .quote-console-summary-list {
+  gap: 9px;
+}
+
+.quote-page .quote-console-summary-list div {
+  padding: 10px 11px;
+  border: 1px solid rgba(15, 79, 207, 0.11);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+}
+
+.quote-page .quote-console-summary-list dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5c7190;
+}
+
+.quote-page .quote-console-summary-list dd {
+  font-size: 0.91rem;
+  line-height: 1.42;
+  color: #10213f;
+  font-weight: 700;
+}
+
+.quote-page .quote-console-total-panel {
+  margin-top: 12px;
+  padding: 15px 14px 14px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(15, 79, 207, 0.1) 0%, rgba(255, 255, 255, 0.98) 60%);
+  border: 1px solid rgba(15, 79, 207, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.quote-page .quote-console-total-kicker {
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+}
+
+.quote-page .quote-console-total-amount {
+  margin-top: 5px;
+  font-size: clamp(1.65rem, 2.8vw, 2rem);
+}
+
+.quote-page .quote-console-total-status {
+  margin-top: 7px;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .quote-page .quote-app-body.quote-console-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .quote-page .quote-app-main {
+    order: 1;
+  }
+
+  .quote-page .quote-console-summary {
+    order: 2;
+    margin: 0 12px 12px;
+    border-right: 1px solid rgba(15, 79, 207, 0.1);
+    border-bottom: none;
+    padding: 14px 13px;
+  }
+
+  .quote-page .quote-console-summary-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .quote-page .quote-console-summary-list div {
+    min-height: 60px;
+  }
+}
+
+@media (max-width: 640px) {
+  .quote-page .quote-console-summary {
+    margin: 0 10px 10px;
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  .quote-page .quote-console-summary-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .quote-page .quote-console-summary-list div {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .quote-page .quote-console-total-panel {
+    margin-top: 10px;
+    padding: 12px;
   }
 }

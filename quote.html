@@ -55,15 +55,16 @@
             <aside class="quote-console-summary" aria-live="polite">
               <h3>Live Summary</h3>
               <dl class="quote-console-summary-list">
-                <div><dt>Space</dt><dd id="liveSpace">Pending...</dd></div>
-                <div><dt>Service</dt><dd id="liveService">Pending...</dd></div>
-                <div><dt>Frequency</dt><dd id="liveFrequency">-</dd></div>
+                <div><dt>Space</dt><dd id="liveSpace">Pending</dd></div>
+                <div><dt>Service</dt><dd id="liveService">Pending</dd></div>
+                <div><dt>Frequency</dt><dd id="liveFrequency">—</dd></div>
                 <div><dt>Add-ons</dt><dd id="liveAddons">0 selected</dd></div>
-                <div><dt>Scope</dt><dd id="liveScope">Calculating...</dd></div>
               </dl>
-              <div class="quote-console-estimate-note">
-                <strong>Estimate visibility</strong>
-                <p>Your total appears on the final review step.</p>
+              <div class="quote-console-total-panel">
+                <span class="quote-console-total-kicker">Estimate</span>
+                <strong id="liveCalculatedTotal" class="quote-console-total-amount" aria-live="polite">—</strong>
+                <span id="liveEstimate" class="quote-console-total-status">Shown at final review</span>
+                <p id="reviewTravelNote" class="quote-console-travel-note" hidden></p>
               </div>
             </aside>
 
@@ -227,39 +228,21 @@
                             <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
                           </div>
                         </div>
-                        <div class="quote-console-review-break" aria-hidden="true"></div>
-                        <div id="quoteCalculatingState" class="quote-calculating">
-                          <div class="quote-calculating-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
-                          <p class="quote-calculating-text">Calculating your estimate…</p>
-                          <p class="quote-calculating-sub">Reviewing space, service, and add-ons</p>
+                        <div id="quoteCalculatingState" class="quote-calculating quote-calculating--inline" hidden aria-hidden="true">
+                          <p class="quote-calculating-text">Calculating…</p>
                         </div>
-                        <div id="quoteReviewReveal" class="quote-review-reveal" hidden>
-                          <div class="quote-estimate-card">
-                            <ul class="quote-plan-bullets quote-plan-bullets--compact">
-                              <li class="quote-plan-bullet">
-                                <i data-lucide="home"></i>
-                                <div><span>Property</span><strong id="reviewProperty">—</strong></div>
-                              </li>
-                              <li class="quote-plan-bullet">
-                                <i data-lucide="sparkles"></i>
-                                <div><span>Service</span><strong><span id="reviewService">—</span> · <span id="reviewFrequency">—</span></strong></div>
-                              </li>
-                              <li class="quote-plan-bullet quote-plan-bullet--full">
-                                <i data-lucide="plus-circle"></i>
-                                <div><span>Add-ons</span><strong id="reviewAddons">None</strong></div>
-                              </li>
-                            </ul>
-                            <div class="quote-estimate-hero quote-estimate-hero--compact">
-                              <strong id="liveCalculatedTotal">$0.00</strong>
-                              <span>Confirmed before we arrive</span>
-                            </div>
-                            <p class="quote-travel-note" id="reviewTravelNote" hidden></p>
-                          </div>
+                        <div id="quoteReviewReveal" class="quote-review-reveal quote-review-reveal--compact" hidden>
                           <label class="field check quote-consent">
                             <input name="consent" type="checkbox" required>
                             <span>I agree to be contacted about my quote.</span>
                           </label>
                           <div data-form-state class="form-state" role="status"></div>
+                        </div>
+                        <div class="visually-hidden" aria-hidden="true">
+                          <span id="reviewProperty"></span>
+                          <span id="reviewService"></span>
+                          <span id="reviewFrequency"></span>
+                          <span id="reviewAddons"></span>
                         </div>
                       </div>
 
@@ -272,7 +255,7 @@
                       <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Submit &amp; book <i data-lucide="arrow-right"></i></button>
                     </div>
                     <p class="quote-nav-trust">No payment required · Estimate confirmed before service</p>
-                    <p class="quote-studio-foot quote-app-studio-foot">Need something fully custom? <a href="contact.html?inquiry=custom-quote">Talk to our team</a></p>
+                    <p class="quote-studio-foot quote-app-studio-foot quote-console-foot">Need something fully custom? <a href="contact.html?inquiry=custom-quote">Talk to our team</a></p>
                   </form>
                 </div>
 

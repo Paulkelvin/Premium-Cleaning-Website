@@ -922,6 +922,7 @@ function initQuoteAssistant(formContainer = document) {
   const liveFrequency = formContainer.querySelector("#liveFrequency");
   const liveAddons = formContainer.querySelector("#liveAddons");
   const liveScope = formContainer.querySelector("#liveScope");
+  const liveEstimate = formContainer.querySelector("#liveEstimate");
 
   const reviewProperty = formContainer.querySelector("#reviewProperty");
   const reviewService = formContainer.querySelector("#reviewService");
@@ -932,9 +933,12 @@ function initQuoteAssistant(formContainer = document) {
   const reviewMethod = formContainer.querySelector("#reviewMethod");
   const reviewSchedule = formContainer.querySelector("#reviewSchedule");
   const root = form.closest("#quoteAssistantCard, #bookAssistantCard, .quote-window") || formContainer;
+  const liveTotalDisplay = root.querySelector("#liveCalculatedTotal");
+  const totalPanel = root.querySelector(".quote-console-total-panel");
   const assistantBubble = root.querySelector("#assistantBubble");
   const windowTitle = root.querySelector("#quoteWindowTitle");
   const isQuoteStudio = root.classList.contains("quote-window");
+  const isQuoteConsole = isQuoteStudio && !isBooking && root.classList.contains("quote-console");
   const formStage = root.querySelector(".quote-form-stage");
   const expandSection = root.querySelector(".quote-window-expand");
   const windowHead = root.querySelector(".quote-window-head");
@@ -1394,9 +1398,22 @@ function initQuoteAssistant(formContainer = document) {
       else liveScope.textContent = "Calculating...";
     }
 
-    const liveTotalDisplay = formContainer.querySelector("#liveCalculatedTotal");
-    if (liveTotalDisplay && pricing.total > 0) {
-      liveTotalDisplay.textContent = formatMoney(pricing.total);
+    const isFinalStep = currentStepIndex === steps.length - 1;
+    const isRevealed = reviewReveal?.classList.contains("is-revealed");
+
+    if (liveEstimate && !isFinalStep) {
+      liveEstimate.textContent = "Shown at final review";
+    }
+
+    if (liveTotalDisplay && !isFinalStep) {
+      liveTotalDisplay.textContent = "—";
+    }
+
+    if (isFinalStep && isRevealed && liveTotalDisplay) {
+      const pricing = calculateQuoteTotal(form, { allowEstimate: true });
+      if (pricing.total > 0) {
+        liveTotalDisplay.textContent = formatMoney(pricing.total);
+      }
     }
   }
 
@@ -1492,13 +1509,31 @@ function initQuoteAssistant(formContainer = document) {
     populateReview(true);
     resetReviewRevealAnimation();
 
-    const rows = reviewReveal.querySelectorAll(".quote-plan-bullet, .quote-review-row");
-    const totalRow = reviewReveal.querySelector(".quote-estimate-hero, .quote-review-total");
-    const totalEl = root.querySelector("#liveCalculatedTotal");
+    const totalEl = liveTotalDisplay || root.querySelector("#liveCalculatedTotal");
     const pricing = calculateQuoteTotal(form);
 
-    if (totalEl) totalEl.textContent = formatMoney(0);
     reviewReveal.classList.add("is-revealed");
+
+    if (isQuoteConsole) {
+      if (totalPanel) totalPanel.classList.remove("is-calculating");
+      if (liveEstimate) liveEstimate.textContent = "Confirmed before we arrive";
+
+      if (!hasValidSpaceMetrics(form)) {
+        if (totalEl) totalEl.textContent = "—";
+        reviewReveal.hidden = false;
+        return;
+      }
+
+      if (totalEl) totalEl.textContent = formatMoney(0);
+      animateCountUp(totalEl, pricing.total, 1300);
+      reviewReveal.hidden = false;
+      return;
+    }
+
+    const rows = reviewReveal.querySelectorAll(".quote-plan-bullet, .quote-review-row");
+    const totalRow = reviewReveal.querySelector(".quote-estimate-hero, .quote-review-total");
+
+    if (totalEl) totalEl.textContent = formatMoney(0);
 
     if (!hasValidSpaceMetrics(form)) {
       if (totalEl) totalEl.textContent = "—";
@@ -1544,14 +1579,17 @@ function initQuoteAssistant(formContainer = document) {
     if (reviewRevealTimer) clearTimeout(reviewRevealTimer);
     if (reviewMsgTimer) clearInterval(reviewMsgTimer);
 
-    calculatingState.hidden = false;
+    if (isQuoteConsole) {
+      calculatingState.hidden = true;
+    } else {
+      calculatingState.hidden = false;
+    }
     reviewReveal.hidden = true;
     reviewReveal.classList.remove("is-revealed");
     setQuoteSubmitPreparing(true);
     resetReviewRevealAnimation();
     populateReview(false);
 
-    const subEl = calculatingState.querySelector(".quote-calculating-sub");
     const calcMessages = [
       "Reviewing space, service, and add-ons",
       "Matching your space to service rates…",
@@ -1559,19 +1597,30 @@ function initQuoteAssistant(formContainer = document) {
       "Preparing your personalized total…"
     ];
     let calcIndex = 0;
-    if (subEl) subEl.textContent = calcMessages[0];
+    const subEl = calculatingState.querySelector(".quote-calculating-sub");
+    if (isQuoteConsole) {
+      if (totalPanel) totalPanel.classList.add("is-calculating");
+      if (liveTotalDisplay) liveTotalDisplay.textContent = "…";
+      if (liveEstimate) liveEstimate.textContent = calcMessages[0];
+    } else if (subEl) {
+      subEl.textContent = calcMessages[0];
+    }
     const calcDelay = prefersReducedMotion()
       ? CALC_DELAY_MS_REDUCED
       : randomInRange(CALC_DELAY_MS_MIN, CALC_DELAY_MS_MAX);
     const msgInterval = Math.max(400, Math.floor(calcDelay / calcMessages.length));
     reviewMsgTimer = setInterval(() => {
       calcIndex += 1;
-      if (calcIndex < calcMessages.length && subEl) {
-        subEl.style.opacity = "0";
-        setTimeout(() => {
-          subEl.textContent = calcMessages[calcIndex];
-          subEl.style.opacity = "1";
-        }, 120);
+      if (calcIndex < calcMessages.length) {
+        if (isQuoteConsole && liveEstimate) {
+          liveEstimate.textContent = calcMessages[calcIndex];
+        } else if (subEl) {
+          subEl.style.opacity = "0";
+          setTimeout(() => {
+            subEl.textContent = calcMessages[calcIndex];
+            subEl.style.opacity = "1";
+          }, 120);
+        }
       }
     }, msgInterval);
 
@@ -1582,8 +1631,10 @@ function initQuoteAssistant(formContainer = document) {
       reviewReveal.hidden = false;
       setQuoteSubmitPreparing(false);
       revealReviewProgressively();
-      remeasureExpandable();
-      scrollQuoteStepIntoView();
+      if (!isQuoteConsole) {
+        remeasureExpandable();
+        scrollQuoteStepIntoView();
+      }
     }, calcDelay);
   }
 
@@ -1692,6 +1743,16 @@ function initQuoteAssistant(formContainer = document) {
         reviewReveal.hidden = true;
         reviewReveal.classList.remove("is-revealed");
       }
+      if (isQuoteConsole) {
+        if (totalPanel) totalPanel.classList.remove("is-calculating");
+        if (liveTotalDisplay) liveTotalDisplay.textContent = "—";
+        if (liveEstimate) liveEstimate.textContent = "Shown at final review";
+        const travelNote = root.querySelector("#reviewTravelNote");
+        if (travelNote) {
+          travelNote.hidden = true;
+          travelNote.textContent = "";
+        }
+      }
     }
   }
 
@@ -1788,7 +1849,10 @@ function initQuoteAssistant(formContainer = document) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    if (!isBooking && currentStepIndex === steps.length - 1 && calculatingState && !calculatingState.hidden) {
+    if (!isBooking && currentStepIndex === steps.length - 1 && (
+      (calculatingState && !calculatingState.hidden) ||
+      (isQuoteConsole && totalPanel?.classList.contains("is-calculating"))
+    )) {
       showStudioToast(root, "Please wait while we finish your estimate.", "error");
       return;
     }
