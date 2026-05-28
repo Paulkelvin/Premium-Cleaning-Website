@@ -63,7 +63,7 @@
               <div class="quote-console-total-panel">
                 <span class="quote-console-total-kicker">Estimate</span>
                 <strong id="liveCalculatedTotal" class="quote-console-total-amount" aria-live="polite">—</strong>
-                <span id="liveEstimate" class="quote-console-total-status">Shown at final review</span>
+                <span id="liveEstimate" class="quote-console-total-status">Consent &amp; contact details required</span>
                 <p id="reviewTravelNote" class="quote-console-travel-note" hidden></p>
               </div>
             </aside>
@@ -229,6 +229,10 @@
                               <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
                             </div>
                           </div>
+                          <label class="field check quote-consent">
+                            <input name="consent" type="checkbox" required>
+                            <span>I agree to be contacted about my quote.</span>
+                          </label>
                           <button type="button" class="button secondary quote-get-estimate" id="btnGetEstimate">Get my estimate <i data-lucide="sparkles"></i></button>
                         </div>
                         <div id="quoteCalculatingState" class="quote-calculating quote-calculating--inline" hidden aria-hidden="true">
@@ -236,13 +240,9 @@
                         </div>
                         <div id="quoteReviewReveal" class="quote-review-reveal quote-review-reveal--compact" hidden>
                           <div class="quote-review-focus-head">
-                            <p class="quote-review-focus-copy">Your estimate is ready. Confirm consent and submit to continue.</p>
+                            <p class="quote-review-focus-copy">Your estimate is ready. Submit below to save your quote — we only store your details after you submit.</p>
                             <button type="button" class="quote-review-edit-link" id="quoteEditContactBtn">Edit contact details</button>
                           </div>
-                          <label class="field check quote-consent">
-                            <input name="consent" type="checkbox" required>
-                            <span>I agree to be contacted about my quote.</span>
-                          </label>
                           <div data-form-state class="form-state" role="status"></div>
                         </div>
                         <div class="visually-hidden" aria-hidden="true">

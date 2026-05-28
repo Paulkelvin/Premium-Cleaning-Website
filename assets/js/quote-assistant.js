@@ -1026,10 +1026,6 @@ function initQuoteAssistant(formContainer = document) {
     const focusOn = Boolean(enabled);
     finalQuoteStep.classList.toggle("is-review-focus", focusOn);
     if (contactEntry) contactEntry.setAttribute("aria-hidden", focusOn ? "true" : "false");
-    if (consentInput) {
-      consentInput.required = focusOn;
-      if (!focusOn) consentInput.checked = false;
-    }
   }
 
   function isFinalContactInfoComplete() {
@@ -1039,6 +1035,34 @@ function initQuoteAssistant(formContainer = document) {
     const email = String(form.querySelector('input[name="email"]')?.value || "").trim();
     const preferred = form.querySelector('input[name="preferred_contact"]:checked');
     return Boolean(name && phoneDigits.length >= 10 && validateEmailAddress(email) && preferred);
+  }
+
+  function isFinalConsentGiven() {
+    return Boolean(consentInput?.checked);
+  }
+
+  function isFinalReadyForEstimate() {
+    return isFinalContactInfoComplete() && isFinalConsentGiven();
+  }
+
+  function canShowQuoteEstimateTotal() {
+    return !isQuoteConsole || Boolean(quoteDraft?.captured);
+  }
+
+  function hideQuoteEstimateDisplay() {
+    if (!isQuoteConsole) return;
+    if (liveTotalDisplay) liveTotalDisplay.textContent = "—";
+    if (totalPanel) totalPanel.classList.remove("is-calculating");
+    const travelNote = root.querySelector("#reviewTravelNote");
+    if (travelNote) {
+      travelNote.hidden = true;
+      travelNote.textContent = "";
+    }
+    if (liveEstimate && currentStepIndex === steps.length - 1) {
+      liveEstimate.textContent = isFinalReadyForEstimate()
+        ? "Tap Get my estimate to reveal your total"
+        : "Consent & contact details required";
+    }
   }
 
   function setSubmitEnabledForFinalStep(enabled) {
@@ -1056,9 +1080,16 @@ function initQuoteAssistant(formContainer = document) {
   function invalidateQuoteDraft() {
     quoteDraft = null;
     setSubmitEnabledForFinalStep(false);
-    if (liveEstimate && currentStepIndex === steps.length - 1) {
-      liveEstimate.textContent = "Complete contact details, then get your estimate";
+    if (reviewRevealTimer) clearTimeout(reviewRevealTimer);
+    if (reviewMsgTimer) clearInterval(reviewMsgTimer);
+    reviewAnimationStep = -1;
+    if (calculatingState) calculatingState.hidden = true;
+    if (reviewReveal) {
+      reviewReveal.hidden = true;
+      reviewReveal.classList.remove("is-revealed");
     }
+    setFinalReviewFocus(false);
+    hideQuoteEstimateDisplay();
   }
 
   async function maybeStartFinalReview() {
@@ -1075,7 +1106,12 @@ function initQuoteAssistant(formContainer = document) {
       setFinalReviewFocus(false);
       setQuoteSubmitPreparing(false);
       setSubmitEnabledForFinalStep(false);
-      if (liveEstimate) liveEstimate.textContent = "Complete contact details, then get your estimate";
+      hideQuoteEstimateDisplay();
+      return;
+    }
+    if (!isFinalConsentGiven()) {
+      showStudioToast(root, "Please agree to be contacted before getting your estimate.", "error");
+      consentInput?.focus?.({ preventScroll: true });
       return;
     }
     if (btnGetEstimate) {
@@ -1085,16 +1121,9 @@ function initQuoteAssistant(formContainer = document) {
       if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
     }
     try {
-      const { payload, pricing } = buildSubmissionPayload(form, table);
-      // Keep the estimate local until consent is given on final submit (Supabase RLS requires consent = true).
+      const { pricing } = buildSubmissionPayload(form, table);
+      // Estimate stays local until final submit. Database insert happens only after consent + submit.
       quoteDraft = { captured: true, pricing };
-      if (typeof window.saveQuoteSession === "function") {
-        window.saveQuoteSession({
-          ...payload,
-          estimated_total: pricing.total,
-          size_input_mode: getSizeInputMode(form)
-        });
-      }
     } catch (err) {
       console.error("Estimate capture failed:", err);
       showStudioToast(root, mapSubmissionError(err), "error");
@@ -1521,7 +1550,16 @@ function initQuoteAssistant(formContainer = document) {
       liveTotalDisplay.textContent = "—";
     }
 
-    if (isFinalStep && isRevealed && liveTotalDisplay) {
+    if (isFinalStep && !canShowQuoteEstimateTotal()) {
+      if (liveTotalDisplay) liveTotalDisplay.textContent = "—";
+      if (liveEstimate) {
+        liveEstimate.textContent = isFinalReadyForEstimate()
+          ? "Tap Get my estimate to reveal your total"
+          : "Consent & contact details required";
+      }
+    }
+
+    if (isFinalStep && isRevealed && liveTotalDisplay && canShowQuoteEstimateTotal()) {
       const pricing = calculateQuoteTotal(form, { allowEstimate: true });
       if (pricing.total > 0) {
         liveTotalDisplay.textContent = formatMoney(pricing.total);
@@ -1592,11 +1630,12 @@ function initQuoteAssistant(formContainer = document) {
     const liveTotalDisplay = root.querySelector("#liveCalculatedTotal");
     const travelNote = root.querySelector("#reviewTravelNote");
     const totalValue = pricing.total || session?.estimated_total || 0;
+    const shouldShowTotal = showTotal && canShowQuoteEstimateTotal();
     if (liveTotalDisplay) {
-      liveTotalDisplay.textContent = showTotal ? formatMoney(totalValue) : "…";
+      liveTotalDisplay.textContent = shouldShowTotal ? formatMoney(totalValue) : "—";
     }
     if (travelNote) {
-      if (pricing.travelFee > 0) {
+      if (shouldShowTotal && pricing.travelFee > 0) {
         travelNote.hidden = false;
         travelNote.textContent = `Includes $${pricing.travelFee.toFixed(0)} travel fee${pricing.areaName ? ` for ${pricing.areaName}` : ""}.`;
       } else {
@@ -1856,10 +1895,13 @@ function initQuoteAssistant(formContainer = document) {
       if (btnNext) btnNext.style.display = "none";
       if (btnSubmit) btnSubmit.style.display = "inline-flex";
       if (isQuoteConsole) setSubmitEnabledForFinalStep(false);
-      if (isQuoteConsole) setGetEstimateEnabled(isFinalContactInfoComplete());
+      if (isQuoteConsole) setGetEstimateEnabled(isFinalReadyForEstimate());
       if (!(isQuoteStudio && table === "quote_requests")) {
         populateReview(true);
         if (isBooking) updatePaymentUI();
+      } else if (isQuoteConsole) {
+        populateReview(false);
+        hideQuoteEstimateDisplay();
       }
     } else {
       setFinalReviewFocus(false);
@@ -1880,13 +1922,7 @@ function initQuoteAssistant(formContainer = document) {
       }
       if (isQuoteConsole) {
         if (totalPanel) totalPanel.classList.remove("is-calculating");
-        if (liveTotalDisplay) liveTotalDisplay.textContent = "—";
-        if (liveEstimate) liveEstimate.textContent = "Shown at final review";
-        const travelNote = root.querySelector("#reviewTravelNote");
-        if (travelNote) {
-          travelNote.hidden = true;
-          travelNote.textContent = "";
-        }
+        hideQuoteEstimateDisplay();
       }
     }
   }
@@ -1923,7 +1959,7 @@ function initQuoteAssistant(formContainer = document) {
     onUpdate: () => {
       updateLiveSummary();
       updateNavState();
-      if (currentStepIndex === steps.length - 1) populateReview();
+      if (currentStepIndex === steps.length - 1) populateReview(canShowQuoteEstimateTotal());
     }
   });
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
@@ -1973,7 +2009,7 @@ function initQuoteAssistant(formContainer = document) {
     editContactBtn.addEventListener("click", () => {
       setFinalReviewFocus(false);
       invalidateQuoteDraft();
-      setGetEstimateEnabled(isFinalContactInfoComplete());
+      setGetEstimateEnabled(isFinalReadyForEstimate());
       contactEntry?.querySelector('input[name="full_name"]')?.focus?.({ preventScroll: true });
       scrollQuoteStepIntoView();
     });
@@ -1989,8 +2025,11 @@ function initQuoteAssistant(formContainer = document) {
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {
-      populateReview();
-      setGetEstimateEnabled(isFinalContactInfoComplete());
+      populateReview(canShowQuoteEstimateTotal());
+      setGetEstimateEnabled(isFinalReadyForEstimate());
+      if (event?.target?.matches?.('input[name="consent"]') && !isFinalConsentGiven()) {
+        invalidateQuoteDraft();
+      }
       if (event?.target?.matches?.('input[name="full_name"], input[name="phone"], input[name="email"], input[name="preferred_contact"]')) {
         invalidateQuoteDraft();
       }
@@ -2001,8 +2040,8 @@ function initQuoteAssistant(formContainer = document) {
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {
-      populateReview();
-      setGetEstimateEnabled(isFinalContactInfoComplete());
+      populateReview(canShowQuoteEstimateTotal());
+      setGetEstimateEnabled(isFinalReadyForEstimate());
       if (event?.target?.matches?.('input[name="full_name"], input[name="phone"], input[name="email"]')) {
         invalidateQuoteDraft();
       }
