@@ -63,6 +63,14 @@ alter table contact_submissions enable row level security;
 alter table quote_requests enable row level security;
 alter table bookings enable row level security;
 
+grant usage on schema public to anon, authenticated;
+grant insert on contact_submissions to anon;
+grant insert on quote_requests to anon;
+grant insert on bookings to anon;
+grant select, update on contact_submissions to authenticated;
+grant select, update on quote_requests to authenticated;
+grant select, update on bookings to authenticated;
+
 drop policy if exists "Allow public contact inserts" on contact_submissions;
 drop policy if exists "Allow public quote inserts" on quote_requests;
 drop policy if exists "Allow public booking inserts" on bookings;
@@ -81,7 +89,7 @@ drop policy if exists "Allow admin booking status updates" on bookings;
 
 -- Public form inserts (website). Basic sanity checks only — not a spam substitute.
 create policy "Allow public contact inserts" on contact_submissions
-  for insert to public
+  for insert to anon
   with check (
     consent = true
     and email is not null
@@ -90,7 +98,7 @@ create policy "Allow public contact inserts" on contact_submissions
   );
 
 create policy "Allow public quote inserts" on quote_requests
-  for insert to public
+  for insert to anon
   with check (
     consent = true
     and email is not null
@@ -100,7 +108,7 @@ create policy "Allow public quote inserts" on quote_requests
   );
 
 create policy "Allow public booking inserts" on bookings
-  for insert to public
+  for insert to anon
   with check (
     consent = true
     and email is not null

@@ -1081,21 +1081,16 @@ function initQuoteAssistant(formContainer = document) {
     if (btnGetEstimate) {
       btnGetEstimate.disabled = true;
       btnGetEstimate.setAttribute("aria-busy", "true");
-      btnGetEstimate.innerHTML = `Saving quote... <i data-lucide="loader-circle"></i>`;
+      btnGetEstimate.innerHTML = `Preparing estimate... <i data-lucide="loader-circle"></i>`;
       if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
     }
     try {
       const { payload, pricing } = buildSubmissionPayload(form, table);
-      payload.consent = false;
-      if (typeof window.supabaseInsert !== "function") {
-        throw new Error("Form service unavailable. Please refresh and try again.");
-      }
-      const result = await window.supabaseInsert(table, payload);
-      quoteDraft = { id: result.id, pricing };
+      // Keep the estimate local until consent is given on final submit (Supabase RLS requires consent = true).
+      quoteDraft = { captured: true, pricing };
       if (typeof window.saveQuoteSession === "function") {
         window.saveQuoteSession({
           ...payload,
-          quote_id: result.id,
           estimated_total: pricing.total,
           size_input_mode: getSizeInputMode(form)
         });
@@ -2025,7 +2020,7 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
-    if (!isBooking && isQuoteConsole && currentStepIndex === steps.length - 1 && !quoteDraft?.id) {
+    if (!isBooking && isQuoteConsole && currentStepIndex === steps.length - 1 && !quoteDraft?.captured) {
       showStudioToast(root, "Tap 'Get my estimate' first.", "error");
       return;
     }
@@ -2049,7 +2044,7 @@ function initQuoteAssistant(formContainer = document) {
 
     try {
       const { payload, pricing } = buildSubmissionPayload(form, table);
-      let result = { id: quoteDraft?.id };
+      let result = {};
       if (table === "bookings") {
         if (typeof window.supabaseInsert !== "function") {
           throw new Error("Form service unavailable. Please refresh and try again.");
@@ -2058,12 +2053,10 @@ function initQuoteAssistant(formContainer = document) {
         if (session?.quote_id) payload.quote_id = session.quote_id;
         result = await window.supabaseInsert(table, payload);
       } else if (table === "quote_requests") {
-        if (!result.id) {
-          if (typeof window.supabaseInsert !== "function") {
-            throw new Error("Form service unavailable. Please refresh and try again.");
-          }
-          result = await window.supabaseInsert(table, payload);
+        if (typeof window.supabaseInsert !== "function") {
+          throw new Error("Form service unavailable. Please refresh and try again.");
         }
+        result = await window.supabaseInsert(table, payload);
       } else {
         if (typeof window.supabaseInsert !== "function") {
           throw new Error("Form service unavailable. Please refresh and try again.");
