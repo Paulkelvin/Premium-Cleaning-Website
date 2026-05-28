@@ -947,6 +947,7 @@ function initQuoteAssistant(formContainer = document) {
   const finalQuoteStep = !isBooking ? root.querySelector('.quote-step[data-step="4"]') : null;
   const contactEntry = root.querySelector("#quoteContactEntry");
   const editContactBtn = root.querySelector("#quoteEditContactBtn");
+  const consentInput = root.querySelector('input[name="consent"]');
   const stepDots = root.querySelector("#quoteStepDots");
   const consoleProgress = root.querySelector("#quoteConsoleProgress");
   const prefillChip = root.querySelector("#quotePrefillChip");
@@ -1023,6 +1024,45 @@ function initQuoteAssistant(formContainer = document) {
     const focusOn = Boolean(enabled);
     finalQuoteStep.classList.toggle("is-review-focus", focusOn);
     if (contactEntry) contactEntry.setAttribute("aria-hidden", focusOn ? "true" : "false");
+    if (consentInput) {
+      consentInput.required = focusOn;
+      if (!focusOn) consentInput.checked = false;
+    }
+  }
+
+  function isFinalContactInfoComplete() {
+    if (!finalQuoteStep) return true;
+    const name = String(form.querySelector('input[name="full_name"]')?.value || "").trim();
+    const phoneDigits = String(form.querySelector('input[name="phone"]')?.value || "").replace(/\D/g, "");
+    const email = String(form.querySelector('input[name="email"]')?.value || "").trim();
+    const preferred = form.querySelector('input[name="preferred_contact"]:checked');
+    return Boolean(name && phoneDigits.length >= 10 && validateEmailAddress(email) && preferred);
+  }
+
+  function setSubmitEnabledForFinalStep(enabled) {
+    if (!btnSubmit || isBooking || !isQuoteConsole) return;
+    btnSubmit.disabled = !enabled;
+    btnSubmit.setAttribute("aria-disabled", enabled ? "false" : "true");
+  }
+
+  function maybeStartFinalReview() {
+    if (!isQuoteConsole || currentStepIndex !== steps.length - 1) return;
+    if (!isFinalContactInfoComplete()) {
+      if (reviewRevealTimer) clearTimeout(reviewRevealTimer);
+      if (reviewMsgTimer) clearInterval(reviewMsgTimer);
+      if (calculatingState) calculatingState.hidden = true;
+      if (reviewReveal) {
+        reviewReveal.hidden = true;
+        reviewReveal.classList.remove("is-revealed");
+      }
+      reviewAnimationStep = -1;
+      setFinalReviewFocus(false);
+      setQuoteSubmitPreparing(false);
+      setSubmitEnabledForFinalStep(false);
+      if (liveEstimate) liveEstimate.textContent = "Complete contact details to view estimate";
+      return;
+    }
+    showCalculatingReview();
   }
 
   function collapseExpandable() {
@@ -1090,7 +1130,7 @@ function initQuoteAssistant(formContainer = document) {
       remeasureExpandable();
       scrollQuoteStepIntoView({ behavior: scrollBehavior });
       if (table === "quote_requests" && stepIndex === steps.length - 1) {
-        showCalculatingReview();
+        maybeStartFinalReview();
       }
     };
 
@@ -1128,7 +1168,7 @@ function initQuoteAssistant(formContainer = document) {
             remeasureExpandable();
             scrollQuoteStepIntoView({ behavior: scrollBehavior });
             if (table === "quote_requests" && stepIndex === steps.length - 1) {
-              showCalculatingReview();
+              maybeStartFinalReview();
             }
           }, 280);
         }
@@ -1555,6 +1595,7 @@ function initQuoteAssistant(formContainer = document) {
       if (!hasValidSpaceMetrics(form)) {
         if (totalEl) totalEl.textContent = "—";
         reviewReveal.hidden = false;
+        setSubmitEnabledForFinalStep(true);
         scrollQuoteEstimateIntoView();
         return;
       }
@@ -1562,6 +1603,7 @@ function initQuoteAssistant(formContainer = document) {
       if (totalEl) totalEl.textContent = formatMoney(0);
       animateCountUp(totalEl, pricing.total, 1300);
       reviewReveal.hidden = false;
+      setSubmitEnabledForFinalStep(true);
       scrollQuoteEstimateIntoView();
       return;
     }
@@ -1606,6 +1648,18 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
+    if (!isFinalContactInfoComplete()) {
+      setQuoteSubmitPreparing(false);
+      setFinalReviewFocus(false);
+      setSubmitEnabledForFinalStep(false);
+      if (calculatingState) calculatingState.hidden = true;
+      if (reviewReveal) {
+        reviewReveal.hidden = true;
+        reviewReveal.classList.remove("is-revealed");
+      }
+      return;
+    }
+
     if (reviewAnimationStep === currentStepIndex && !reviewReveal.hidden && reviewReveal.classList.contains("is-revealed")) {
       setQuoteSubmitPreparing(false);
       populateReview(true);
@@ -1625,6 +1679,7 @@ function initQuoteAssistant(formContainer = document) {
     reviewReveal.hidden = true;
     reviewReveal.classList.remove("is-revealed");
     setQuoteSubmitPreparing(true);
+    setSubmitEnabledForFinalStep(false);
     resetReviewRevealAnimation();
     populateReview(false);
 
@@ -1761,12 +1816,14 @@ function initQuoteAssistant(formContainer = document) {
     if (currentStepIndex === steps.length - 1) {
       if (btnNext) btnNext.style.display = "none";
       if (btnSubmit) btnSubmit.style.display = "inline-flex";
+      if (isQuoteConsole) setSubmitEnabledForFinalStep(false);
       if (!(isQuoteStudio && table === "quote_requests")) {
         populateReview(true);
         if (isBooking) updatePaymentUI();
       }
     } else {
       setFinalReviewFocus(false);
+      setSubmitEnabledForFinalStep(true);
       if (btnNext) btnNext.style.display = "inline-flex";
       if (btnSubmit) {
         btnSubmit.style.display = "none";
@@ -1874,6 +1931,8 @@ function initQuoteAssistant(formContainer = document) {
   if (editContactBtn) {
     editContactBtn.addEventListener("click", () => {
       setFinalReviewFocus(false);
+      setSubmitEnabledForFinalStep(false);
+      if (liveEstimate) liveEstimate.textContent = "Complete contact details to view estimate";
       contactEntry?.querySelector('input[name="full_name"]')?.focus?.({ preventScroll: true });
       scrollQuoteStepIntoView();
     });
@@ -1882,13 +1941,19 @@ function initQuoteAssistant(formContainer = document) {
   form.addEventListener("change", () => {
     updateLiveSummary();
     updateNavState();
-    if (currentStepIndex === steps.length - 1) populateReview();
+    if (currentStepIndex === steps.length - 1) {
+      populateReview();
+      maybeStartFinalReview();
+    }
   });
 
   form.addEventListener("input", () => {
     updateLiveSummary();
     updateNavState();
-    if (currentStepIndex === steps.length - 1) populateReview();
+    if (currentStepIndex === steps.length - 1) {
+      populateReview();
+      maybeStartFinalReview();
+    }
   });
 
   form.addEventListener("submit", async (e) => {
