@@ -50,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHomeReviewsCarousel();
   initContactPage();
   initSiteMeta();
+  initBrandLogos();
 
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
@@ -643,11 +644,53 @@ function initContactPage() {
   }
 }
 
+function getSiteAssetPrefix() {
+  const sheet = document.querySelector('link[rel="stylesheet"]')?.href || "";
+  return /\/services\/|\\services\\/.test(sheet) ? "../" : "";
+}
+
+function siteAssetPath(filename) {
+  return `${getSiteAssetPrefix()}assets/images/${filename}`;
+}
+
+function createBrandLogoImg({ admin = false } = {}) {
+  const img = document.createElement("img");
+  img.className = admin ? "brand-logo brand-logo--admin" : "brand-logo";
+  img.src = siteAssetPath("rscleaningcollective-logo.PNG");
+  img.alt = "RS Cleaning Collective";
+  img.decoding = "async";
+  if (admin) {
+    img.width = 40;
+    img.height = 40;
+  } else {
+    img.width = 168;
+    img.height = 56;
+  }
+  return img;
+}
+
+function initBrandLogos() {
+  document.querySelectorAll(".brand").forEach((brand) => {
+    if (brand.querySelector(".brand-logo")) return;
+    const mark = brand.querySelector(".brand-mark");
+    const nameSpan = brand.querySelector("span:not(.brand-mark)");
+    const img = createBrandLogoImg();
+    if (mark) mark.replaceWith(img);
+    else brand.prepend(img);
+    if (nameSpan) nameSpan.remove();
+  });
+
+  document.querySelectorAll(".admin-brand-mark, .admin-login-mark").forEach((mark) => {
+    if (mark.querySelector(".brand-logo") || mark.classList.contains("brand-logo")) return;
+    mark.replaceWith(createBrandLogoImg({ admin: true }));
+  });
+}
+
 function initSiteMeta() {
   if (document.querySelector('link[rel="icon"]')) return;
   const link = document.createElement("link");
   link.rel = "icon";
-  link.type = "image/svg+xml";
-  link.href = `${document.querySelector('link[rel="stylesheet"]')?.href?.includes("../") ? "../" : ""}assets/images/favicon.svg`;
+  link.type = "image/png";
+  link.href = siteAssetPath("rscleaningcollective-logo.PNG");
   document.head.appendChild(link);
 }

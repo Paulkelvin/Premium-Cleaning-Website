@@ -881,8 +881,8 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
   triggerUpdate();
 }
 
-const CALC_DELAY_MS_MIN = 2500;
-const CALC_DELAY_MS_MAX = 4500;
+const CALC_DELAY_MS_MIN = 900;
+const CALC_DELAY_MS_MAX = 1600;
 const CALC_DELAY_MS_REDUCED = 800;
 
 function randomInRange(min, max) {
@@ -941,6 +941,7 @@ function initQuoteAssistant(formContainer = document) {
   const calculatingState = root.querySelector("#quoteCalculatingState");
   const reviewReveal = root.querySelector("#quoteReviewReveal");
   const stepDots = root.querySelector("#quoteStepDots");
+  const consoleProgress = root.querySelector("#quoteConsoleProgress");
   const prefillChip = root.querySelector("#quotePrefillChip");
   let typewriterTimer = null;
   let reviewRevealTimer = null;
@@ -957,13 +958,24 @@ function initQuoteAssistant(formContainer = document) {
       : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
-    "Your contact details so we can send the estimate.",
-    "Review your total and submit."
+    "Share your contact details, review, and submit."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",
     "Review your booking and choose how you'd like to pay."
   ];
+  const quoteSubmitIdleLabel = !isBooking ? (btnSubmit?.innerHTML || "Submit & book") : "";
+
+  function setQuoteSubmitPreparing(isPreparing) {
+    if (isBooking || !btnSubmit) return;
+    btnSubmit.disabled = isPreparing;
+    btnSubmit.setAttribute("aria-disabled", isPreparing ? "true" : "false");
+    btnSubmit.setAttribute("aria-busy", isPreparing ? "true" : "false");
+    btnSubmit.innerHTML = isPreparing
+      ? `Preparing estimate... <i data-lucide="loader-circle"></i>`
+      : quoteSubmitIdleLabel;
+    if (typeof lucide !== "undefined") lucide.createIcons({ root: btnSubmit.parentElement });
+  }
 
   function scrollQuoteStepIntoView() {
     if (!isQuoteStudio || isBooking) return;
@@ -1509,11 +1521,13 @@ function initQuoteAssistant(formContainer = document) {
 
   function showCalculatingReview() {
     if (!calculatingState || !reviewReveal) {
+      setQuoteSubmitPreparing(false);
       populateReview(true);
       return;
     }
 
     if (!isBooking && !isSpaceStepComplete()) {
+      setQuoteSubmitPreparing(false);
       if (calculatingState) calculatingState.hidden = true;
       if (reviewReveal) reviewReveal.hidden = true;
       goToFirstIncompleteStep("Please complete your space details first.");
@@ -1521,6 +1535,7 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     if (reviewAnimationStep === currentStepIndex && !reviewReveal.hidden && reviewReveal.classList.contains("is-revealed")) {
+      setQuoteSubmitPreparing(false);
       populateReview(true);
       return;
     }
@@ -1532,6 +1547,7 @@ function initQuoteAssistant(formContainer = document) {
     calculatingState.hidden = false;
     reviewReveal.hidden = true;
     reviewReveal.classList.remove("is-revealed");
+    setQuoteSubmitPreparing(true);
     resetReviewRevealAnimation();
     populateReview(false);
 
@@ -1564,6 +1580,7 @@ function initQuoteAssistant(formContainer = document) {
       reviewMsgTimer = null;
       calculatingState.hidden = true;
       reviewReveal.hidden = false;
+      setQuoteSubmitPreparing(false);
       revealReviewProgressively();
       remeasureExpandable();
       scrollQuoteStepIntoView();
@@ -1573,9 +1590,13 @@ function initQuoteAssistant(formContainer = document) {
   function updateStepChrome() {
     const stepNum = currentStepIndex + 1;
     if (windowTitle && isQuoteStudio && !isBooking) {
-      windowTitle.textContent = `Quote · Step ${stepNum} of ${steps.length}`;
+      windowTitle.textContent = `Step ${stepNum} of ${steps.length}`;
     }
     root.dataset.step = String(stepNum);
+    if (consoleProgress && isQuoteStudio && !isBooking) {
+      const progress = (stepNum / steps.length) * 100;
+      consoleProgress.style.width = `${progress}%`;
+    }
 
     if (stepDots && isQuoteStudio && !isBooking) {
       stepDots.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
@@ -1659,7 +1680,10 @@ function initQuoteAssistant(formContainer = document) {
       }
     } else {
       if (btnNext) btnNext.style.display = "inline-flex";
-      if (btnSubmit) btnSubmit.style.display = "none";
+      if (btnSubmit) {
+        btnSubmit.style.display = "none";
+      }
+      setQuoteSubmitPreparing(false);
       if (reviewRevealTimer) clearTimeout(reviewRevealTimer);
       if (reviewMsgTimer) clearInterval(reviewMsgTimer);
       reviewAnimationStep = -1;
@@ -1763,6 +1787,11 @@ function initQuoteAssistant(formContainer = document) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    if (!isBooking && currentStepIndex === steps.length - 1 && calculatingState && !calculatingState.hidden) {
+      showStudioToast(root, "Please wait while we finish your estimate.", "error");
+      return;
+    }
 
     if (!validateAllQuoteSteps()) return;
 
@@ -1933,8 +1962,7 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
       : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
-    "Your contact details so we can send the estimate.",
-    "Review your total and submit."
+    "Share your contact details, review, and submit."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",

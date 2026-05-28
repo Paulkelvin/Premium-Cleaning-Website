@@ -37,25 +37,47 @@
         <h1 class="visually-hidden" data-studio-title>Get a cleaning quote in minutes</h1>
         <p class="quote-studio-intro visually-hidden" data-studio-copy>Share a few details and we will confirm scope, timing, and pricing before your appointment.</p>
 
-        <div class="quote-app quote-window" id="quoteAssistantCard">
-          <div class="quote-window-chrome" aria-hidden="true">
-            <span class="quote-window-dots"><i></i><i></i><i></i></span>
-            <span class="quote-window-title" id="quoteWindowTitle">Quote · Step 1 of 5</span>
-          </div>
-          <div class="quote-step-dots" id="quoteStepDots" aria-label="Quote progress">
-            <span class="quote-step-dot is-active"></span>
-            <span class="quote-step-dot"></span>
-            <span class="quote-step-dot"></span>
-            <span class="quote-step-dot"></span>
-            <span class="quote-step-dot"></span>
-          </div>
-          <header class="quote-app-header">
-            <p class="quote-coach-line" id="assistantBubble" aria-live="polite" aria-atomic="true"><span id="assistantBubbleText"></span></p>
-            <p class="quote-prefill-chip" id="quotePrefillChip" hidden></p>
+        <div class="quote-app quote-console quote-window" id="quoteAssistantCard">
+          <header class="quote-console-head">
+            <div>
+              <p class="quote-console-kicker">Quote Console</p>
+              <h2 class="quote-console-title">Build your cleaning quote</h2>
+            </div>
+            <div class="quote-console-meta">
+              <p class="quote-console-step" id="quoteWindowTitle">Step 1 of 4</p>
+              <div class="quote-console-progress" aria-hidden="true">
+                <span id="quoteConsoleProgress"></span>
+              </div>
+            </div>
           </header>
 
-          <div class="quote-app-body">
+          <div class="quote-app-body quote-console-body">
+            <aside class="quote-console-summary" aria-live="polite">
+              <h3>Live Summary</h3>
+              <dl class="quote-console-summary-list">
+                <div><dt>Space</dt><dd id="liveSpace">Pending...</dd></div>
+                <div><dt>Service</dt><dd id="liveService">Pending...</dd></div>
+                <div><dt>Frequency</dt><dd id="liveFrequency">-</dd></div>
+                <div><dt>Add-ons</dt><dd id="liveAddons">0 selected</dd></div>
+                <div><dt>Scope</dt><dd id="liveScope">Calculating...</dd></div>
+              </dl>
+              <div class="quote-console-estimate-note">
+                <strong>Estimate visibility</strong>
+                <p>Your total appears on the final review step.</p>
+              </div>
+            </aside>
+
             <div class="quote-app-main">
+              <header class="quote-app-header">
+                <p class="quote-coach-line" id="assistantBubble" aria-live="polite" aria-atomic="true"><span id="assistantBubbleText"></span></p>
+                <p class="quote-prefill-chip" id="quotePrefillChip" hidden></p>
+              </header>
+              <div class="quote-step-dots" id="quoteStepDots" aria-label="Quote progress">
+                <span class="quote-step-dot is-active"></span>
+                <span class="quote-step-dot"></span>
+                <span class="quote-step-dot"></span>
+                <span class="quote-step-dot"></span>
+              </div>
               <div class="quote-window-body">
                 <div class="quote-window-expand">
                   <form id="quoteAssistantForm" class="quote-form" data-table="quote_requests" novalidate>
@@ -185,7 +207,7 @@
                         </div>
                       </div>
 
-                      <div class="quote-step" data-step="4" data-step-title="Contact">
+                      <div class="quote-step" data-step="4" data-step-title="Contact &amp; review">
                         <label class="field">Full name
                           <input name="full_name" required autocomplete="name" placeholder="Jane Doe">
                         </label>
@@ -205,9 +227,7 @@
                             <label class="quote-pill"><input type="radio" name="preferred_contact" value="Text"><span>Text</span></label>
                           </div>
                         </div>
-                      </div>
-
-                      <div class="quote-step" data-step="5">
+                        <div class="quote-console-review-break" aria-hidden="true"></div>
                         <div id="quoteCalculatingState" class="quote-calculating">
                           <div class="quote-calculating-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
                           <p class="quote-calculating-text">Calculating your estimate…</p>

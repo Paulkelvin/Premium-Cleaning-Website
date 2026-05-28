@@ -153,6 +153,31 @@ h3 {
   box-shadow: 0 4px 12px rgba(12, 84, 255, 0.25);
 }
 
+.brand-logo {
+  display: block;
+  width: auto;
+  height: 52px;
+  max-width: min(200px, 42vw);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.brand-logo--admin {
+  height: 40px;
+  max-width: 40px;
+  border-radius: 10px;
+}
+
+.site-footer .brand-logo {
+  height: 48px;
+  max-width: 180px;
+}
+
+.brand-apparel-photo {
+  object-fit: contain;
+  background: linear-gradient(165deg, #f6f8fb 0%, #eef2f7 100%);
+}
+
 .site-nav {
   display: flex;
   align-items: center;
@@ -6232,7 +6257,8 @@ body.admin-login-page {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.quote-nav-next:disabled {
+.quote-nav-next:disabled,
+.quote-nav-submit:disabled {
   opacity: 0.45;
   cursor: not-allowed;
   transform: none;
@@ -10756,5 +10782,335 @@ html {
 @media (max-width: 640px) {
   .quote-page .quote-app {
     overflow: visible;
+  }
+}
+
+/* ================================================================
+   QUOTE CONSOLE REDESIGN (quote.html)
+   ================================================================ */
+
+.quote-page main {
+  overflow: visible;
+}
+
+.quote-page .quote-studio {
+  padding: 4px 0 18px;
+  min-height: auto;
+}
+
+.quote-page .quote-studio-inner {
+  max-width: 1120px;
+}
+
+.quote-page .quote-app.quote-console {
+  max-height: none !important;
+  min-height: min(640px, calc(100dvh - var(--header-height) - 42px));
+  border-radius: 22px;
+  border: 1px solid rgba(15, 79, 207, 0.12);
+  background: #fff;
+  box-shadow: 0 18px 42px rgba(11, 19, 36, 0.12);
+  overflow: hidden;
+}
+
+.quote-console-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid rgba(15, 79, 207, 0.08);
+  background: linear-gradient(180deg, rgba(238, 244, 252, 0.75), rgba(255, 255, 255, 1));
+}
+
+.quote-console-kicker {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quote-console-title {
+  margin: 4px 0 0;
+  font-size: clamp(1.1rem, 1.4vw, 1.3rem);
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.quote-console-meta {
+  min-width: 176px;
+}
+
+.quote-console-step {
+  margin: 0 0 8px;
+  text-align: right;
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quote-console-progress {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(15, 79, 207, 0.1);
+  overflow: hidden;
+}
+
+.quote-console-progress > span {
+  display: block;
+  width: 25%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #1e78ff);
+  border-radius: inherit;
+  transition: width 0.35s ease;
+}
+
+.quote-console-body {
+  display: grid;
+  grid-template-columns: minmax(250px, 320px) 1fr;
+  min-height: 0;
+}
+
+.quote-console-summary {
+  padding: 18px;
+  border-right: 1px solid rgba(15, 79, 207, 0.08);
+  background: linear-gradient(180deg, #f8fbff 0%, #f4f8fe 100%);
+}
+
+.quote-console-summary h3 {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  color: var(--navy);
+}
+
+.quote-console-summary-list {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.quote-console-summary-list div {
+  padding: 10px 11px;
+  border: 1px solid rgba(15, 79, 207, 0.1);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.quote-console-summary-list dt {
+  margin: 0 0 3px;
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.quote-console-summary-list dd {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.quote-console-estimate-note {
+  margin-top: 14px;
+  padding: 11px;
+  border-radius: 12px;
+  background: rgba(15, 79, 207, 0.07);
+  border: 1px dashed rgba(15, 79, 207, 0.2);
+}
+
+.quote-console-estimate-note strong {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blue);
+}
+
+.quote-console-estimate-note p {
+  margin: 5px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.quote-page .quote-app-main {
+  min-height: 0;
+  overflow: visible !important;
+}
+
+.quote-page .quote-window-expand {
+  max-height: none !important;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quote-page .quote-app-header {
+  padding: 12px 18px 8px;
+  background: #fff;
+  border-bottom: 1px solid rgba(15, 79, 207, 0.06);
+}
+
+.quote-page .quote-step-dots {
+  padding: 8px 18px 6px;
+  border-bottom: 1px solid rgba(15, 79, 207, 0.05);
+  background: #fff;
+}
+
+.quote-page .quote-app-main .quote-window-body {
+  padding: 10px 18px 0;
+  background: #fff;
+}
+
+.quote-page .quote-form-stage {
+  border: 1px solid rgba(15, 79, 207, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px 14px 12px;
+  min-height: 0;
+}
+
+.quote-console-review-break {
+  height: 1px;
+  margin: 12px 0;
+  background: rgba(15, 79, 207, 0.12);
+}
+
+.quote-page .quote-app-footer {
+  margin: 10px 0 0;
+  padding: 12px 18px 9px;
+  border-top: 1px solid rgba(15, 79, 207, 0.08);
+  background: #fff;
+}
+
+.quote-page .quote-nav-submit,
+.quote-page .quote-nav-next {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+.quote-page .quote-nav-next:hover,
+.quote-page .quote-nav-submit:hover {
+  background: #0c57de;
+  border-color: #0c57de;
+}
+
+.quote-page .quote-nav-trust {
+  margin: 0;
+  padding: 4px 18px 8px;
+  border-top: none;
+  background: #fff;
+}
+
+.quote-page .quote-app-studio-foot {
+  margin: 0;
+  padding: 0 18px 12px;
+  border-top: none;
+  background: #fff;
+}
+
+@media (max-width: 1024px) {
+  .quote-page .quote-app.quote-console {
+    min-height: 0;
+  }
+
+  .quote-console-body {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-console-summary {
+    border-right: none;
+    border-bottom: 1px solid rgba(15, 79, 207, 0.08);
+    padding-bottom: 14px;
+  }
+
+  .quote-console-summary-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .quote-console-head {
+    padding: 14px 12px 10px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .quote-console-step {
+    text-align: left;
+  }
+
+  .quote-console-summary {
+    padding: 12px;
+  }
+
+  .quote-console-summary-list {
+    grid-template-columns: 1fr;
+  }
+
+  .quote-page .quote-app-header,
+  .quote-page .quote-step-dots,
+  .quote-page .quote-app-main .quote-window-body,
+  .quote-page .quote-app-footer,
+  .quote-page .quote-nav-trust,
+  .quote-page .quote-app-studio-foot {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+}
+
+/* ================================================================
+   QUOTE CONSOLE QA POLISH (visual/accessibility only)
+   ================================================================ */
+
+.quote-page .quote-coach-line {
+  line-height: 1.45;
+  color: #1f2e46;
+}
+
+.quote-page .quote-nav-trust {
+  color: #4a5b70;
+}
+
+.quote-console-summary-list div {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quote-console-summary-list div:hover {
+  border-color: rgba(15, 79, 207, 0.2);
+  box-shadow: 0 4px 14px rgba(15, 79, 207, 0.06);
+}
+
+.quote-console-summary-list dd {
+  overflow-wrap: anywhere;
+}
+
+.quote-page .quote-option input:focus-visible + .quote-option-face,
+.quote-page .quote-pill input:focus-visible + span,
+.quote-page .quote-size-mode-option input:focus-visible + span,
+.quote-page .quote-tip-trigger:focus-visible,
+.quote-page .quote-nav-back:focus-visible,
+.quote-page .quote-nav-next:focus-visible,
+.quote-page .quote-nav-submit:focus-visible,
+.quote-page .quote-metric-input-wrap:focus-within {
+  outline: 2px solid rgba(15, 79, 207, 0.55);
+  outline-offset: 2px;
+}
+
+.quote-page .quote-nav-next:disabled,
+.quote-page .quote-nav-submit:disabled {
+  filter: saturate(0.85);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-console-summary-list div {
+    transition: none;
   }
 }

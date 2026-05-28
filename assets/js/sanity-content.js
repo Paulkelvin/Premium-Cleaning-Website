@@ -209,8 +209,11 @@ function applyPageHero(data) {
     if (sectionRoot) {
       text(sectionRoot.querySelector("h2"), section.title);
       text(sectionRoot.querySelector("p"), section.body);
-      attr(sectionRoot.querySelector("img"), "src", section.imageUrl);
-      attr(sectionRoot.querySelector("img"), "alt", section.title || page.title);
+      const sectionImg = sectionRoot.querySelector("img");
+      if (sectionImg && !sectionImg.hasAttribute("data-brand-apparel")) {
+        attr(sectionImg, "src", section.imageUrl);
+        attr(sectionImg, "alt", section.title || page.title);
+      }
     }
   }
 }
