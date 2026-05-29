@@ -56,6 +56,9 @@ create table if not exists bookings (
   payment_method text default 'pay_at_service',
   payment_status text default 'pending',
   quote_id uuid,
+  square_checkout_url text,
+  square_order_id text,
+  square_payment_id text,
   consent boolean default false
 );
 

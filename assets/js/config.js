@@ -37,6 +37,10 @@ window.CLEANCO_CONFIG = {
       "One-time": 0.0
     }
   },
-  // stripePaymentLink: paste your Stripe Payment Link URL to enable pay-online booking.
+  // Enable automated Square checkout for variable quote totals (requires Supabase Edge Functions).
+  squareCheckoutEnabled: true,
+  // Public site URL — must match SITE_URL secret in Supabase (no trailing slash).
+  siteUrl: "",
+  // Deprecated: static Stripe link cannot handle variable quote prices.
   stripePaymentLink: ""
 };

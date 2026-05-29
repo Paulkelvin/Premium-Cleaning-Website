@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment received | RS Cleaning Collective</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/jpeg" href="assets/images/favicon.jpeg">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://unpkg.com/lucide@0.469.0"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="section-inner header-inner">
+      <a class="brand" href="index.html"><span class="brand-mark">RS</span><span>RS Cleaning Collective</span></a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="section-inner" style="max-width: 640px;">
+        <div class="quote-success-panel" style="display: block; margin: 0 auto;">
+          <div class="quote-success-icon"><i data-lucide="check"></i></div>
+          <h1 style="margin-bottom: 12px;">Thank you for your payment</h1>
+          <p class="quote-success-copy">Your booking is saved. Our team will confirm your appointment details shortly.</p>
+          <p class="quote-success-copy" id="paymentBookingRef" hidden></p>
+          <div class="quote-success-actions" style="margin-top: 24px;">
+            <a href="index.html" class="button">Back to home</a>
+            <a href="contact.html" class="button ghost">Contact us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (typeof lucide !== "undefined") lucide.createIcons();
+      const params = new URLSearchParams(window.location.search);
+      const bookingId = params.get("booking");
+      const ref = document.getElementById("paymentBookingRef");
+      if (bookingId && ref) {
+        ref.hidden = false;
+        ref.textContent = "Reference: " + bookingId;
+      }
+    });
+  </script>
+</body>
+</html>

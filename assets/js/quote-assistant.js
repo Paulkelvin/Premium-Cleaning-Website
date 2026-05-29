@@ -1494,8 +1494,8 @@ function initQuoteAssistant(formContainer = document) {
   function updatePaymentUI() {
     if (!isBooking || !btnSubmit) return;
     const payOnline = form.querySelector('input[name="payment_method"][value="pay_online"]')?.checked;
-    const stripeLink = window.CLEANCO_CONFIG?.stripePaymentLink;
-    if (payOnline && stripeLink) {
+    const squareEnabled = typeof window.isSquareCheckoutEnabled === "function" && window.isSquareCheckoutEnabled();
+    if (payOnline && squareEnabled) {
       btnSubmit.innerHTML = `Pay & Book Now <i data-lucide="lock"></i>`;
     } else if (payOnline) {
       btnSubmit.innerHTML = `Confirm booking — pay online <i data-lucide="credit-card"></i>`;
@@ -2129,7 +2129,8 @@ function initQuoteAssistant(formContainer = document) {
         }
       } else {
         const payOnline = payload.payment_method === "pay_online";
-        const stripeLink = window.CLEANCO_CONFIG?.stripePaymentLink;
+        const squareEnabled = typeof window.isSquareCheckoutEnabled === "function" && window.isSquareCheckoutEnabled();
+        const canCreateSquareCheckout = payOnline && squareEnabled && typeof window.createSquareCheckout === "function";
 
         if (typeof window.clearQuoteSession === "function") {
           window.clearQuoteSession();
@@ -2150,8 +2151,8 @@ function initQuoteAssistant(formContainer = document) {
         if (successState) {
           const msg = successState.querySelector("[data-booking-message]");
           if (msg) {
-            if (payOnline && stripeLink) {
-              msg.textContent = "Your booking is saved. Complete secure payment in the next step to lock in your time slot.";
+            if (canCreateSquareCheckout) {
+              msg.textContent = "Your booking is saved. Redirecting to secure Square checkout...";
             } else if (payOnline) {
               msg.textContent = "Your booking is saved. We'll send a secure payment link to your email within the hour.";
             } else {
@@ -2163,8 +2164,24 @@ function initQuoteAssistant(formContainer = document) {
           showSuccessPanel(successState);
         }
 
-        if (payOnline && stripeLink) {
-          setTimeout(() => { window.open(stripeLink, "_blank", "noopener"); }, 600);
+        if (canCreateSquareCheckout && result?.id) {
+          try {
+            const checkoutUrl = await window.createSquareCheckout(result.id);
+            setTimeout(() => {
+              window.location.href = checkoutUrl;
+            }, 700);
+          } catch (checkoutErr) {
+            console.error("Square checkout error:", checkoutErr);
+            const msg = successState?.querySelector("[data-booking-message]");
+            if (msg) {
+              msg.textContent = "Your booking is saved, but we couldn't open checkout automatically. Our team will send a payment link shortly.";
+            }
+            showStudioToast(
+              root,
+              checkoutErr?.message || "Could not open Square checkout. We'll follow up with a payment link.",
+              "error"
+            );
+          }
         }
       }
 
