@@ -15,14 +15,21 @@ Admin access is managed in the **`admin_users`** table in Supabase (see migratio
 | Delete records | Each contact / quote / booking card → **Delete** |
 | View website | Sidebar **View website** or top bar button |
 | Return to admin | While logged in, public pages show a floating **Admin** button (bottom-right) |
-| Create another admin | **Settings** → Admin team → email + temporary password |
-| Export data | **Settings** → Export all records (JSON) |
+| Create another admin | **Settings** → Admin team (super admins only) |
+| Remove a standard admin | **Settings** → Admin team → **Remove** (super admins only) |
+| Export data | **Settings** → choose format (Excel, CSV, JSON) and record type |
+
+### Super admin vs standard admin
+
+- **Super admins** (`rs.cleaning@collective.com`, `paulopackager@gmail.com`) can create and remove standard admins.
+- **Standard admins** can manage leads/bookings but **cannot** invite or remove other admins.
+- Super admins do not see other super admins in the team list — only standard admins they manage.
 
 ### One-time Supabase setup for new admin features
 
 1. **SQL Editor** → run `supabase/migrations/20250530_admin_users_delete.sql`
-2. **Edge Functions** → deploy `admin-create-user` (JWT verify **OFF**, same as payment functions)
-3. Optional secret: `SUPABASE_ANON_KEY` (function also reads the `apikey` header from the dashboard)
+2. **SQL Editor** → run `supabase/migrations/20250531_admin_superuser.sql`
+3. **Edge Functions** → deploy `admin-create-user` and `admin-delete-user` (JWT verify **OFF**)
 
 ---
 

@@ -28,10 +28,6 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? req.headers.get("apikey") ?? "";
     const authHeader = req.headers.get("Authorization") ?? "";
 
-    if (!supabaseUrl || !serviceRoleKey || !anonKey) {
-      throw new Error("Server configuration incomplete");
-    }
-
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -43,60 +39,66 @@ Deno.serve(async (req) => {
     const callerEmail = String(callerData.user.email).toLowerCase();
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const { data: callerAdmin, error: adminCheckError } = await adminClient
+    const { data: callerAdmin } = await adminClient
       .from("admin_users")
       .select("email, role")
       .eq("email", callerEmail)
       .maybeSingle();
 
-    if (adminCheckError || !callerAdmin || callerAdmin.role !== "superuser") {
-      throw new Error("Only super admins can create new admin accounts");
+    if (!callerAdmin || callerAdmin.role !== "superuser") {
+      throw new Error("Only super admins can remove team members");
     }
 
-    const { email, password } = await req.json();
+    const { email } = await req.json();
     const normalizedEmail = String(email || "").toLowerCase().trim();
-    const userPassword = String(password || "");
-
-    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
-      throw new Error("A valid email is required");
-    }
-    if (userPassword.length < 8) {
-      throw new Error("Password must be at least 8 characters");
+    if (!normalizedEmail) {
+      throw new Error("Email is required");
     }
 
-    const { data: existingAdmin } = await adminClient
+    const { data: targetAdmin } = await adminClient
       .from("admin_users")
-      .select("email")
+      .select("email, role")
       .eq("email", normalizedEmail)
       .maybeSingle();
 
-    if (existingAdmin) {
-      throw new Error("This email is already an admin");
+    if (!targetAdmin) {
+      throw new Error("Admin account not found");
+    }
+    if (targetAdmin.role === "superuser") {
+      throw new Error("Super admins cannot be removed from the dashboard");
+    }
+    if (normalizedEmail === callerEmail) {
+      throw new Error("You cannot remove your own account");
     }
 
-    const { error: createError } = await adminClient.auth.admin.createUser({
-      email: normalizedEmail,
-      password: userPassword,
-      email_confirm: true,
-    });
-
-    if (createError) {
-      throw new Error(createError.message || "Could not create auth user");
+    const { data: authUsers, error: listError } = await adminClient.auth.admin.listUsers();
+    if (listError) {
+      throw new Error(listError.message || "Could not look up auth user");
     }
 
-    const { error: insertError } = await adminClient.from("admin_users").insert({
-      email: normalizedEmail,
-      invited_by: callerEmail,
-      role: "admin",
-    });
+    const authUser = authUsers.users.find(
+      (user) => String(user.email || "").toLowerCase() === normalizedEmail
+    );
 
-    if (insertError) {
-      throw new Error(insertError.message || "User created but admin access failed");
+    if (authUser?.id) {
+      const { error: deleteAuthError } = await adminClient.auth.admin.deleteUser(authUser.id);
+      if (deleteAuthError) {
+        throw new Error(deleteAuthError.message || "Could not delete auth user");
+      }
+    }
+
+    const { error: deleteRowError } = await adminClient
+      .from("admin_users")
+      .delete()
+      .eq("email", normalizedEmail);
+
+    if (deleteRowError) {
+      throw new Error(deleteRowError.message || "Could not remove admin access");
     }
 
     return jsonResponse({ ok: true, email: normalizedEmail });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Could not create admin user";
+    const message = error instanceof Error ? error.message : "Could not delete admin user";
     return jsonResponse({ error: message }, 400);
   }
 });

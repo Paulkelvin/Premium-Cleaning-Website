@@ -40,7 +40,18 @@ function mapSanityGalleryItem(item, index) {
   if (!config.sanityProjectId || !config.sanityDataset) return;
 
   const query = `{
-    "settings": *[_type == "siteSettings"][0],
+    "settings": *[_type == "siteSettings"][0]{
+      businessName,
+      logoText,
+      phone,
+      email,
+      serviceAreaSummary,
+      operatingHours,
+      footerDescription,
+      socialLinks,
+      primaryCtaLabel,
+      primaryCtaHref
+    },
     "home": *[_type == "homePage"][0]{
       heroEyebrow,
       heroTitle,
@@ -177,6 +188,24 @@ function applySettings(settings) {
   document.querySelectorAll(".site-footer p").forEach((node) => {
     if (node.textContent.includes("Premium local cleaning")) text(node, settings.footerDescription);
   });
+  document.querySelectorAll("[data-sanity-service-area]").forEach((node) => {
+    text(node, settings.serviceAreaSummary);
+  });
+  document.querySelectorAll("[data-sanity-hours]").forEach((node) => {
+    text(node, settings.operatingHours);
+  });
+  if (settings.primaryCtaLabel && settings.primaryCtaHref) {
+    document.querySelectorAll("[data-sanity-primary-cta]").forEach((node) => {
+      text(node, settings.primaryCtaLabel);
+      attr(node, "href", settings.primaryCtaHref);
+    });
+  }
+  const socialRoot = document.querySelector("[data-sanity-social]");
+  if (socialRoot && settings.socialLinks?.length) {
+    socialRoot.innerHTML = settings.socialLinks.map((link) =>
+      `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label)}</a>`
+    ).join("");
+  }
 }
 
 function applyPageHero(data) {
@@ -203,8 +232,10 @@ function applyPageHero(data) {
   const heroImg = heroRoot.querySelector("img");
   attr(heroImg, "src", page.heroImageUrl);
 
+  applyPageBody(page);
+
   const section = page.sections?.[0];
-  if (section) {
+  if (section && document.querySelector(".about-story-origin")) {
     const sectionRoot = document.querySelector(".about-story-origin, main section:nth-of-type(2)");
     if (sectionRoot) {
       text(sectionRoot.querySelector("h2"), section.title);
@@ -216,6 +247,21 @@ function applyPageHero(data) {
       }
     }
   }
+}
+
+function applyPageBody(page) {
+  const root = document.querySelector("[data-sanity-page-content]");
+  if (!root || !page?.sections?.length) return;
+  root.innerHTML = page.sections.map((section) => {
+    const body = String(section.body || "")
+      .split(/\n+/)
+      .filter(Boolean)
+      .map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`)
+      .join("");
+    const eyebrow = section.eyebrow ? `<p class="eyebrow">${escapeHtml(section.eyebrow)}</p>` : "";
+    const title = section.title ? `<h2>${escapeHtml(section.title)}</h2>` : "";
+    return `${eyebrow}${title}${body}`;
+  }).join("");
 }
 
 function applyQuoteStudioHero(pages) {
@@ -236,11 +282,10 @@ function applyQuoteStudioHero(pages) {
 
 function applyHome(home) {
   if (!home || document.body.dataset.sanityPage !== "home") return;
-  text(document.querySelector(".hero .eyebrow"), home.heroEyebrow);
   text(document.querySelector(".hero h1"), home.heroTitle);
   text(document.querySelector(".hero .hero-lead"), home.heroCopy);
 
-  const heroImage = document.querySelector(".hero-image img, .hero img");
+  const heroImage = document.querySelector(".hero-bg img, .hero-image img, .hero img");
   attr(heroImage, "src", home.heroImageUrl);
 
   const actions = document.querySelectorAll(".hero-actions a");
@@ -255,21 +300,39 @@ function applyHome(home) {
     text(node.querySelector("span"), item.label);
   });
 
-  text(document.querySelector(".services-overview h2"), home.servicesOverviewTitle);
-  text(document.querySelector(".why-choose h2, .band h2"), home.whyChooseUsTitle);
+  text(document.querySelector(".why-choose-us-split .heading-tag-split h2"), home.whyChooseUsTitle);
+  document.querySelectorAll(".why-choose-us-split .premium-features .feature-row").forEach((row, index) => {
+    const item = home.whyChooseUsItems?.[index];
+    if (!item) return;
+    text(row.querySelector("span"), item);
+  });
 
-  const serviceCards = document.querySelectorAll("[data-home-service-cards] .card, .services-grid .card");
+  text(document.querySelector(".services-editorial-section .heading-underline-gradient h2"), home.servicesOverviewTitle);
+
+  const serviceCards = document.querySelectorAll(".service-card-horizontal");
   (home.serviceCards || []).forEach((card, index) => {
     const node = serviceCards[index];
     if (!node) return;
     text(node.querySelector("h3"), card.title);
-    text(node.querySelector("p"), card.body);
+    text(node.querySelector(".service-info-wrap > p"), card.body);
     const img = node.querySelector("img");
     attr(img, "src", card.imageUrl);
     attr(img, "alt", card.title);
-    const link = node.querySelector("a");
-    attr(link, "href", card.href);
+    const learnLink = node.querySelector(".service-card-actions .tag:not(.tag--cta)");
+    attr(learnLink, "href", card.href);
   });
+
+  const steps = document.querySelectorAll(".grid.four.steps .step");
+  (home.howItWorksSteps || []).forEach((step, index) => {
+    const node = steps[index];
+    if (!node) return;
+    text(node.querySelector("h3"), step.title);
+    text(node.querySelector("p"), step.body);
+  });
+
+  text(document.querySelector(".quote-panel h2"), home.finalCtaTitle);
+  const quotePanelCopy = document.querySelector(".quote-panel > p");
+  if (quotePanelCopy) text(quotePanelCopy, home.finalCtaCopy);
 }
 
 function applyService(services) {
@@ -277,15 +340,32 @@ function applyService(services) {
   if (!slug) return;
   const service = services.find((item) => item.slug === slug);
   if (!service) return;
-  text(document.querySelector(".page-hero .eyebrow"), service.title);
-  text(document.querySelector(".page-hero h1"), service.shortDescription);
-  text(document.querySelector(".page-hero p:not(.eyebrow)"), service.overview);
-  text(document.querySelector("main section:nth-of-type(2) h2"), service.overviewTitle);
-  const list = document.querySelector("main section:nth-of-type(2) .feature-list");
-  if (list && service.includedItems?.length) {
-    list.innerHTML = service.includedItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+
+  const hero = document.querySelector(".service-detail-hero, .page-hero");
+  if (hero) {
+    text(hero.querySelector(".eyebrow"), service.title);
+    text(hero.querySelector("h1"), service.shortDescription || service.overviewTitle);
+    text(hero.querySelector(".service-detail-for, .hero-lead, p:not(.eyebrow)"), service.overview);
+    const cta = hero.querySelector(".cta-row .button, .hero-actions .button");
+    if (cta && service.ctaLabel) text(cta, service.ctaLabel);
   }
-  const image = document.querySelector("main section:nth-of-type(2) img");
+
+  const includedList = document.querySelector(".service-detail-scope .feature-list:not(.feature-list--muted)");
+  if (includedList && service.includedItems?.length) {
+    includedList.innerHTML = service.includedItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  }
+
+  const addOnSection = document.querySelector("[data-sanity-service-addons]");
+  if (addOnSection && service.recommendedAddOns?.length) {
+    addOnSection.innerHTML = service.recommendedAddOns.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
+  }
+
+  const factors = document.querySelector("[data-sanity-service-factors]");
+  if (factors && service.estimateFactors?.length) {
+    factors.innerHTML = service.estimateFactors.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  }
+
+  const image = document.querySelector(".service-detail-hero img, .service-detail-scope img");
   attr(image, "src", service.heroImageUrl);
   attr(image, "alt", service.title);
   if (service.title) document.title = `${service.title} | RS Cleaning Collective`;

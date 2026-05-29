@@ -208,7 +208,7 @@
         <div class="admin-settings-grid">
           <article class="admin-settings-card">
             <h3><i data-lucide="user"></i> Your account</h3>
-            <p class="admin-settings-copy">Signed in as <strong data-settings-email>—</strong></p>
+            <p class="admin-settings-copy">Signed in as <strong data-settings-email>—</strong> <span class="admin-role-badge" data-settings-role hidden></span></p>
             <p class="admin-settings-copy admin-settings-copy--muted">Access is limited to approved admin accounts. Use the sidebar or button above to return to the public website any time.</p>
             <div class="admin-settings-actions">
               <a class="admin-btn admin-btn--ghost" href="index.html" data-admin-view-site><i data-lucide="globe"></i> Open website</a>
@@ -216,9 +216,9 @@
             </div>
           </article>
 
-          <article class="admin-settings-card">
+          <article class="admin-settings-card" data-superuser-only hidden>
             <h3><i data-lucide="users"></i> Admin team</h3>
-            <p class="admin-settings-copy">Create login access for another admin without opening Supabase.</p>
+            <p class="admin-settings-copy">Super admins can create standard admin accounts. New admins can manage records but cannot invite others.</p>
             <ul class="admin-team-list" data-admin-team-list></ul>
             <form class="admin-team-form" data-admin-invite-form novalidate>
               <label class="admin-settings-field">
@@ -235,11 +235,35 @@
             </form>
           </article>
 
+          <article class="admin-settings-card" data-admin-only-note hidden>
+            <h3><i data-lucide="shield"></i> Admin access</h3>
+            <p class="admin-settings-copy">You have standard admin access. Contact a super admin if you need another team member added.</p>
+          </article>
+
           <article class="admin-settings-card">
             <h3><i data-lucide="database"></i> Data tools</h3>
-            <p class="admin-settings-copy">Export all contacts, quotes, and bookings as JSON for backup or reporting.</p>
+            <p class="admin-settings-copy">Export contacts, quotes, and bookings for backup or reporting.</p>
+            <div class="admin-export-controls">
+              <label class="admin-settings-field">
+                <span>Format</span>
+                <select data-admin-export-format aria-label="Export format">
+                  <option value="xlsx">Excel (.xlsx)</option>
+                  <option value="csv">CSV (.csv)</option>
+                  <option value="json">JSON (.json)</option>
+                </select>
+              </label>
+              <label class="admin-settings-field">
+                <span>Records</span>
+                <select data-admin-export-scope aria-label="Export scope">
+                  <option value="all">All records</option>
+                  <option value="contact_submissions">Contacts only</option>
+                  <option value="quote_requests">Quotes only</option>
+                  <option value="bookings">Bookings only</option>
+                </select>
+              </label>
+            </div>
             <div class="admin-settings-actions">
-              <button class="admin-btn admin-btn--ghost" type="button" data-admin-export><i data-lucide="download"></i> Export all records</button>
+              <button class="admin-btn admin-btn--primary" type="button" data-admin-export><i data-lucide="download"></i> Download export</button>
             </div>
             <ul class="admin-settings-list admin-settings-list--compact">
               <li><strong>Live site</strong> <span data-settings-site-url>—</span></li>
@@ -251,6 +275,7 @@
     </main>
   </div>
   <script src="assets/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="assets/js/site.js"></script>
   <script src="assets/js/admin.js"></script>
   <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>

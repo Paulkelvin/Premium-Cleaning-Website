@@ -27,6 +27,8 @@ let dashboardCache = {
   bookings: []
 };
 
+let currentAdminProfile = { email: "", role: "admin" };
+
 function getAdminHeaders() {
   return {
     apikey: adminConfig.supabaseAnonKey,
@@ -751,12 +753,48 @@ async function deleteRecord(table, id) {
   }
 }
 
+async function fetchCurrentAdminProfile() {
+  const email = (
+    safeGet("cleanco_admin_email") ||
+    parseJwtEmail(getAdminToken()) ||
+    ""
+  ).toLowerCase();
+
+  if (!adminHasSupabase || !email) {
+    const isSuper = getAllowedAdminEmails().includes(email);
+    return { email, role: isSuper ? "superuser" : "admin" };
+  }
+
+  const response = await fetch(
+    `${adminConfig.supabaseUrl}/rest/v1/admin_users?email=eq.${encodeURIComponent(email)}&select=email,role`,
+    { headers: getAdminHeaders() }
+  );
+  if (!response.ok) {
+    return { email, role: getAllowedAdminEmails().includes(email) ? "superuser" : "admin" };
+  }
+  const rows = await response.json();
+  if (!rows.length) {
+    return { email, role: getAllowedAdminEmails().includes(email) ? "superuser" : "admin" };
+  }
+  return rows[0];
+}
+
+function isSuperuser() {
+  return currentAdminProfile.role === "superuser";
+}
+
 async function fetchAdminTeam() {
+  if (!isSuperuser()) return [];
   if (!adminHasSupabase) {
-    return getAllowedAdminEmails().map((email) => ({ email, created_at: null, invited_by: null }));
+    return getAllowedAdminEmails().map((entry) => ({
+      email: entry,
+      created_at: null,
+      invited_by: null,
+      role: "superuser"
+    }));
   }
   const response = await fetch(
-    `${adminConfig.supabaseUrl}/rest/v1/admin_users?select=email,created_at,invited_by&order=created_at.asc`,
+    `${adminConfig.supabaseUrl}/rest/v1/admin_users?role=eq.admin&select=email,created_at,invited_by,role&order=created_at.asc`,
     { headers: getAdminHeaders() }
   );
   if (!response.ok) {
@@ -785,30 +823,71 @@ async function createAdminUser(email, password) {
   return body;
 }
 
+async function deleteAdminUser(email) {
+  if (!adminHasSupabase) {
+    throw new Error("Supabase is required to remove admin accounts.");
+  }
+  const response = await fetch(`${adminConfig.supabaseUrl}/functions/v1/admin-delete-user`, {
+    method: "POST",
+    headers: {
+      ...getAdminHeaders(),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email })
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body.error || "Could not remove admin account");
+  }
+  return body;
+}
+
 function renderAdminTeam(members) {
   const list = document.querySelector("[data-admin-team-list]");
   if (!list) return;
   if (!members.length) {
-    list.innerHTML = `<li class="admin-team-empty">No team members loaded.</li>`;
+    list.innerHTML = `<li class="admin-team-empty">No standard admin accounts yet.</li>`;
     return;
   }
   list.innerHTML = members
     .map((member) => {
       const invited = member.invited_by ? ` · invited by ${escapeHtml(member.invited_by)}` : "";
       const when = member.created_at ? formatTimestamp(member.created_at) : "Demo mode";
-      return `<li><strong>${escapeHtml(member.email)}</strong><span>${when}${invited}</span></li>`;
+      return `
+        <li class="admin-team-item">
+          <div class="admin-team-item-copy">
+            <strong>${escapeHtml(member.email)}</strong>
+            <span>${when}${invited}</span>
+          </div>
+          <button class="admin-btn admin-btn--danger admin-btn--small" type="button" data-delete-admin data-email="${escapeHtml(member.email)}">
+            <i data-lucide="trash-2"></i> Remove
+          </button>
+        </li>`;
     })
     .join("");
 }
 
 function updateSettingsPanel() {
   const emailEl = document.querySelector("[data-settings-email]");
+  const roleEl = document.querySelector("[data-settings-role]");
   const siteEl = document.querySelector("[data-settings-site-url]");
+  const superCard = document.querySelector("[data-superuser-only]");
+  const adminNote = document.querySelector("[data-admin-only-note]");
   const email =
+    currentAdminProfile.email ||
     safeGet("cleanco_admin_email") ||
     parseJwtEmail(getAdminToken()) ||
     "Admin";
+
   if (emailEl) emailEl.textContent = email;
+  if (roleEl) {
+    const label = isSuperuser() ? "Super admin" : "Admin";
+    roleEl.textContent = label;
+    roleEl.hidden = false;
+    roleEl.className = `admin-role-badge ${isSuperuser() ? "is-super" : "is-admin"}`;
+  }
+  if (superCard) superCard.hidden = !isSuperuser();
+  if (adminNote) adminNote.hidden = isSuperuser();
   if (siteEl) {
     const siteUrl = adminConfig.siteUrl || window.location.origin;
     siteEl.innerHTML = `<a href="${escapeHtml(siteUrl)}" target="_blank" rel="noopener">${escapeHtml(siteUrl)}</a>`;
@@ -816,27 +895,112 @@ function updateSettingsPanel() {
 }
 
 async function loadSettingsView() {
+  currentAdminProfile = await fetchCurrentAdminProfile();
   updateSettingsPanel();
-  const members = await fetchAdminTeam();
-  renderAdminTeam(members);
+  if (isSuperuser()) {
+    const members = await fetchAdminTeam();
+    renderAdminTeam(members);
+  }
   refreshIcons();
 }
 
-function exportAllRecords() {
-  const payload = {
-    exported_at: new Date().toISOString(),
-    contact_submissions: dashboardCache.contact_submissions,
-    quote_requests: dashboardCache.quote_requests,
-    bookings: dashboardCache.bookings
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+function flattenRecord(row) {
+  const copy = { ...row };
+  Object.keys(copy).forEach((key) => {
+    const value = copy[key];
+    if (value === null || value === undefined) return;
+    if (typeof value === "object") copy[key] = JSON.stringify(value);
+  });
+  return copy;
+}
+
+function getExportRows(scope) {
+  if (scope === "all") {
+    return [
+      ...dashboardCache.contact_submissions.map((row) => ({ record_type: "contact", ...flattenRecord(row) })),
+      ...dashboardCache.quote_requests.map((row) => ({ record_type: "quote", ...flattenRecord(row) })),
+      ...dashboardCache.bookings.map((row) => ({ record_type: "booking", ...flattenRecord(row) }))
+    ];
+  }
+  const label = scope === "contact_submissions" ? "contact" : scope === "quote_requests" ? "quote" : "booking";
+  return (dashboardCache[scope] || []).map((row) => ({ record_type: label, ...flattenRecord(row) }));
+}
+
+function downloadBlob(blob, filename) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `rs-cleaning-export-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = filename;
   link.click();
   URL.revokeObjectURL(url);
-  showAdminToast("Export downloaded.", "success");
+}
+
+function exportRecords() {
+  const format = document.querySelector("[data-admin-export-format]")?.value || "xlsx";
+  const scope = document.querySelector("[data-admin-export-scope]")?.value || "all";
+  const stamp = new Date().toISOString().slice(0, 10);
+  const rows = getExportRows(scope);
+
+  if (!rows.length) {
+    showAdminToast("No records to export for that selection.");
+    return;
+  }
+
+  if (format === "json") {
+    const payload = {
+      exported_at: new Date().toISOString(),
+      scope,
+      records: rows
+    };
+    downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), `rs-cleaning-export-${stamp}.json`);
+    showAdminToast("JSON export downloaded.", "success");
+    return;
+  }
+
+  if (format === "csv") {
+    const headers = Array.from(rows.reduce((set, row) => {
+      Object.keys(row).forEach((key) => set.add(key));
+      return set;
+    }, new Set()));
+    const escapeCsv = (value) => {
+      const text = String(value ?? "");
+      if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+      return text;
+    };
+    const lines = [
+      headers.join(","),
+      ...rows.map((row) => headers.map((key) => escapeCsv(row[key])).join(","))
+    ];
+    const csv = `\uFEFF${lines.join("\n")}`;
+    downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `rs-cleaning-export-${stamp}.csv`);
+    showAdminToast("CSV export downloaded.", "success");
+    return;
+  }
+
+  if (typeof XLSX === "undefined") {
+    showAdminToast("Excel export is unavailable. Choose CSV or JSON instead.");
+    return;
+  }
+
+  if (scope === "all") {
+    const workbook = XLSX.utils.book_new();
+    const sheets = [
+      ["Contacts", dashboardCache.contact_submissions],
+      ["Quotes", dashboardCache.quote_requests],
+      ["Bookings", dashboardCache.bookings]
+    ];
+    sheets.forEach(([name, data]) => {
+      const sheetRows = data.map(flattenRecord);
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(sheetRows.length ? sheetRows : [{ note: "No records" }]), name);
+    });
+    XLSX.writeFile(workbook, `rs-cleaning-export-${stamp}.xlsx`);
+  } else {
+    const sheetName = scope === "contact_submissions" ? "Contacts" : scope === "quote_requests" ? "Quotes" : "Bookings";
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), sheetName);
+    XLSX.writeFile(workbook, `rs-cleaning-${sheetName.toLowerCase()}-${stamp}.xlsx`);
+  }
+  showAdminToast("Excel export downloaded.", "success");
 }
 
 async function initDashboard() {
@@ -848,6 +1012,7 @@ async function initDashboard() {
 
   setDashboardLoading(true);
   try {
+    currentAdminProfile = await fetchCurrentAdminProfile();
     const entries = await Promise.all(
       TABLES.map(async (table) => [table, await fetchTable(table)])
     );
@@ -928,6 +1093,26 @@ document.addEventListener("click", async (event) => {
     return;
   }
 
+  const deleteAdminBtn = event.target.closest("[data-delete-admin]");
+  if (deleteAdminBtn) {
+    event.preventDefault();
+    const email = deleteAdminBtn.dataset.email;
+    if (!email) return;
+    const confirmed = window.confirm(`Remove admin access for ${email}? They will no longer be able to sign in.`);
+    if (!confirmed) return;
+    deleteAdminBtn.disabled = true;
+    try {
+      await deleteAdminUser(email);
+      showAdminToast(`Removed admin access for ${email}.`, "success");
+      await loadSettingsView();
+    } catch (error) {
+      console.error(error);
+      showAdminToast(error.message || "Could not remove admin account.");
+      deleteAdminBtn.disabled = false;
+    }
+    return;
+  }
+
   const expandAll = event.target.closest("[data-admin-expand-all]");
   if (expandAll) {
     const toolbar = expandAll.closest("[data-admin-toolbar]");
@@ -999,7 +1184,7 @@ function switchView(targetView) {
 }
 
 function initSettingsHandlers() {
-  document.querySelector("[data-admin-export]")?.addEventListener("click", exportAllRecords);
+  document.querySelector("[data-admin-export]")?.addEventListener("click", exportRecords);
 
   const inviteForm = document.querySelector("[data-admin-invite-form]");
   if (inviteForm) {
