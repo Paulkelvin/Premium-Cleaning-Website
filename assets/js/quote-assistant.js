@@ -740,11 +740,22 @@ function buildSubmissionPayload(form, table) {
   payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
 
   if (table === "bookings") {
-    payload.service_area_name = pricing.areaName || payload.service_area_name || "";
-    payload.travel_fee = Number.isFinite(Number(pricing.travelFee)) ? Number(pricing.travelFee) : 0;
     payload.payment_method = data.get("payment_method") || "pay_at_service";
     if (payload.payment_method !== "pay_online") {
       payload.payment_method = "pay_at_service";
+    }
+    const normalizedAreaName = String(pricing.areaName || payload.service_area_name || "").trim();
+    const normalizedTravelFee = Number.isFinite(Number(pricing.travelFee))
+      ? Number(pricing.travelFee)
+      : Number(payload.travel_fee || 0) || 0;
+
+    // Keep online checkout resilient for legacy sessions without service-area metadata.
+    if (!normalizedAreaName && payload.payment_method === "pay_online") {
+      payload.service_area_name = "Outside service area";
+      payload.travel_fee = 35;
+    } else {
+      payload.service_area_name = normalizedAreaName;
+      payload.travel_fee = normalizedTravelFee;
     }
   }
 
@@ -1269,7 +1280,9 @@ function initQuoteAssistant(formContainer = document) {
       bubble.classList.remove("is-typing", "is-fading");
       setStepContentVisible(true);
       remeasureExpandable();
-      scrollQuoteStepIntoView({ behavior: scrollBehavior });
+      if (!isBooking) {
+        scrollQuoteStepIntoView({ behavior: scrollBehavior });
+      }
     };
 
     if (instant || (coachInitialPaint && isQuoteStudio && !isBooking)) {
@@ -1310,7 +1323,9 @@ function initQuoteAssistant(formContainer = document) {
           setTimeout(() => {
             setStepContentVisible(true);
             remeasureExpandable();
-            scrollQuoteStepIntoView({ behavior: scrollBehavior });
+            if (!isBooking) {
+              scrollQuoteStepIntoView({ behavior: scrollBehavior });
+            }
           }, 280);
         }
       }
@@ -2208,12 +2223,6 @@ function initQuoteAssistant(formContainer = document) {
 
     try {
       const { payload, pricing } = buildSubmissionPayload(form, table);
-      if (table === "bookings") {
-        const normalizedArea = String(payload.service_area_name || "").trim();
-        if (!normalizedArea) {
-          throw new Error("Please check and confirm your service area before booking.");
-        }
-      }
       let result = {};
       if (table === "bookings") {
         if (typeof window.supabaseInsert !== "function") {

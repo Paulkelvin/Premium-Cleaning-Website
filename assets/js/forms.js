@@ -42,6 +42,9 @@ function sanitizePayload(table, payload) {
 
 function mapSubmissionError(error) {
   const raw = String(error?.message || error || "");
+  if (raw.toLowerCase().includes("service area")) {
+    return "Please confirm your service area before checkout. If unsure, continue and we'll apply the outside-area review fee.";
+  }
   if (raw.includes("row-level security") || raw.includes("RLS")) {
     return "We could not save your request yet. Please call or email us directly.";
   }
