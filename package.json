@@ -11,7 +11,10 @@
     "sanity:migrate-images": "node scripts/migrate-sanity-images.mjs",
     "sanity:migrate-images:cli": "sanity exec scripts/migrate-sanity-images-exec.cjs --with-user-token",
     "sanity:schema-deploy": "sanity schema deploy --workspace premiumCleaningWebsite --no-extract-manifest",
-    "sanity:sync-service-areas": "sanity exec scripts/sync-service-areas.cjs --with-user-token"
+    "sanity:sync-service-areas": "sanity exec scripts/sync-service-areas.cjs --with-user-token",
+    "sanity:sync-website": "sanity exec scripts/sync-website-to-sanity.cjs --with-user-token",
+    "sanity:sync-stock-images": "sanity exec scripts/sync-stock-service-images.cjs --with-user-token",
+    "sanity:strip-legacy-urls": "sanity exec scripts/strip-legacy-url-fields.cjs --with-user-token"
   },
   "dependencies": {
     "@sanity/vision": "^3.99.0",

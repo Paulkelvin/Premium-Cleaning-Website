@@ -142,6 +142,25 @@ To restore the six Maryland/DC service area documents from seed:
 npm run sanity:sync-service-areas
 ```
 
+### Keep Sanity aligned with the website (recommended)
+
+The live site loads marketing content from Sanity (`assets/js/sanity-content.js`). HTML still contains Unsplash placeholders as fallbacks; **Sanity is what visitors see when the API loads.**
+
+To push **current website copy + real gallery photos** into Sanity:
+
+```powershell
+npm run sanity:sync-website
+```
+
+This script:
+
+1. Reads text from your HTML pages and `assets/js/config.js`
+2. Builds gallery items from `assets/images/Before*.jpeg` and `After*.jpeg` (same rules as `gallery-data.js`)
+3. Uploads local images into Sanity image fields
+4. Removes stale FAQ/testimonial/gallery documents that no longer exist on the site
+
+Re-run after you change website copy or add new before/after photos.
+
 ---
 
 ## Step 4 — What the client gets at handoff
