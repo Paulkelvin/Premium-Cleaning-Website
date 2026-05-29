@@ -1,9 +1,18 @@
 window.CLEANCO_CONFIG = {
   businessName: "RS Cleaning Collective",
   // Update phone in Sanity siteSettings when the client provides their real number.
-  phone: "(555) 014-7820",
-  email: "hello@REDACTED.com",
-  serviceArea: "Austin, TX and nearby communities",
+  phone: "202-262-6379",
+  email: "Ryannrslegalcollective.com",
+  address: "3990 dockser drive, Mechanicsville, Md 20659",
+  serviceArea: "Charles County, St. Mary's County, Calvert County, Prince George's County, Southern Anne Arundel County, and Washington, DC",
+  serviceAreas: [
+    "Charles County",
+    "St. Mary's County",
+    "Calvert County",
+    "Prince George's County",
+    "Southern Anne Arundel County",
+    "Washington, DC"
+  ],
   supabaseUrl: "https://hbacogyhftngwoxenttv.supabase.co",
   supabaseAnonKey: "sb_publishable_jCivAQateqBu5rCK1IbmbQ_zNB4E39g",
   // Optional: legacy anon JWT (eyJ...) from Supabase → Project Settings → API.
@@ -19,19 +28,19 @@ window.CLEANCO_CONFIG = {
     minimumJob: 100,
     rates: {
       "Standard cleaning": 0.17,
-      "Deep cleaning": 0.30,
-      "Move-in/Move-out": 0.35,
+      "Deep cleaning": 0.28,
+      "Move-in/Move-out": 0.32,
       "Office cleaning": 0.20
     },
     addOns: {
-      "Carpet cleaning": 75,
       "Wash and fold": 45,
-      "Inside oven": 25,
-      "Inside fridge": 25,
-      "Cabinet interiors": 30,
-      "Interior windows": 40,
-      "Junk removal": 95,
-      "Power washing": 120
+      "Fold laundry only": 25,
+      "Inside oven": 40,
+      "Inside fridge": 40,
+      "Cabinet interiors": 50,
+      "Interior Windows Accessible (1-10)": 50,
+      "Interior Windows Accessible (11-20)": 100,
+      "Bedding refresh (strip and remake beds)": 15
     },
     frequencyDiscounts: {
       "Weekly": 0.20,

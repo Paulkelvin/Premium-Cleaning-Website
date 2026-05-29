@@ -6,6 +6,14 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+function safeExternalUrl(value) {
+  try {
+    const parsed = new URL(String(value || "").trim());
+    if (parsed.protocol === "https:") return parsed.href;
+  } catch {}
+  return "";
+}
+
 function text(node, value) {
   if (node && value) node.textContent = value;
 }
@@ -172,39 +180,51 @@ function mapSanityGalleryItem(item, index) {
 
 function applySettings(settings) {
   if (!settings) return;
+  const cfg = window.CLEANCO_CONFIG || {};
+  const normalized = {
+    ...settings,
+    phone: settings.phone || cfg.phone,
+    email: settings.email || cfg.email,
+    serviceAreaSummary: settings.serviceAreaSummary || cfg.serviceArea,
+  };
   document.querySelectorAll(".brand span:last-child").forEach((node) => {
-    if (!node.textContent.includes("Admin")) text(node, settings.logoText || settings.businessName);
+    if (!node.textContent.includes("Admin")) text(node, normalized.logoText || normalized.businessName);
   });
   document.querySelectorAll("a[href^='tel:']").forEach((node) => {
-    if (!settings.phone) return;
-    text(node, settings.phone);
-    attr(node, "href", `tel:${String(settings.phone).replace(/[^+\d]/g, "")}`);
+    if (!normalized.phone) return;
+    text(node, normalized.phone);
+    attr(node, "href", `tel:${String(normalized.phone).replace(/[^+\d]/g, "")}`);
   });
   document.querySelectorAll("a[href^='mailto:']").forEach((node) => {
-    if (!settings.email) return;
-    text(node, settings.email);
-    attr(node, "href", `mailto:${settings.email}`);
+    if (!normalized.email) return;
+    text(node, normalized.email);
+    attr(node, "href", `mailto:${normalized.email}`);
   });
   document.querySelectorAll(".site-footer p").forEach((node) => {
-    if (node.textContent.includes("Premium local cleaning")) text(node, settings.footerDescription);
+    if (node.textContent.includes("Premium local cleaning")) text(node, normalized.footerDescription);
   });
   document.querySelectorAll("[data-sanity-service-area]").forEach((node) => {
-    text(node, settings.serviceAreaSummary);
+    text(node, normalized.serviceAreaSummary);
   });
   document.querySelectorAll("[data-sanity-hours]").forEach((node) => {
-    text(node, settings.operatingHours);
+    text(node, normalized.operatingHours);
   });
-  if (settings.primaryCtaLabel && settings.primaryCtaHref) {
+  if (normalized.primaryCtaLabel && normalized.primaryCtaHref) {
     document.querySelectorAll("[data-sanity-primary-cta]").forEach((node) => {
-      text(node, settings.primaryCtaLabel);
-      attr(node, "href", settings.primaryCtaHref);
+      text(node, normalized.primaryCtaLabel);
+      attr(node, "href", normalized.primaryCtaHref);
     });
   }
   const socialRoot = document.querySelector("[data-sanity-social]");
-  if (socialRoot && settings.socialLinks?.length) {
-    socialRoot.innerHTML = settings.socialLinks.map((link) =>
-      `<a href="${escapeHtml(link.url)}" target="_blank" rel="noopener">${escapeHtml(link.label)}</a>`
-    ).join("");
+  if (socialRoot && normalized.socialLinks?.length) {
+    socialRoot.innerHTML = normalized.socialLinks
+      .map((link) => {
+        const href = safeExternalUrl(link.url);
+        if (!href) return "";
+        return `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.label)}</a>`;
+      })
+      .filter(Boolean)
+      .join("");
   }
 }
 
@@ -443,7 +463,19 @@ function applyGallery(items) {
 
 function applyServiceAreas(areas) {
   const target = document.querySelector("[data-service-area-list]");
-  if (!target || !areas.length) return;
+  if (!target) return;
+  const configAreas = Array.isArray(window.CLEANCO_CONFIG?.serviceAreas)
+    ? window.CLEANCO_CONFIG.serviceAreas.filter(Boolean)
+    : [];
+  if (configAreas.length) {
+    target.innerHTML = configAreas.map((name) => `
+      <article class="card service-area-card">
+        <h3>${escapeHtml(name)}</h3>
+      </article>
+    `).join("");
+    return;
+  }
+  if (!areas.length) return;
   target.innerHTML = areas.map((area) => `
     <article class="card service-area-card">
       <h3>${escapeHtml(area.name)}</h3>

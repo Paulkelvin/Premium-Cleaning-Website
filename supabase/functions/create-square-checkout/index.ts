@@ -6,6 +6,96 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+/** Keep pricing in sync with assets/js/config.js */
+function computeBookingTotal(booking: Record<string, string | null | undefined>) {
+  const pricing = {
+    minimumJob: 100,
+    rates: {
+      "Standard cleaning": 0.17,
+      "Deep cleaning": 0.28,
+      "Move-in/Move-out": 0.32,
+      "Office cleaning": 0.20,
+    },
+    addOns: {
+      "Wash and fold": 45,
+      "Fold laundry only": 25,
+      "Inside oven": 40,
+      "Inside fridge": 40,
+      "Cabinet interiors": 50,
+      "Interior Windows Accessible (1-10)": 50,
+      "Interior Windows Accessible (11-20)": 100,
+      "Bedding refresh (strip and remake beds)": 15,
+    },
+    frequencyDiscounts: {
+      Weekly: 0.20,
+      "Bi-weekly": 0.15,
+      Monthly: 0.10,
+      "One-time": 0.0,
+    },
+  };
+
+  const serviceType = String(booking.service_type || "").trim();
+  const parsedSqft = parseInt(String(booking.square_feet || "").replace(/,/g, ""), 10);
+  const beds = parseInt(String(booking.bedrooms || ""), 10) || 2;
+  const baths = parseInt(String(booking.bathrooms || ""), 10) || 1;
+  const sqft = parsedSqft > 0 ? parsedSqft : Math.round(beds * 450 + baths * 150 + 350);
+  const freq = String(booking.frequency || "One-time").trim() || "One-time";
+
+  if (!serviceType || !pricing.rates[serviceType as keyof typeof pricing.rates] || sqft <= 0) {
+    return { total: 0 };
+  }
+
+  let basePrice = sqft * pricing.rates[serviceType as keyof typeof pricing.rates];
+  if (basePrice > 0 && basePrice < pricing.minimumJob) basePrice = pricing.minimumJob;
+
+  let addonsPrice = 0;
+  String(booking.add_ons || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .forEach((addon) => {
+      if (pricing.addOns[addon as keyof typeof pricing.addOns]) {
+        addonsPrice += pricing.addOns[addon as keyof typeof pricing.addOns];
+      }
+    });
+
+  let subtotal = basePrice + addonsPrice;
+  const discount = pricing.frequencyDiscounts[freq as keyof typeof pricing.frequencyDiscounts] || 0;
+  subtotal -= subtotal * discount;
+
+  const travelFee = resolveTravelFee(booking.service_area_name, booking.travel_fee);
+  subtotal += travelFee;
+
+  return { total: Math.round(subtotal * 100) / 100 };
+}
+
+const AREA_FEE_RULES: Record<string, number> = {
+  "charles county": 0,
+  "st. mary's county": 0,
+  "st mary's county": 0,
+  "calvert county": 0,
+  "prince george's county": 0,
+  "prince georges county": 0,
+  "southern anne arundel county": 20,
+  "washington, dc": 20,
+  "washington dc": 20,
+};
+
+function resolveTravelFee(areaName?: string | null, rawTravelFee?: string | null) {
+  const normalizedArea = String(areaName || "").trim().toLowerCase();
+  if (normalizedArea && AREA_FEE_RULES[normalizedArea] != null) {
+    return AREA_FEE_RULES[normalizedArea];
+  }
+
+  const numericFee = Math.max(0, Number(rawTravelFee || 0) || 0);
+  if (normalizedArea && numericFee > 0) {
+    // Unknown but explicitly confirmed area from checker/session.
+    return numericFee;
+  }
+  // No confirmed area -> treat as outside zone default.
+  return 35;
+}
+
 function squareBaseUrl(environment: string) {
   return environment === "production"
     ? "https://connect.squareup.com/v2"
@@ -53,7 +143,9 @@ Deno.serve(async (req) => {
 
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
-      .select("id, estimated_total, service_type, full_name, payment_method, payment_status")
+      .select(
+        "id, estimated_total, service_type, full_name, payment_method, payment_status, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+      )
       .eq("id", bookingId)
       .single();
 
@@ -65,9 +157,17 @@ Deno.serve(async (req) => {
       throw new Error("This booking is not set up for online payment");
     }
 
-    const amountCents = Math.round(Number(booking.estimated_total) * 100);
+    if (booking.payment_status === "paid") {
+      throw new Error("This booking is already paid");
+    }
+    if (!String(booking.service_area_name || "").trim()) {
+      throw new Error("Service area must be confirmed before checkout");
+    }
+
+    const { total } = computeBookingTotal(booking);
+    const amountCents = Math.round(total * 100);
     if (!Number.isFinite(amountCents) || amountCents < 100) {
-      throw new Error("Invalid booking total for checkout");
+      throw new Error("Could not calculate a valid checkout total for this booking");
     }
 
     const serviceLabel = String(booking.service_type || "Cleaning service").slice(0, 200);
@@ -115,7 +215,10 @@ Deno.serve(async (req) => {
 
     const orderId = squareBody?.payment_link?.order_id || squareBody?.related_resources?.orders?.[0]?.id || null;
 
-    const updatePayload: Record<string, string> = { payment_status: "pending_payment" };
+    const updatePayload: Record<string, string | number> = {
+      payment_status: "pending_payment",
+      estimated_total: total,
+    };
     if (orderId) updatePayload.square_order_id = orderId;
     if (checkoutUrl) updatePayload.square_checkout_url = checkoutUrl;
 
@@ -125,8 +228,10 @@ Deno.serve(async (req) => {
       .eq("id", bookingId);
 
     if (updateError) {
-      // Fall back if optional Square columns are not migrated yet.
-      await supabase.from("bookings").update({ payment_status: "pending_payment" }).eq("id", bookingId);
+      await supabase
+        .from("bookings")
+        .update({ payment_status: "pending_payment", estimated_total: total })
+        .eq("id", bookingId);
     }
 
     return new Response(JSON.stringify({ checkout_url: checkoutUrl, booking_id: bookingId }), {

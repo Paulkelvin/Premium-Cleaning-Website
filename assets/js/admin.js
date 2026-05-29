@@ -47,14 +47,26 @@ async function verifyAdminEmail(email, token) {
       `${adminConfig.supabaseUrl}/rest/v1/admin_users?email=eq.${encodeURIComponent(normalized)}&select=email`,
       { headers: { apikey: adminConfig.supabaseAnonKey, Authorization: `Bearer ${token}` } }
     );
-    if (response.ok) {
-      const rows = await response.json();
-      if (Array.isArray(rows) && rows.length > 0) return true;
-    }
+    if (!response.ok) return false;
+    const rows = await response.json();
+    return Array.isArray(rows) && rows.length > 0;
   } catch (error) {
-    console.warn("Could not verify admin_users; falling back to config allowlist.", error);
+    console.warn("Could not verify admin_users.", error);
+    return false;
   }
-  return getAllowedAdminEmails().includes(normalized);
+}
+
+async function assertAdminSession() {
+  if (!adminHasSupabase) return isLoggedIn();
+  const token = getAdminToken();
+  if (!token) return false;
+  const email = (
+    safeGet("cleanco_admin_email") ||
+    parseJwtEmail(token) ||
+    ""
+  ).toLowerCase();
+  if (!email) return false;
+  return verifyAdminEmail(email, token);
 }
 
 function showAdminToast(message, type = "error") {
@@ -143,11 +155,6 @@ const FIELD_CONFIG = {
   ]
 };
 
-function getHashValue(name) {
-  const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  return params.get(name);
-}
-
 function safeGet(key) {
   try {
     return window.sessionStorage.getItem(key);
@@ -183,14 +190,6 @@ function safeRemove(key) {
   } catch {}
 }
 
-function getAdminToken() {
-  const token = safeGet("cleanco_admin_token") || getHashValue("access_token");
-  if (token && !safeGet("cleanco_admin_token")) {
-    safeSet("cleanco_admin_token", token);
-  }
-  return token;
-}
-
 function parseJwtEmail(token) {
   if (!token) return "";
   try {
@@ -203,15 +202,35 @@ function parseJwtEmail(token) {
   }
 }
 
+function captureAuthHashOnce() {
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash || !hash.includes("access_token=")) return;
+  const params = new URLSearchParams(hash);
+  const token = params.get("access_token");
+  if (!token) return;
+  safeSet("cleanco_admin_token", token);
+  safeSet("cleanco_admin_email", parseJwtEmail(token));
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+}
+
+captureAuthHashOnce();
+
+function getAdminToken() {
+  return safeGet("cleanco_admin_token");
+}
+
 function goToDashboard(accessToken) {
   if (accessToken) {
     safeSet("cleanco_admin_email", parseJwtEmail(accessToken));
+    safeSet("cleanco_admin_token", accessToken);
   }
-  if (safeSet("cleanco_admin_token", accessToken)) {
-    window.location.href = "admin-dashboard.html";
-    return;
-  }
-  window.location.href = `admin-dashboard.html#access_token=${encodeURIComponent(accessToken)}`;
+  window.location.href = "admin-dashboard.html";
+}
+
+function clearAdminSession() {
+  safeRemove("cleanco_admin");
+  safeRemove("cleanco_admin_token");
+  safeRemove("cleanco_admin_email");
 }
 
 function isLoggedIn() {
@@ -677,10 +696,9 @@ if (loginForm) {
       if (!response.ok) {
         throw new Error(body.error_description || body.msg || body.message || "Sign in failed");
       }
-      const adminEmails = getAllowedAdminEmails();
       const signedInEmail = String(body.user?.email || email || "").toLowerCase();
       const isAuthorized = await verifyAdminEmail(signedInEmail, body.access_token);
-      if (!isAuthorized && adminEmails.length) {
+      if (!isAuthorized) {
         throw new Error("This account is not authorized for admin access.");
       }
       safeSet("cleanco_admin_email", signedInEmail);
@@ -770,11 +788,11 @@ async function fetchCurrentAdminProfile() {
     { headers: getAdminHeaders() }
   );
   if (!response.ok) {
-    return { email, role: getAllowedAdminEmails().includes(email) ? "superuser" : "admin" };
+    return { email, role: "admin" };
   }
   const rows = await response.json();
   if (!rows.length) {
-    return { email, role: getAllowedAdminEmails().includes(email) ? "superuser" : "admin" };
+    return { email, role: "admin" };
   }
   return rows[0];
 }
@@ -1005,7 +1023,8 @@ function exportRecords() {
 
 async function initDashboard() {
   if (!document.querySelector("[data-dashboard]")) return;
-  if (!isLoggedIn()) {
+  if (!(await assertAdminSession())) {
+    clearAdminSession();
     window.location.href = "admin-login.html";
     return;
   }
@@ -1150,9 +1169,7 @@ document.querySelector("[data-admin-refresh]")?.addEventListener("click", () => 
 });
 
 document.querySelector("[data-admin-logout]")?.addEventListener("click", () => {
-  safeRemove("cleanco_admin");
-  safeRemove("cleanco_admin_token");
-  safeRemove("cleanco_admin_email");
+  clearAdminSession();
   window.location.href = "admin-login.html";
 });
 

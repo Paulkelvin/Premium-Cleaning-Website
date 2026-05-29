@@ -5,19 +5,19 @@ function getPricingConfig() {
     minimumJob: 100,
     rates: {
       "Standard cleaning": 0.17,
-      "Deep cleaning": 0.30,
-      "Move-in/Move-out": 0.35,
+      "Deep cleaning": 0.28,
+      "Move-in/Move-out": 0.32,
       "Office cleaning": 0.20
     },
     addOns: {
-      "Carpet cleaning": 75,
       "Wash and fold": 45,
-      "Inside oven": 25,
-      "Inside fridge": 25,
-      "Cabinet interiors": 30,
-      "Interior windows": 40,
-      "Junk removal": 95,
-      "Power washing": 120
+      "Fold laundry only": 25,
+      "Inside oven": 40,
+      "Inside fridge": 40,
+      "Cabinet interiors": 50,
+      "Interior Windows Accessible (1-10)": 50,
+      "Interior Windows Accessible (11-20)": 100,
+      "Bedding refresh (strip and remake beds)": 15
     },
     frequencyDiscounts: {
       "Weekly": 0.20,
@@ -31,18 +31,18 @@ function getPricingConfig() {
 const ADDON_VALUE_ALIASES = {
   oven: "Inside oven",
   fridge: "Inside fridge",
-  windows: "Interior windows",
+  windows: "Interior Windows Accessible (1-10)",
   laundry: "Wash and fold",
   "wash and fold": "Wash and fold",
-  "carpet refresh": "Carpet cleaning",
-  "carpet cleaning": "Carpet cleaning",
+  "fold laundry only": "Fold laundry only",
   "inside cabinets": "Cabinet interiors",
   "cabinet interiors": "Cabinet interiors",
-  "interior windows": "Interior windows",
+  "interior windows": "Interior Windows Accessible (1-10)",
+  "interior windows accessible (1-10)": "Interior Windows Accessible (1-10)",
+  "interior windows accessible (11-20)": "Interior Windows Accessible (11-20)",
   "inside oven": "Inside oven",
   "inside fridge": "Inside fridge",
-  "junk removal": "Junk removal",
-  "power washing": "Power washing"
+  "bedding refresh (strip and remake beds)": "Bedding refresh (strip and remake beds)"
 };
 
 function normalizeAddonValue(value) {
@@ -64,14 +64,14 @@ const SERVICE_SLUG_MAP = {
 };
 
 const ADDON_SLUG_MAP = {
-  "carpet-cleaning": "Carpet cleaning",
   "wash-and-fold": "Wash and fold",
+  "fold-laundry-only": "Fold laundry only",
   "inside-oven": "Inside oven",
   "inside-fridge": "Inside fridge",
   "cabinet-interiors": "Cabinet interiors",
-  "interior-windows": "Interior windows",
-  "junk-removal": "Junk removal",
-  "power-washing": "Power washing"
+  "interior-windows-accessible-1-10": "Interior Windows Accessible (1-10)",
+  "interior-windows-accessible-11-20": "Interior Windows Accessible (11-20)",
+  "bedding-refresh": "Bedding refresh (strip and remake beds)"
 };
 
 const QUOTE_CONTEXT_KEY = "rs_cleaning_quote_context";
@@ -709,7 +709,8 @@ function buildSubmissionPayload(form, table) {
     if (session) {
       [
         "full_name", "email", "phone", "service_type", "property_type",
-        "bedrooms", "bathrooms", "square_feet", "frequency", "add_ons", "estimated_total"
+        "bedrooms", "bathrooms", "square_feet", "frequency", "add_ons",
+        "estimated_total", "service_area_name", "travel_fee"
       ].forEach((key) => {
         if ((!payload[key] || payload[key] === "") && session[key] != null && session[key] !== "") {
           payload[key] = session[key];
@@ -739,8 +740,12 @@ function buildSubmissionPayload(form, table) {
   payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
 
   if (table === "bookings") {
+    payload.service_area_name = pricing.areaName || payload.service_area_name || "";
+    payload.travel_fee = Number.isFinite(Number(pricing.travelFee)) ? Number(pricing.travelFee) : 0;
     payload.payment_method = data.get("payment_method") || "pay_at_service";
-    payload.payment_status = payload.payment_method === "pay_online" ? "pending_payment" : "pay_at_service";
+    if (payload.payment_method !== "pay_online") {
+      payload.payment_method = "pay_at_service";
+    }
   }
 
   return { payload, pricing };
@@ -2203,6 +2208,12 @@ function initQuoteAssistant(formContainer = document) {
 
     try {
       const { payload, pricing } = buildSubmissionPayload(form, table);
+      if (table === "bookings") {
+        const normalizedArea = String(payload.service_area_name || "").trim();
+        if (!normalizedArea) {
+          throw new Error("Please check and confirm your service area before booking.");
+        }
+      }
       let result = {};
       if (table === "bookings") {
         if (typeof window.supabaseInsert !== "function") {
@@ -2228,6 +2239,8 @@ function initQuoteAssistant(formContainer = document) {
           ...payload,
           quote_id: result.id,
           estimated_total: pricing.total,
+          service_area_name: pricing.areaName || "",
+          travel_fee: Number.isFinite(Number(pricing.travelFee)) ? Number(pricing.travelFee) : 0,
           size_input_mode: getSizeInputMode(form)
         };
         if (typeof window.saveQuoteSession === "function") {

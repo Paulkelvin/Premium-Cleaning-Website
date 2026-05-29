@@ -53,6 +53,8 @@ create table if not exists bookings (
   address text,
   message text,
   estimated_total numeric(10,2),
+  service_area_name text,
+  travel_fee numeric(10,2) default 0,
   payment_method text default 'pay_at_service',
   payment_status text default 'pending',
   quote_id uuid,
@@ -170,6 +172,13 @@ create policy "Allow public booking inserts" on bookings
     and email ~* '^[^@]+@[^@]+\.[^@]+$'
     and full_name is not null
     and address is not null
+    and coalesce(travel_fee, 0) >= 0
+    and coalesce(payment_method, 'pay_at_service') in ('pay_online', 'pay_at_service')
+    and (
+      coalesce(payment_method, 'pay_at_service') <> 'pay_online'
+      or coalesce(length(trim(service_area_name)), 0) > 0
+    )
+    and coalesce(payment_status, 'pending_payment') in ('pending_payment', 'pay_at_service', 'pending')
   );
 
 -- Admin-only reads/updates/deletes — email must exist in admin_users.
@@ -219,3 +228,41 @@ create policy "Allow admin booking deletes" on bookings
 create policy "Superusers delete lower admins" on admin_users
   for delete to authenticated
   using (public.is_superuser() and role = 'admin');
+
+create or replace function public.bookings_secure_payment_fields()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if tg_op = 'INSERT' then
+    if new.payment_method is null or new.payment_method not in ('pay_online', 'pay_at_service') then
+      new.payment_method := 'pay_at_service';
+    end if;
+
+    if new.payment_method = 'pay_online' then
+      new.payment_status := 'pending_payment';
+    else
+      new.payment_status := 'pay_at_service';
+    end if;
+
+    if new.travel_fee is null or new.travel_fee < 0 then
+      new.travel_fee := 0;
+    end if;
+
+    new.square_order_id := null;
+    new.square_checkout_url := null;
+    new.square_payment_id := null;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists bookings_secure_payment_fields on bookings;
+
+create trigger bookings_secure_payment_fields
+  before insert on bookings
+  for each row
+  execute function public.bookings_secure_payment_fields();

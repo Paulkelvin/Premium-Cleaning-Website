@@ -15,9 +15,19 @@ const TABLE_COLUMNS = {
     "full_name", "email", "phone", "service_type", "property_type",
     "bedrooms", "bathrooms", "square_feet", "add_ons", "frequency",
     "preferred_date", "preferred_time", "address", "message",
-    "estimated_total", "payment_method", "payment_status", "quote_id", "consent"
+    "estimated_total", "service_area_name", "travel_fee",
+    "payment_method", "quote_id", "consent"
   ]
 };
+
+function finalizeBookingPayload(body) {
+  delete body.payment_status;
+  delete body.square_order_id;
+  delete body.square_checkout_url;
+  delete body.square_payment_id;
+  body.payment_method = body.payment_method === "pay_online" ? "pay_online" : "pay_at_service";
+  return body;
+}
 
 function sanitizePayload(table, payload) {
   const allowed = TABLE_COLUMNS[table] || Object.keys(payload);
@@ -48,6 +58,10 @@ async function supabaseInsert(table, payload) {
   const body = sanitizePayload(table, payload);
   const rowId = crypto.randomUUID();
   body.id = rowId;
+
+  if (table === "bookings") {
+    finalizeBookingPayload(body);
+  }
 
   if (!hasSupabase) {
     const key = `cleanco_${table}`;

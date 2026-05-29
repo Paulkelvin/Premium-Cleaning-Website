@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initContactPage();
   initSiteMeta();
   initBrandLogos();
+  applyContactOverrides();
   initAdminReturnLink();
 
   // 7. Config Copy Bindings
@@ -694,6 +695,61 @@ function initSiteMeta() {
   link.type = "image/jpeg";
   link.href = siteAssetPath("favicon.jpeg");
   document.head.appendChild(link);
+}
+
+function applyContactOverrides() {
+  const config = window.CLEANCO_CONFIG || {};
+  const phone = String(config.phone || "").trim();
+  const email = String(config.email || "").trim();
+  const address = String(config.address || "").trim();
+  const serviceAreaSummary = String(config.serviceArea || "").trim();
+  const serviceAreas = Array.isArray(config.serviceAreas) ? config.serviceAreas.filter(Boolean) : [];
+
+  if (phone) {
+    const telHref = `tel:${phone.replace(/[^+\d]/g, "")}`;
+    document.querySelectorAll("a[href^='tel:']").forEach((node) => {
+      node.textContent = phone;
+      node.setAttribute("href", telHref);
+    });
+  }
+
+  if (email) {
+    const mailto = email.includes("@") ? `mailto:${email}` : email;
+    document.querySelectorAll("a[href^='mailto:']").forEach((node) => {
+      node.textContent = email;
+      node.setAttribute("href", mailto);
+    });
+  }
+
+  document.querySelectorAll("[data-sanity-service-area], [data-copy-config='serviceArea']").forEach((node) => {
+    if (serviceAreaSummary) node.textContent = serviceAreaSummary;
+  });
+
+  document.querySelectorAll(".site-footer").forEach((footer) => {
+    const headings = [...footer.querySelectorAll("h3")];
+    const contactHeading = headings.find((node) => node.textContent.trim().toLowerCase() === "contact");
+    const areasHeading = headings.find((node) => node.textContent.trim().toLowerCase() === "areas");
+
+    if (contactHeading) {
+      const contactList = contactHeading.parentElement?.querySelector("ul");
+      if (contactList) {
+        const hoursLine = contactList.querySelector("li:last-child")?.textContent || "Mon-Sat, 8am-6pm";
+        contactList.innerHTML = `
+          <li>${phone ? `<a href="tel:${phone.replace(/[^+\d]/g, "")}">${phone}</a>` : ""}</li>
+          <li>${email ? (email.includes("@") ? `<a href="mailto:${email}">${email}</a>` : email) : ""}</li>
+          <li>${address || serviceAreaSummary}</li>
+          <li>${hoursLine}</li>
+        `;
+      }
+    }
+
+    if (areasHeading && serviceAreas.length) {
+      const areasList = areasHeading.parentElement?.querySelector("ul");
+      if (areasList) {
+        areasList.innerHTML = serviceAreas.map((area) => `<li>${area}</li>`).join("");
+      }
+    }
+  });
 }
 
 function ensureAppToastHost() {

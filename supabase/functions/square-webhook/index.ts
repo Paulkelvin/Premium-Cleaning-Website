@@ -62,6 +62,15 @@ Deno.serve(async (req) => {
   const rawBody = await req.text();
   const signatureKey = Deno.env.get("SQUARE_WEBHOOK_SIGNATURE_KEY");
   const notificationUrl = Deno.env.get("SQUARE_WEBHOOK_NOTIFICATION_URL");
+  const squareEnvironment = Deno.env.get("SQUARE_ENVIRONMENT") || "sandbox";
+  const requireSignature =
+    squareEnvironment === "production" ||
+    Deno.env.get("SQUARE_REQUIRE_WEBHOOK_SIGNATURE") === "true";
+
+  if (requireSignature && (!signatureKey || !notificationUrl)) {
+    console.error("square-webhook: signature verification required but not configured");
+    return new Response("Webhook verification not configured", { status: 503 });
+  }
 
   if (signatureKey && notificationUrl) {
     const signatureHeader = req.headers.get("x-square-hmacsha256-signature");
@@ -86,6 +95,10 @@ Deno.serve(async (req) => {
       console.error("square-webhook: invalid signature");
       return new Response("Invalid signature", { status: 401 });
     }
+  } else if (requireSignature) {
+    return new Response("Missing signature", { status: 401 });
+  } else {
+    console.warn("square-webhook: processing without signature verification (sandbox/dev only)");
   }
 
   let payload: Record<string, unknown>;

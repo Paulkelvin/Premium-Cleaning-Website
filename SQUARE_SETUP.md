@@ -6,7 +6,8 @@ This site creates a **unique Square checkout link for every booking** using the 
 
 | Piece | Purpose |
 |-------|---------|
-| `supabase/functions/create-square-checkout` | Reads booking total → creates Square payment link |
+| `supabase/functions/create-square-checkout` | Recomputes booking total server-side → creates Square payment link |
+| `supabase/functions/confirm-square-payment` | Verifies payment with Square API before marking booking paid |
 | `supabase/functions/square-webhook` | Marks booking `payment_status = paid` when Square confirms payment |
 | `assets/js/payments.js` | Calls the Edge Function after booking |
 | `payment-complete.html` | Thank-you page after Square redirect |
@@ -19,6 +20,7 @@ In **SQL Editor**, run (if not already applied):
 
 1. `supabase/migrations/20250528_fix_public_inserts.sql`
 2. `supabase/migrations/20250529_square_payment_fields.sql`
+3. `supabase/migrations/20250533_booking_payment_security.sql` — locks payment fields on booking insert
 
 ---
 
@@ -59,6 +61,7 @@ supabase secrets set SITE_URL="https://YOUR-LIVE-SITE-URL"
 
 ```powershell
 supabase functions deploy create-square-checkout
+supabase functions deploy confirm-square-payment
 supabase functions deploy square-webhook
 ```
 
