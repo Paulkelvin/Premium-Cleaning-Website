@@ -6,6 +6,9 @@ window.CLEANCO_CONFIG = {
   serviceArea: "Austin, TX and nearby communities",
   supabaseUrl: "https://hbacogyhftngwoxenttv.supabase.co",
   supabaseAnonKey: "sb_publishable_jCivAQateqBu5rCK1IbmbQ_zNB4E39g",
+  // Optional: legacy anon JWT (eyJ...) from Supabase → Project Settings → API.
+  // Only needed if Edge Functions have JWT verification turned ON.
+  supabaseFunctionKey: "",
   // Must match Supabase Auth users + supabase/schema.sql RLS policies (exact emails).
   adminEmails: ["rs.cleaning@collective.com", "paulopackager@gmail.com"],
   // phone: fallback before Sanity loads — also edit Site Settings → Phone in Sanity Studio for live updates site-wide
@@ -40,7 +43,7 @@ window.CLEANCO_CONFIG = {
   // Enable automated Square checkout for variable quote totals (requires Supabase Edge Functions).
   squareCheckoutEnabled: true,
   // Public site URL — must match SITE_URL secret in Supabase (no trailing slash).
-  siteUrl: "",
+  siteUrl: "https://rs.cleaningcollective.workers.dev",
   // Deprecated: static Stripe link cannot handle variable quote prices.
   stripePaymentLink: ""
 };

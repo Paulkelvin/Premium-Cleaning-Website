@@ -9,6 +9,20 @@
     );
   }
 
+  function getFunctionAuthHeaders() {
+    // Edge Functions need the legacy anon JWT (eyJ...) in Authorization when JWT verify is on.
+    // When JWT verify is OFF, apikey alone is enough — do not send Bearer with sb_publishable_ keys.
+    const apiKey = config.supabaseFunctionKey || config.supabaseAnonKey;
+    const headers = {
+      "Content-Type": "application/json",
+      apikey: apiKey,
+    };
+    if (typeof apiKey === "string" && apiKey.startsWith("eyJ")) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+    return headers;
+  }
+
   async function createSquareCheckout(bookingId) {
     if (!bookingId) {
       throw new Error("Missing booking id");
@@ -19,11 +33,7 @@
 
     const response = await fetch(`${config.supabaseUrl}/functions/v1/create-square-checkout`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: config.supabaseAnonKey,
-        Authorization: `Bearer ${config.supabaseAnonKey}`,
-      },
+      headers: getFunctionAuthHeaders(),
       body: JSON.stringify({ booking_id: bookingId }),
     });
 
