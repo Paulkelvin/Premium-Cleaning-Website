@@ -70,9 +70,39 @@ grant usage on schema public to anon, authenticated;
 grant insert on contact_submissions to anon;
 grant insert on quote_requests to anon;
 grant insert on bookings to anon;
-grant select, update on contact_submissions to authenticated;
-grant select, update on quote_requests to authenticated;
-grant select, update on bookings to authenticated;
+grant select, update, delete on contact_submissions to authenticated;
+grant select, update, delete on quote_requests to authenticated;
+grant select, update, delete on bookings to authenticated;
+grant select on admin_users to authenticated;
+
+create table if not exists admin_users (
+  email text primary key,
+  created_at timestamptz not null default now(),
+  invited_by text
+);
+
+insert into admin_users (email) values
+  ('rs.cleaning@collective.com'),
+  ('paulopackager@gmail.com')
+on conflict (email) do nothing;
+
+alter table admin_users enable row level security;
+
+create or replace function public.is_admin_user()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from admin_users
+    where lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+$$;
+
+grant execute on function public.is_admin_user() to authenticated, anon;
 
 drop policy if exists "Allow public contact inserts" on contact_submissions;
 drop policy if exists "Allow public quote inserts" on quote_requests;
@@ -89,6 +119,10 @@ drop policy if exists "Allow admin booking reads" on bookings;
 drop policy if exists "Allow admin contact status updates" on contact_submissions;
 drop policy if exists "Allow admin quote status updates" on quote_requests;
 drop policy if exists "Allow admin booking status updates" on bookings;
+drop policy if exists "Allow admin contact deletes" on contact_submissions;
+drop policy if exists "Allow admin quote deletes" on quote_requests;
+drop policy if exists "Allow admin booking deletes" on bookings;
+drop policy if exists "Admins read admin_users" on admin_users;
 
 -- Public form inserts (website). Basic sanity checks only — not a spam substitute.
 create policy "Allow public contact inserts" on contact_submissions
@@ -120,30 +154,46 @@ create policy "Allow public booking inserts" on bookings
     and address is not null
   );
 
--- Admin-only reads/updates — must match Supabase Auth user email exactly.
+-- Admin-only reads/updates/deletes — email must exist in admin_users.
+create policy "Admins read admin_users" on admin_users
+  for select to authenticated
+  using (public.is_admin_user());
+
 create policy "Allow admin contact reads" on contact_submissions
   for select to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user());
 
 create policy "Allow admin quote reads" on quote_requests
   for select to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user());
 
 create policy "Allow admin booking reads" on bookings
   for select to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user());
 
 create policy "Allow admin contact status updates" on contact_submissions
   for update to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
-  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user())
+  with check (public.is_admin_user());
 
 create policy "Allow admin quote status updates" on quote_requests
   for update to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
-  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user())
+  with check (public.is_admin_user());
 
 create policy "Allow admin booking status updates" on bookings
   for update to authenticated
-  using ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'))
-  with check ((auth.jwt() ->> 'email') in ('rs.cleaning@collective.com', 'paulopackager@gmail.com'));
+  using (public.is_admin_user())
+  with check (public.is_admin_user());
+
+create policy "Allow admin contact deletes" on contact_submissions
+  for delete to authenticated
+  using (public.is_admin_user());
+
+create policy "Allow admin quote deletes" on quote_requests
+  for delete to authenticated
+  using (public.is_admin_user());
+
+create policy "Allow admin booking deletes" on bookings
+  for delete to authenticated
+  using (public.is_admin_user());

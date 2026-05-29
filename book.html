@@ -114,6 +114,7 @@
                 <label class="field">Access notes <small class="field-optional">optional</small>
                   <textarea name="message" rows="2" placeholder="Gate code, parking, pets, etc."></textarea>
                 </label>
+                <div data-form-state class="form-state quote-nav-state" role="status"></div>
               </div>
 
               <div class="quote-step" data-step="2" data-step-title="Confirm &amp; pay">
@@ -150,12 +151,19 @@
 
               </div>
 
+              <p class="quote-nav-hint" data-nav-hint hidden role="alert"></p>
               <div class="quote-form-nav">
                 <button type="button" class="button ghost quote-nav-back" id="btnQuoteBack"><i data-lucide="arrow-left"></i> Back</button>
                 <button type="button" class="button secondary quote-nav-next" id="btnQuoteNext">Continue <i data-lucide="arrow-right"></i></button>
                 <button type="submit" class="button quote-nav-submit" id="btnQuoteSubmit">Confirm booking <i data-lucide="calendar-check"></i></button>
               </div>
             </form>
+            </div>
+
+            <div id="quoteCheckoutLoading" class="quote-checkout-loading" hidden>
+              <div class="quote-checkout-spinner"><i data-lucide="loader-circle"></i></div>
+              <h2>Opening secure checkout</h2>
+              <p class="quote-success-copy">Hang tight — we're connecting you to Square to pay your quoted total.</p>
             </div>
 
             <div id="quoteSuccessState" class="quote-success-panel" hidden>

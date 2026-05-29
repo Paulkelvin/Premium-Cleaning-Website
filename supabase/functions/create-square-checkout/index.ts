@@ -115,14 +115,19 @@ Deno.serve(async (req) => {
 
     const orderId = squareBody?.payment_link?.order_id || squareBody?.related_resources?.orders?.[0]?.id || null;
 
-    await supabase
+    const updatePayload: Record<string, string> = { payment_status: "pending_payment" };
+    if (orderId) updatePayload.square_order_id = orderId;
+    if (checkoutUrl) updatePayload.square_checkout_url = checkoutUrl;
+
+    const { error: updateError } = await supabase
       .from("bookings")
-      .update({
-        payment_status: "pending_payment",
-        square_checkout_url: checkoutUrl,
-        square_order_id: orderId,
-      })
+      .update(updatePayload)
       .eq("id", bookingId);
+
+    if (updateError) {
+      // Fall back if optional Square columns are not migrated yet.
+      await supabase.from("bookings").update({ payment_status: "pending_payment" }).eq("id", bookingId);
+    }
 
     return new Response(JSON.stringify({ checkout_url: checkoutUrl, booking_id: bookingId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

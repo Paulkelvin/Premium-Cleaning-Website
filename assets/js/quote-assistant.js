@@ -497,26 +497,10 @@ function validatePhoneNumber(value) {
   return String(value || "").replace(/\D/g, "").length >= 10;
 }
 
-function ensureStudioToast(root) {
-  const header = root.querySelector(".quote-app-header") || root;
-  let toast = header.querySelector(".quote-studio-toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.className = "quote-studio-toast";
-    toast.setAttribute("role", "alert");
-    toast.setAttribute("aria-live", "polite");
-    header.insertBefore(toast, header.firstChild);
+function showStudioToast(_root, message, type = "error") {
+  if (typeof window.showAppToast === "function") {
+    window.showAppToast(message, type);
   }
-  return toast;
-}
-
-function showStudioToast(root, message, type = "error") {
-  const toast = ensureStudioToast(root);
-  toast.textContent = message;
-  toast.className = `quote-studio-toast is-${type}`;
-  requestAnimationFrame(() => toast.classList.add("is-visible"));
-  if (toast._hideTimer) clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(() => toast.classList.remove("is-visible"), 4500);
 }
 
 function getInputLabel(input) {
@@ -1011,8 +995,76 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   function scrollQuoteStepIntoView({ behavior = "smooth" } = {}) {
-    if (!isQuoteStudio || isBooking) return;
-    scrollElementToQuoteTop(stepScrollAnchor, { behavior, extraOffset: 8 });
+    if (!isQuoteStudio) return;
+    const activeStep = steps[currentStepIndex];
+    const anchor = isBooking
+      ? (activeStep?.querySelector(".field, .book-schedule-block") || form.querySelector(".quote-form-nav") || stepScrollAnchor)
+      : stepScrollAnchor;
+    scrollElementToQuoteTop(anchor, { behavior, extraOffset: isBooking ? 20 : 8 });
+  }
+
+  const stepKicker = root.querySelector("#quoteProgressText");
+  const stepHeading = root.querySelector("#quoteStepHeading");
+  const bookProgressFill = root.querySelector("#quoteProgressFill");
+  const navHint = form.querySelector("[data-nav-hint]");
+  const checkoutLoading = formContainer.querySelector("#quoteCheckoutLoading");
+
+  function setNavHint(message) {
+    if (!navHint) return;
+    if (message) {
+      navHint.textContent = message;
+      navHint.hidden = false;
+      navHint.classList.add("is-visible");
+    } else {
+      navHint.hidden = true;
+      navHint.classList.remove("is-visible");
+      navHint.textContent = "";
+    }
+  }
+
+  function updateBookStepBanner() {
+    if (!isBooking) return;
+    const stepEl = steps[currentStepIndex];
+    const title = stepEl?.dataset?.stepTitle || `Step ${currentStepIndex + 1}`;
+    if (stepKicker) stepKicker.textContent = `Step ${currentStepIndex + 1} of ${steps.length}`;
+    if (stepHeading && stepHeading.textContent !== title) {
+      stepHeading.classList.remove("is-changing");
+      void stepHeading.offsetWidth;
+      stepHeading.textContent = title;
+      stepHeading.classList.add("is-changing");
+    }
+    if (bookProgressFill) {
+      bookProgressFill.style.width = `${((currentStepIndex + 1) / steps.length) * 100}%`;
+    }
+    if (stepDots) {
+      stepDots.querySelectorAll(".quote-step-dot").forEach((dot, index) => {
+        dot.classList.toggle("is-active", index === currentStepIndex);
+        dot.classList.toggle("is-done", index < currentStepIndex);
+      });
+    }
+  }
+
+  function hideFormChrome() {
+    form.style.display = "none";
+    const expand = formContainer.querySelector(".quote-window-expand");
+    if (expand) expand.style.display = "none";
+    const progress = formContainer.querySelector(".quote-progress");
+    if (progress) progress.style.display = "none";
+    if (windowHead) windowHead.style.display = "none";
+    const stepBanner = root.querySelector(".quote-step-banner");
+    if (stepBanner) stepBanner.style.display = "none";
+    const prefillBanner = document.getElementById("quotePrefillBanner");
+    if (prefillBanner) prefillBanner.hidden = true;
+  }
+
+  function showCheckoutLoadingPanel() {
+    hideFormChrome();
+    const successState = formContainer.querySelector("#quoteSuccessState");
+    if (successState) successState.hidden = true;
+    if (checkoutLoading) {
+      checkoutLoading.hidden = false;
+      if (typeof lucide !== "undefined") lucide.createIcons({ root: checkoutLoading });
+    }
   }
 
   function scrollQuoteEstimateIntoView({ behavior = "smooth" } = {}) {
@@ -1107,6 +1159,16 @@ function initQuoteAssistant(formContainer = document) {
       setQuoteSubmitPreparing(false);
       setSubmitEnabledForFinalStep(false);
       hideQuoteEstimateDisplay();
+      showStudioToast(root, "Complete your name, phone, email, and contact preference first.", "error");
+      const firstMissing = !String(form.querySelector('input[name="full_name"]')?.value || "").trim()
+        ? form.querySelector('input[name="full_name"]')
+        : String(form.querySelector('input[name="phone"]')?.value || "").replace(/\D/g, "").length < 10
+          ? form.querySelector('input[name="phone"]')
+          : !validateEmailAddress(form.querySelector('input[name="email"]')?.value)
+            ? form.querySelector('input[name="email"]')
+            : form.querySelector('input[name="preferred_contact"]');
+      if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(firstMissing);
+      if (typeof window.scrollFieldIntoView === "function") window.scrollFieldIntoView(firstMissing);
       return;
     }
     if (!isFinalConsentGiven()) {
@@ -1217,6 +1279,12 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
+    if (isBooking && !instant) {
+      bubble.classList.add("is-fading");
+      setTimeout(finishCoach, COACH_FADE_MS);
+      return;
+    }
+
     bubbleText.textContent = "";
     bubble.classList.add("is-typing");
 
@@ -1252,7 +1320,13 @@ function initQuoteAssistant(formContainer = document) {
   function validateSpaceStep(silent = false) {
     const propertyType = form.querySelector('input[name="property_type"]:checked');
     if (!propertyType) {
-      if (!silent) showStudioToast(root, "Please select a property type.", "error");
+      if (!silent) {
+        showStudioToast(root, "Please select a property type.", "error");
+        setNavHint("Please select a property type.");
+        if (typeof window.scrollFieldIntoView === "function") {
+          window.scrollFieldIntoView(form.querySelector('input[name="property_type"]'));
+        }
+      }
       return false;
     }
     return validateSizeChunk(silent);
@@ -1262,11 +1336,23 @@ function initQuoteAssistant(formContainer = document) {
     const serviceType = form.querySelector('input[name="service_type"]:checked');
     const frequency = form.querySelector('input[name="frequency"]:checked');
     if (!serviceType) {
-      if (!silent) showStudioToast(root, "Please select a cleaning type.", "error");
+      if (!silent) {
+        showStudioToast(root, "Please select a cleaning type.", "error");
+        setNavHint("Please select a cleaning type.");
+        if (typeof window.scrollFieldIntoView === "function") {
+          window.scrollFieldIntoView(form.querySelector('input[name="service_type"]'));
+        }
+      }
       return false;
     }
     if (!frequency) {
-      if (!silent) showStudioToast(root, "Please select a frequency.", "error");
+      if (!silent) {
+        showStudioToast(root, "Please select a frequency.", "error");
+        setNavHint("Please select a frequency.");
+        if (typeof window.scrollFieldIntoView === "function") {
+          window.scrollFieldIntoView(form.querySelector('input[name="frequency"]'));
+        }
+      }
       return false;
     }
     return true;
@@ -1406,6 +1492,15 @@ function initQuoteAssistant(formContainer = document) {
       return;
     }
 
+    if (isBooking && currentStepIndex === 0) {
+      const valid = validateStep(steps[0], true);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = false;
+      btnNext.removeAttribute("aria-disabled");
+      btnNext.classList.remove("is-hidden");
+      return;
+    }
+
     btnNext.classList.remove("is-hidden");
     btnNext.disabled = false;
     btnNext.setAttribute("aria-disabled", "false");
@@ -1482,12 +1577,23 @@ function initQuoteAssistant(formContainer = document) {
     if (errors.length) {
       const first = errors[0];
       if (!silent) {
+        if (typeof window.clearFieldErrors === "function") window.clearFieldErrors(stepEl);
+        errors.forEach(({ input }) => {
+          if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(input);
+        });
         showStudioToast(root, first.message, "error");
+        setNavHint(first.message);
         first.input?.focus?.({ preventScroll: true });
-        first.input?.closest(".book-date-scroll")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        if (first.input?.closest(".book-date-scroll")) {
+          first.input.closest(".book-date-scroll")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        } else if (typeof window.scrollFieldIntoView === "function") {
+          window.scrollFieldIntoView(first.input);
+        }
+        scrollQuoteStepIntoView({ behavior: "smooth" });
       }
       return false;
     }
+    if (!silent) setNavHint("");
     return true;
   }
 
@@ -1828,6 +1934,7 @@ function initQuoteAssistant(formContainer = document) {
     }
 
     updatePrefillChip();
+    updateBookStepBanner();
   }
 
   function transitionToStep(nextIndex, direction = 1) {
@@ -1845,6 +1952,7 @@ function initQuoteAssistant(formContainer = document) {
     if (currentStepEl === nextStepEl) return;
 
     isStepTransitioning = true;
+    if (formStage) formStage.classList.add("is-step-transitioning");
     currentStepEl.classList.add(direction > 0 ? "is-exiting-forward" : "is-exiting-back");
     setTimeout(() => {
       currentStepEl.classList.remove("active", "is-exiting-forward", "is-exiting-back");
@@ -1852,8 +1960,10 @@ function initQuoteAssistant(formContainer = document) {
       nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
       updateUI();
       playAssistantMessage(currentStepIndex);
+      scrollQuoteStepIntoView({ behavior: "smooth" });
       setTimeout(() => {
         nextStepEl.classList.remove("is-entering-forward", "is-entering-back");
+        if (formStage) formStage.classList.remove("is-step-transitioning");
         isStepTransitioning = false;
       }, STEP_TRANSITION_ENTER_MS);
     }, STEP_TRANSITION_EXIT_MS);
@@ -2037,6 +2147,11 @@ function initQuoteAssistant(formContainer = document) {
   });
 
   form.addEventListener("input", (event) => {
+    if (event.target.matches("input, select, textarea")) {
+      event.target.closest(".field, .book-time-option, .book-schedule-block, .quote-option, .quote-fieldset")
+        ?.classList.remove("is-invalid");
+      setNavHint("");
+    }
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {
@@ -2072,10 +2187,15 @@ function initQuoteAssistant(formContainer = document) {
 
     if (btnSubmit) {
       btnSubmit.disabled = true;
-      btnSubmit.textContent = "Sending...";
+      const payOnlineSelected = isBooking
+        && form.querySelector('input[name="payment_method"][value="pay_online"]')?.checked
+        && typeof window.isSquareCheckoutEnabled === "function"
+        && window.isSquareCheckoutEnabled();
+      btnSubmit.textContent = payOnlineSelected ? "Opening checkout..." : "Sending...";
     }
 
     const stateEl = form.querySelector("[data-form-state]");
+    let redirectingToCheckout = false;
     if (stateEl) {
       stateEl.className = "form-state loading";
       stateEl.textContent = "Saving your request...";
@@ -2136,51 +2256,48 @@ function initQuoteAssistant(formContainer = document) {
           window.clearQuoteSession();
         }
 
-        form.style.display = "none";
-        const expand = formContainer.querySelector(".quote-window-expand");
-        if (expand) expand.style.display = "none";
-        const progress = formContainer.querySelector(".quote-progress");
-        if (progress) progress.style.display = "none";
-        if (windowHead) windowHead.style.display = "none";
-        const stepBanner = root.querySelector(".quote-step-banner");
-        if (stepBanner) stepBanner.style.display = "none";
-        const prefillBanner = document.getElementById("quotePrefillBanner");
-        if (prefillBanner) prefillBanner.hidden = true;
-
         const successState = formContainer.querySelector("#quoteSuccessState");
-        if (successState) {
-          const msg = successState.querySelector("[data-booking-message]");
-          if (msg) {
-            if (canCreateSquareCheckout) {
-              msg.textContent = "Your booking is saved. Redirecting to secure Square checkout...";
-            } else if (payOnline) {
-              msg.textContent = "Your booking is saved. We'll send a secure payment link to your email within the hour.";
-            } else {
-              msg.textContent = "Your appointment request is confirmed. We'll contact you shortly to finalize your time slot.";
-            }
-          }
-          const totalEl = successState.querySelector("[data-success-total]");
-          if (totalEl) totalEl.textContent = formatMoney(pricing.total || payload.estimated_total);
-          showSuccessPanel(successState);
-        }
 
         if (canCreateSquareCheckout && result?.id) {
+          showCheckoutLoadingPanel();
           try {
             const checkoutUrl = await window.createSquareCheckout(result.id);
-            setTimeout(() => {
-              window.location.href = checkoutUrl;
-            }, 700);
+            redirectingToCheckout = true;
+            window.location.href = checkoutUrl;
+            return;
           } catch (checkoutErr) {
             console.error("Square checkout error:", checkoutErr);
-            const msg = successState?.querySelector("[data-booking-message]");
-            if (msg) {
-              msg.textContent = "Your booking is saved, but we couldn't open checkout automatically. Our team will send a payment link shortly.";
+            if (checkoutLoading) checkoutLoading.hidden = true;
+            hideFormChrome();
+            if (successState) {
+              const msg = successState.querySelector("[data-booking-message]");
+              if (msg) {
+                msg.textContent = "Your booking is saved, but we couldn't open checkout automatically. Our team will send a payment link shortly.";
+              }
+              const totalEl = successState.querySelector("[data-success-total]");
+              if (totalEl) totalEl.textContent = formatMoney(pricing.total || payload.estimated_total);
+              showSuccessPanel(successState);
             }
             showStudioToast(
               root,
               checkoutErr?.message || "Could not open Square checkout. We'll follow up with a payment link.",
               "error"
             );
+          }
+        } else {
+          hideFormChrome();
+          if (successState) {
+            const msg = successState.querySelector("[data-booking-message]");
+            if (msg) {
+              if (payOnline) {
+                msg.textContent = "Your booking is saved. We'll send a secure payment link to your email within the hour.";
+              } else {
+                msg.textContent = "Your appointment request is confirmed. We'll contact you shortly to finalize your time slot.";
+              }
+            }
+            const totalEl = successState.querySelector("[data-success-total]");
+            if (totalEl) totalEl.textContent = formatMoney(pricing.total || payload.estimated_total);
+            showSuccessPanel(successState);
           }
         }
       }
@@ -2205,7 +2322,7 @@ function initQuoteAssistant(formContainer = document) {
         ? window.mapSubmissionError(err)
         : `Could not submit: ${err.message}`, "error");
     } finally {
-      if (btnSubmit) {
+      if (!redirectingToCheckout && btnSubmit) {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = defaultSubmitLabel;
         if (typeof lucide !== "undefined") lucide.createIcons({ root: btnSubmit.parentElement });

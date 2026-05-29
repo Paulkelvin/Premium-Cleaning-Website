@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initContactPage();
   initSiteMeta();
   initBrandLogos();
+  initAdminReturnLink();
 
   // 7. Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
@@ -693,4 +694,81 @@ function initSiteMeta() {
   link.type = "image/jpeg";
   link.href = siteAssetPath("favicon.jpeg");
   document.head.appendChild(link);
+}
+
+function ensureAppToastHost() {
+  let host = document.getElementById("app-toast-host");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "app-toast-host";
+    host.className = "app-toast-host";
+    host.setAttribute("aria-live", "polite");
+    document.body.appendChild(host);
+  }
+  let toast = host.querySelector(".app-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.className = "app-toast";
+    toast.setAttribute("role", "alert");
+    host.appendChild(toast);
+  }
+  return toast;
+}
+
+function showAppToast(message, type = "error") {
+  const toast = ensureAppToastHost();
+  toast.textContent = message;
+  toast.className = `app-toast is-${type}`;
+  requestAnimationFrame(() => toast.classList.add("is-visible"));
+  if (toast._hideTimer) clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(() => toast.classList.remove("is-visible"), 5200);
+}
+
+function scrollFieldIntoView(element, { extraOffset = 16 } = {}) {
+  if (!element) return;
+  const target = element.closest(".field, .book-schedule-block, .book-time-grid, .quote-fieldset, .quote-option-grid, .contact-ui-form")
+    || element;
+  const headerHeight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-height")) || 72;
+  requestAnimationFrame(() => {
+    const rect = target.getBoundingClientRect();
+    const targetTop = Math.max(0, rect.top + window.scrollY - headerHeight - extraOffset);
+    if (Math.abs(window.scrollY - targetTop) > 2) {
+      window.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+  });
+}
+
+function markFieldInvalid(input) {
+  if (!input) return;
+  const target = input.closest(".field, .book-time-option, .book-schedule-block, .quote-option, .quote-fieldset")
+    || input;
+  target.classList.add("is-invalid");
+}
+
+function clearFieldErrors(container) {
+  if (!container) return;
+  container.querySelectorAll(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
+}
+
+window.showAppToast = showAppToast;
+window.scrollFieldIntoView = scrollFieldIntoView;
+window.markFieldInvalid = markFieldInvalid;
+window.clearFieldErrors = clearFieldErrors;
+
+function initAdminReturnLink() {
+  if (document.body.classList.contains("admin-shell")) return;
+  let token = null;
+  try {
+    token = window.sessionStorage.getItem("cleanco_admin_token") || window.localStorage.getItem("cleanco_admin_token");
+  } catch {}
+  if (!token) return;
+
+  if (document.querySelector("[data-admin-return-link]")) return;
+  const link = document.createElement("a");
+  link.href = "admin-dashboard.html";
+  link.className = "admin-return-link";
+  link.setAttribute("data-admin-return-link", "");
+  link.innerHTML = '<i data-lucide="layout-dashboard"></i><span>Admin</span>';
+  document.body.appendChild(link);
+  if (typeof lucide !== "undefined") lucide.createIcons({ root: link });
 }

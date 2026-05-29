@@ -147,6 +147,35 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
       showState(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
       return;
     }
+
+    if (typeof window.clearFieldErrors === "function") window.clearFieldErrors(form);
+    const firstName = form.querySelector("#contactFirstName");
+    const lastName = form.querySelector("#contactLastName");
+    const email = form.querySelector('input[name="email"]');
+    const phone = form.querySelector('input[name="phone"]');
+    const message = form.querySelector('textarea[name="message"]');
+    const consent = form.querySelector('input[name="consent"]');
+
+    const fail = (field, text) => {
+      if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(field);
+      if (typeof window.showAppToast === "function") window.showAppToast(text, "error");
+      if (typeof window.scrollFieldIntoView === "function") window.scrollFieldIntoView(field);
+      showState(form, "error", text);
+      field?.focus?.({ preventScroll: true });
+      return false;
+    };
+
+    if (!firstName?.value.trim()) return fail(firstName, "Please enter your first name.");
+    if (!lastName?.value.trim()) return fail(lastName, "Please enter your last name.");
+    if (!email?.value.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email.value.trim())) {
+      return fail(email, "Please enter a valid email address.");
+    }
+    if (!phone?.value.trim() || phone.value.replace(/\D/g, "").length < 10) {
+      return fail(phone, "Please enter a complete phone number.");
+    }
+    if (!message?.value.trim()) return fail(message, "Please enter a message so we know how to help.");
+    if (!consent?.checked) return fail(consent, "Please agree to the privacy policy before sending.");
+
     submit.disabled = true;
     showState(form, "loading", "Sending...");
 

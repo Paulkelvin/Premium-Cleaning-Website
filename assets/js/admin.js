@@ -27,6 +27,42 @@ let dashboardCache = {
   bookings: []
 };
 
+function getAdminHeaders() {
+  return {
+    apikey: adminConfig.supabaseAnonKey,
+    Authorization: `Bearer ${getAdminToken()}`
+  };
+}
+
+async function verifyAdminEmail(email, token) {
+  const normalized = String(email || "").toLowerCase().trim();
+  if (!normalized) return false;
+  if (!adminHasSupabase) {
+    return getAllowedAdminEmails().includes(normalized);
+  }
+  try {
+    const response = await fetch(
+      `${adminConfig.supabaseUrl}/rest/v1/admin_users?email=eq.${encodeURIComponent(normalized)}&select=email`,
+      { headers: { apikey: adminConfig.supabaseAnonKey, Authorization: `Bearer ${token}` } }
+    );
+    if (response.ok) {
+      const rows = await response.json();
+      if (Array.isArray(rows) && rows.length > 0) return true;
+    }
+  } catch (error) {
+    console.warn("Could not verify admin_users; falling back to config allowlist.", error);
+  }
+  return getAllowedAdminEmails().includes(normalized);
+}
+
+function showAdminToast(message, type = "error") {
+  if (typeof window.showAppToast === "function") {
+    window.showAppToast(message, type);
+    return;
+  }
+  window.alert(message);
+}
+
 function getAllowedAdminEmails() {
   const list = adminConfig.adminEmails;
   if (Array.isArray(list) && list.length) {
@@ -328,6 +364,7 @@ function renderFieldGrid(table, row) {
 
 function renderStatusActions(table, row, status) {
   const actions = [];
+  const title = getRowTitle(row);
   if (row.email) {
     actions.push(
       `<a class="admin-btn admin-btn--ghost" href="mailto:${escapeHtml(row.email)}"><i data-lucide="mail"></i> Email</a>`
@@ -348,6 +385,9 @@ function renderStatusActions(table, row, status) {
       `<button class="admin-btn admin-btn--primary" type="button" data-mark-status data-status="resolved" data-table="${table}" data-id="${row.id}"><i data-lucide="check"></i> Mark handled</button>`
     );
   }
+  actions.push(
+    `<button class="admin-btn admin-btn--danger" type="button" data-delete-record data-table="${table}" data-id="${row.id}" data-title="${escapeHtml(title)}"><i data-lucide="trash-2"></i> Delete</button>`
+  );
   return actions.join("");
 }
 
@@ -637,7 +677,8 @@ if (loginForm) {
       }
       const adminEmails = getAllowedAdminEmails();
       const signedInEmail = String(body.user?.email || email || "").toLowerCase();
-      if (adminEmails.length && !adminEmails.includes(signedInEmail)) {
+      const isAuthorized = await verifyAdminEmail(signedInEmail, body.access_token);
+      if (!isAuthorized && adminEmails.length) {
         throw new Error("This account is not authorized for admin access.");
       }
       safeSet("cleanco_admin_email", signedInEmail);
@@ -661,12 +702,7 @@ async function fetchTable(table) {
 
   const response = await fetch(
     `${adminConfig.supabaseUrl}/rest/v1/${table}?select=*&order=created_at.desc`,
-    {
-      headers: {
-        apikey: adminConfig.supabaseAnonKey,
-        Authorization: `Bearer ${getAdminToken()}`
-      }
-    }
+    { headers: getAdminHeaders() }
   );
   if (!response.ok) {
     console.error(`Could not fetch ${table}:`, await response.text());
@@ -688,8 +724,7 @@ async function updateStatus(table, id, status) {
   const response = await fetch(`${adminConfig.supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
     method: "PATCH",
     headers: {
-      apikey: adminConfig.supabaseAnonKey,
-      Authorization: `Bearer ${getAdminToken()}`,
+      ...getAdminHeaders(),
       "Content-Type": "application/json"
     },
     body: JSON.stringify({ status })
@@ -697,6 +732,111 @@ async function updateStatus(table, id, status) {
   if (!response.ok) {
     throw new Error(await response.text());
   }
+}
+
+async function deleteRecord(table, id) {
+  if (!adminHasSupabase) {
+    const key = localTables[table];
+    const rows = JSON.parse(localStorage.getItem(key) || "[]").filter((row) => row.id !== id);
+    localStorage.setItem(key, JSON.stringify(rows));
+    return;
+  }
+
+  const response = await fetch(`${adminConfig.supabaseUrl}/rest/v1/${table}?id=eq.${id}`, {
+    method: "DELETE",
+    headers: getAdminHeaders()
+  });
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+}
+
+async function fetchAdminTeam() {
+  if (!adminHasSupabase) {
+    return getAllowedAdminEmails().map((email) => ({ email, created_at: null, invited_by: null }));
+  }
+  const response = await fetch(
+    `${adminConfig.supabaseUrl}/rest/v1/admin_users?select=email,created_at,invited_by&order=created_at.asc`,
+    { headers: getAdminHeaders() }
+  );
+  if (!response.ok) {
+    console.error("Could not fetch admin team:", await response.text());
+    return [];
+  }
+  return response.json();
+}
+
+async function createAdminUser(email, password) {
+  if (!adminHasSupabase) {
+    throw new Error("Supabase is required to create admin accounts.");
+  }
+  const response = await fetch(`${adminConfig.supabaseUrl}/functions/v1/admin-create-user`, {
+    method: "POST",
+    headers: {
+      ...getAdminHeaders(),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body.error || "Could not create admin account");
+  }
+  return body;
+}
+
+function renderAdminTeam(members) {
+  const list = document.querySelector("[data-admin-team-list]");
+  if (!list) return;
+  if (!members.length) {
+    list.innerHTML = `<li class="admin-team-empty">No team members loaded.</li>`;
+    return;
+  }
+  list.innerHTML = members
+    .map((member) => {
+      const invited = member.invited_by ? ` · invited by ${escapeHtml(member.invited_by)}` : "";
+      const when = member.created_at ? formatTimestamp(member.created_at) : "Demo mode";
+      return `<li><strong>${escapeHtml(member.email)}</strong><span>${when}${invited}</span></li>`;
+    })
+    .join("");
+}
+
+function updateSettingsPanel() {
+  const emailEl = document.querySelector("[data-settings-email]");
+  const siteEl = document.querySelector("[data-settings-site-url]");
+  const email =
+    safeGet("cleanco_admin_email") ||
+    parseJwtEmail(getAdminToken()) ||
+    "Admin";
+  if (emailEl) emailEl.textContent = email;
+  if (siteEl) {
+    const siteUrl = adminConfig.siteUrl || window.location.origin;
+    siteEl.innerHTML = `<a href="${escapeHtml(siteUrl)}" target="_blank" rel="noopener">${escapeHtml(siteUrl)}</a>`;
+  }
+}
+
+async function loadSettingsView() {
+  updateSettingsPanel();
+  const members = await fetchAdminTeam();
+  renderAdminTeam(members);
+  refreshIcons();
+}
+
+function exportAllRecords() {
+  const payload = {
+    exported_at: new Date().toISOString(),
+    contact_submissions: dashboardCache.contact_submissions,
+    quote_requests: dashboardCache.quote_requests,
+    bookings: dashboardCache.bookings
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `rs-cleaning-export-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  URL.revokeObjectURL(url);
+  showAdminToast("Export downloaded.", "success");
 }
 
 async function initDashboard() {
@@ -760,7 +900,30 @@ document.addEventListener("click", async (event) => {
       await initDashboard();
     } catch (error) {
       console.error(error);
+      showAdminToast("Could not update status. Try refreshing.");
       statusBtn.disabled = false;
+    }
+    return;
+  }
+
+  const deleteBtn = event.target.closest("[data-delete-record]");
+  if (deleteBtn) {
+    event.preventDefault();
+    const table = deleteBtn.dataset.table;
+    const id = deleteBtn.dataset.id;
+    const title = deleteBtn.dataset.title || "this record";
+    const label = TABLE_LABELS[table] || "Record";
+    const confirmed = window.confirm(`Delete ${label.toLowerCase()} "${title}"? This cannot be undone.`);
+    if (!confirmed) return;
+    deleteBtn.disabled = true;
+    try {
+      await deleteRecord(table, id);
+      showAdminToast("Record deleted.", "success");
+      await initDashboard();
+    } catch (error) {
+      console.error(error);
+      showAdminToast("Could not delete record. Check that admin delete permissions are enabled.");
+      deleteBtn.disabled = false;
     }
     return;
   }
@@ -830,6 +993,49 @@ function switchView(targetView) {
   const subtitle = document.querySelector("[data-admin-subtitle]");
   if (title) title.textContent = meta.title;
   if (subtitle) subtitle.textContent = meta.subtitle;
+  if (targetView === "settings") {
+    loadSettingsView();
+  }
+}
+
+function initSettingsHandlers() {
+  document.querySelector("[data-admin-export]")?.addEventListener("click", exportAllRecords);
+
+  const inviteForm = document.querySelector("[data-admin-invite-form]");
+  if (inviteForm) {
+    inviteForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const state = inviteForm.querySelector("[data-admin-invite-state]");
+      const submit = inviteForm.querySelector("button[type='submit']");
+      const data = new FormData(inviteForm);
+      const email = String(data.get("email") || "").trim();
+      const password = String(data.get("password") || "");
+      if (state) {
+        state.className = "form-state loading admin-settings-state";
+        state.textContent = "Creating admin account...";
+      }
+      if (submit) submit.disabled = true;
+      try {
+        await createAdminUser(email, password);
+        inviteForm.reset();
+        if (state) {
+          state.className = "form-state success admin-settings-state";
+          state.textContent = `Admin account created for ${email}. Share the password securely.`;
+        }
+        showAdminToast(`Admin access granted to ${email}.`, "success");
+        await loadSettingsView();
+      } catch (error) {
+        console.error(error);
+        if (state) {
+          state.className = "form-state error admin-settings-state";
+          state.textContent = error.message || "Could not create admin account.";
+        }
+        showAdminToast(error.message || "Could not create admin account.");
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+    });
+  }
 }
 
 function initKpiNavigation() {
@@ -858,4 +1064,5 @@ initDashboard();
 document.addEventListener("DOMContentLoaded", () => {
   initAdminNavigation();
   initKpiNavigation();
+  initSettingsHandlers();
 });

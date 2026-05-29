@@ -45,6 +45,10 @@
           <i data-lucide="settings"></i>
           <span>Settings</span>
         </a>
+        <a class="admin-nav-item admin-nav-item--site" href="index.html" data-admin-view-site>
+          <i data-lucide="external-link"></i>
+          <span>View website</span>
+        </a>
       </nav>
       <div class="admin-sidebar-footer">
         <button class="admin-logout-btn" data-admin-logout type="button">
@@ -65,6 +69,9 @@
           <p data-admin-subtitle>Overview of leads, quotes, and bookings</p>
         </div>
         <div class="admin-topbar-meta">
+          <a class="admin-btn admin-btn--ghost admin-view-site-btn" href="index.html" data-admin-view-site title="Open public website">
+            <i data-lucide="globe"></i> View website
+          </a>
           <button class="admin-btn admin-btn--ghost admin-refresh-btn" type="button" data-admin-refresh title="Refresh data">
             <i data-lucide="refresh-cw"></i> Refresh
           </button>
@@ -196,20 +203,55 @@
       <section class="admin-panel" data-view-content="settings" hidden>
         <div class="admin-panel-head">
           <h2>Settings</h2>
-          <span>Workspace preferences</span>
+          <span>Account, team, and workspace tools</span>
         </div>
-        <div class="admin-settings-body">
-          <p>Signed in via Supabase auth. Notification and export settings can be added here.</p>
-          <ul class="admin-settings-list">
-            <li><strong>Contact table</strong> contact_submissions</li>
-            <li><strong>Quotes table</strong> quote_requests</li>
-            <li><strong>Bookings table</strong> bookings</li>
-          </ul>
+        <div class="admin-settings-grid">
+          <article class="admin-settings-card">
+            <h3><i data-lucide="user"></i> Your account</h3>
+            <p class="admin-settings-copy">Signed in as <strong data-settings-email>—</strong></p>
+            <p class="admin-settings-copy admin-settings-copy--muted">Access is limited to approved admin accounts. Use the sidebar or button above to return to the public website any time.</p>
+            <div class="admin-settings-actions">
+              <a class="admin-btn admin-btn--ghost" href="index.html" data-admin-view-site><i data-lucide="globe"></i> Open website</a>
+              <button class="admin-btn admin-btn--ghost" type="button" data-admin-logout><i data-lucide="log-out"></i> Log out</button>
+            </div>
+          </article>
+
+          <article class="admin-settings-card">
+            <h3><i data-lucide="users"></i> Admin team</h3>
+            <p class="admin-settings-copy">Create login access for another admin without opening Supabase.</p>
+            <ul class="admin-team-list" data-admin-team-list></ul>
+            <form class="admin-team-form" data-admin-invite-form novalidate>
+              <label class="admin-settings-field">
+                <span>Email</span>
+                <input type="email" name="email" required placeholder="newadmin@example.com" autocomplete="off">
+              </label>
+              <label class="admin-settings-field">
+                <span>Temporary password</span>
+                <input type="password" name="password" required minlength="8" placeholder="At least 8 characters" autocomplete="new-password">
+              </label>
+              <p class="admin-settings-hint">Share the password securely. They can change it later in Supabase if needed.</p>
+              <button class="admin-btn admin-btn--primary" type="submit"><i data-lucide="user-plus"></i> Create admin account</button>
+              <div class="form-state admin-settings-state" data-admin-invite-state role="status"></div>
+            </form>
+          </article>
+
+          <article class="admin-settings-card">
+            <h3><i data-lucide="database"></i> Data tools</h3>
+            <p class="admin-settings-copy">Export all contacts, quotes, and bookings as JSON for backup or reporting.</p>
+            <div class="admin-settings-actions">
+              <button class="admin-btn admin-btn--ghost" type="button" data-admin-export><i data-lucide="download"></i> Export all records</button>
+            </div>
+            <ul class="admin-settings-list admin-settings-list--compact">
+              <li><strong>Live site</strong> <span data-settings-site-url>—</span></li>
+              <li><strong>Tables</strong> contact_submissions · quote_requests · bookings</li>
+            </ul>
+          </article>
         </div>
       </section>
     </main>
   </div>
   <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
   <script src="assets/js/admin.js"></script>
   <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>
