@@ -35,15 +35,32 @@
 
   <script src="assets/js/config.js"></script>
   <script src="assets/js/site.js"></script>
+  <script src="assets/js/payments.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async function () {
       if (typeof lucide !== "undefined") lucide.createIcons();
       const params = new URLSearchParams(window.location.search);
       const bookingId = params.get("booking");
       const ref = document.getElementById("paymentBookingRef");
+      const copy = document.querySelector(".quote-success-copy");
+
       if (bookingId && ref) {
         ref.hidden = false;
         ref.textContent = "Reference: " + bookingId;
+      }
+
+      if (bookingId && typeof window.confirmSquarePayment === "function") {
+        try {
+          await window.confirmSquarePayment(bookingId);
+          if (copy) {
+            copy.textContent = "Payment received. Our team will confirm your appointment details shortly.";
+          }
+        } catch (err) {
+          console.error("Payment confirmation error:", err);
+          if (copy) {
+            copy.textContent = "Thank you. If your payment went through, our team will confirm your booking shortly.";
+          }
+        }
       }
     });
   </script>

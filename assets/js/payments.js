@@ -59,7 +59,29 @@
     document.body.prepend(banner);
   }
 
+  async function confirmSquarePayment(bookingId) {
+    if (!bookingId) {
+      throw new Error("Missing booking id");
+    }
+    if (!isSquareCheckoutEnabled()) {
+      throw new Error("Square checkout is not enabled");
+    }
+
+    const response = await fetch(`${config.supabaseUrl}/functions/v1/confirm-square-payment`, {
+      method: "POST",
+      headers: getFunctionAuthHeaders(),
+      body: JSON.stringify({ booking_id: bookingId }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || "Could not confirm payment");
+    }
+    return data;
+  }
+
   window.isSquareCheckoutEnabled = isSquareCheckoutEnabled;
   window.createSquareCheckout = createSquareCheckout;
+  window.confirmSquarePayment = confirmSquarePayment;
   window.initPaymentReturnBanner = initPaymentReturnBanner;
 })();

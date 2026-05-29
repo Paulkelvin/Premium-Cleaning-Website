@@ -70,8 +70,19 @@ Deno.serve(async (req) => {
       return new Response("Missing signature", { status: 401 });
     }
 
-    const expected = await hmacSha256Base64(signatureKey, notificationUrl + rawBody);
-    if (expected !== signatureHeader) {
+    const urlVariants = [notificationUrl, notificationUrl.replace(/\/$/, ""), `${notificationUrl.replace(/\/$/, "")}/`];
+    const uniqueUrls = [...new Set(urlVariants)];
+    let signatureValid = false;
+
+    for (const url of uniqueUrls) {
+      const expected = await hmacSha256Base64(signatureKey, url + rawBody);
+      if (expected === signatureHeader) {
+        signatureValid = true;
+        break;
+      }
+    }
+
+    if (!signatureValid) {
       console.error("square-webhook: invalid signature");
       return new Response("Invalid signature", { status: 401 });
     }

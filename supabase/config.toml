@@ -1,6 +1,9 @@
 # Supabase local config. Link your project before deploying functions:
 #   supabase link --project-ref hbacogyhftngwoxenttv
 
+[functions.confirm-square-payment]
+verify_jwt = false
+
 [functions.create-square-checkout]
 verify_jwt = false
 
