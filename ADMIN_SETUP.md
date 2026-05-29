@@ -127,10 +127,19 @@ Seed content was imported to dataset **`production`** (39 documents): heroes, FA
 - **You do not need local deployment** to see Sanity content on the **live** site — the site fetches from Sanity’s API in the browser.
 - **Code fixes** (quote bugs, admin email in config) still need **push + Cloudflare build** (`npm run build` → deploy `dist/`).
 
-Schema deploy (`npx sanity schema deploy`) timed out once; import succeeded. If Studio shows warnings about new fields (`location`, `avatarUrl` on testimonials), run schema deploy when convenient:
+If Studio shows **Unknown fields found** (for example `afterImage` on gallery items), the hosted Studio bundle is out of date. Rebuild and deploy Studio plus schema:
 
 ```powershell
-npx sanity schema deploy
+npm run studio:deploy
+npm run sanity:schema-deploy
+```
+
+Studio URL: https://cleaning-websitepaulkelvin-cleaning.sanity.studio/
+
+To restore the six Maryland/DC service area documents from seed:
+
+```powershell
+npm run sanity:sync-service-areas
 ```
 
 ---

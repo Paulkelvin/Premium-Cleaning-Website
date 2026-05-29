@@ -9,7 +9,9 @@
     "studio:deploy": "sanity deploy",
     "sanity:import": "sanity dataset import sanity/seed.ndjson production --replace",
     "sanity:migrate-images": "node scripts/migrate-sanity-images.mjs",
-    "sanity:migrate-images:cli": "sanity exec scripts/migrate-sanity-images-exec.cjs --with-user-token"
+    "sanity:migrate-images:cli": "sanity exec scripts/migrate-sanity-images-exec.cjs --with-user-token",
+    "sanity:schema-deploy": "sanity schema deploy --workspace premiumCleaningWebsite --no-extract-manifest",
+    "sanity:sync-service-areas": "sanity exec scripts/sync-service-areas.cjs --with-user-token"
   },
   "dependencies": {
     "@sanity/vision": "^3.99.0",
