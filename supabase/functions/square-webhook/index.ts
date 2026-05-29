@@ -21,15 +21,37 @@ async function hmacSha256Base64(key: string, message: string) {
 
 function parseBookingId(note?: string | null) {
   if (!note) return null;
-  const match = String(note).match(/booking:([0-9a-f-]{36})/i);
-  return match?.[1] ?? null;
+  const tagged = String(note).match(/booking:([0-9a-f-]{36})/i);
+  if (tagged?.[1]) return tagged[1];
+  const bare = String(note).match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  return bare?.[1] ?? null;
 }
 
 function mapPaymentStatus(status?: string | null) {
   const normalized = String(status || "").toUpperCase();
-  if (normalized === "COMPLETED") return "paid";
+  // Sandbox Test Payment may send APPROVED before COMPLETED.
+  if (normalized === "COMPLETED" || normalized === "APPROVED") return "paid";
   if (normalized === "FAILED" || normalized === "CANCELED") return "payment_failed";
   return "pending_payment";
+}
+
+async function resolveBookingId(
+  supabase: ReturnType<typeof createClient>,
+  payment: Record<string, unknown>
+) {
+  const fromNote = parseBookingId(String(payment.note || ""));
+  if (fromNote) return fromNote;
+
+  const orderId = payment.order_id ? String(payment.order_id) : "";
+  if (!orderId) return null;
+
+  const { data } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("square_order_id", orderId)
+    .maybeSingle();
+
+  return data?.id ?? null;
 }
 
 Deno.serve(async (req) => {
@@ -44,11 +66,13 @@ Deno.serve(async (req) => {
   if (signatureKey && notificationUrl) {
     const signatureHeader = req.headers.get("x-square-hmacsha256-signature");
     if (!signatureHeader) {
+      console.error("square-webhook: missing signature header");
       return new Response("Missing signature", { status: 401 });
     }
 
     const expected = await hmacSha256Base64(signatureKey, notificationUrl + rawBody);
     if (expected !== signatureHeader) {
+      console.error("square-webhook: invalid signature");
       return new Response("Invalid signature", { status: 401 });
     }
   }
@@ -62,21 +86,14 @@ Deno.serve(async (req) => {
 
   const eventType = String(payload.type || "");
   if (!eventType.startsWith("payment.")) {
-    return new Response(JSON.stringify({ ok: true, ignored: true }), {
+    return new Response(JSON.stringify({ ok: true, ignored: true, reason: "non-payment event" }), {
       headers: { "Content-Type": "application/json" },
     });
   }
 
   const payment = (payload.data as { object?: { payment?: Record<string, unknown> } })?.object?.payment;
   if (!payment) {
-    return new Response(JSON.stringify({ ok: true, ignored: true }), {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const bookingId = parseBookingId(String(payment.note || ""));
-  if (!bookingId) {
-    return new Response(JSON.stringify({ ok: true, ignored: true }), {
+    return new Response(JSON.stringify({ ok: true, ignored: true, reason: "no payment object" }), {
       headers: { "Content-Type": "application/json" },
     });
   }
@@ -86,13 +103,40 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
+  const bookingId = await resolveBookingId(supabase, payment);
+  if (!bookingId) {
+    console.warn("square-webhook: no booking match", {
+      note: payment.note,
+      order_id: payment.order_id,
+      status: payment.status,
+    });
+    return new Response(JSON.stringify({ ok: true, ignored: true, reason: "booking not matched" }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const paymentStatus = mapPaymentStatus(String(payment.status || ""));
   const paymentId = payment.id ? String(payment.id) : null;
+
+  if (paymentStatus === "pending_payment") {
+    return new Response(JSON.stringify({ ok: true, ignored: true, reason: "intermediate status", booking_id: bookingId }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   const updatePayload: Record<string, string> = { payment_status: paymentStatus };
   if (paymentId) updatePayload.square_payment_id = paymentId;
 
-  await supabase.from("bookings").update(updatePayload).eq("id", bookingId);
+  const { error } = await supabase.from("bookings").update(updatePayload).eq("id", bookingId);
+  if (error) {
+    console.error("square-webhook: supabase update failed", error.message);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  console.log("square-webhook: updated booking", bookingId, paymentStatus);
 
   return new Response(JSON.stringify({ ok: true, booking_id: bookingId, payment_status: paymentStatus }), {
     headers: { "Content-Type": "application/json" },
