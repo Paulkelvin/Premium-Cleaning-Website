@@ -25,7 +25,7 @@ window.CLEANCO_CONFIG = {
   sanityDataset: "production",
   sanityApiVersion: "2025-05-23",
   pricing: {
-    minimumJob: 100,
+    minimumJob: 0.5,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,

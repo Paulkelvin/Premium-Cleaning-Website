@@ -99,6 +99,12 @@ function mapSanityGalleryItem(item, index) {
         title,
         body,
         "imageUrl": coalesce(image.asset->url, imageUrl)
+      },
+      teamMembers[]{
+        name,
+        role,
+        bio,
+        "photoUrl": coalesce(photo.asset->url, photoUrl)
       }
     },
     "services": *[_type == "service"] | order(displayOrder asc){
@@ -254,19 +260,68 @@ function applyPageHero(data) {
 
   applyPageBody(page);
 
+  applyAboutOrigin(page);
+  applyAboutTeam(page);
+}
+
+function applyAboutOrigin(page) {
+  if (document.body.dataset.sanityPage !== "about") return;
   const section = page.sections?.[0];
-  if (section && document.querySelector(".about-story-origin")) {
-    const sectionRoot = document.querySelector(".about-story-origin, main section:nth-of-type(2)");
-    if (sectionRoot) {
-      text(sectionRoot.querySelector("h2"), section.title);
-      text(sectionRoot.querySelector("p"), section.body);
-      const sectionImg = sectionRoot.querySelector("img");
-      if (sectionImg && !sectionImg.hasAttribute("data-brand-apparel")) {
-        attr(sectionImg, "src", section.imageUrl);
-        attr(sectionImg, "alt", section.title || page.title);
-      }
-    }
+  const sectionRoot = document.querySelector(".about-story-origin");
+  if (!sectionRoot || !section) return;
+
+  const heading = sectionRoot.querySelector(".heading-accent-left");
+  if (heading) {
+    text(heading.querySelector(".eyebrow"), section.eyebrow);
+    text(heading.querySelector("h2"), section.title);
   }
+
+  const copyRoot = sectionRoot.querySelector(".split > div:first-child");
+  if (copyRoot && section.body) {
+    const paragraphs = String(section.body).split(/\n+/).filter(Boolean);
+    const staticPs = [...copyRoot.querySelectorAll("p")];
+    paragraphs.forEach((paragraph, index) => {
+      if (staticPs[index]) text(staticPs[index], paragraph);
+    });
+  }
+
+  const founderImg = sectionRoot.querySelector("[data-about-founder-photo]");
+  if (founderImg && section.imageUrl) {
+    attr(founderImg, "src", section.imageUrl);
+    attr(founderImg, "alt", section.title ? `${section.title} portrait` : "Founder portrait");
+  }
+}
+
+function teamMemberInitials(name) {
+  return String(name || "")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase() || "?";
+}
+
+function renderTeamMemberPhoto(member) {
+  if (member.photoUrl) {
+    return `<img class="team-member-photo" src="${escapeHtml(member.photoUrl)}" alt="${escapeHtml(member.name)}" width="400" height="400" decoding="async" loading="lazy">`;
+  }
+  return `<div class="team-member-photo team-member-photo--placeholder" aria-hidden="true"><span>${escapeHtml(teamMemberInitials(member.name))}</span></div>`;
+}
+
+function applyAboutTeam(page) {
+  if (document.body.dataset.sanityPage !== "about") return;
+  const list = document.querySelector("[data-about-team-list]");
+  if (!list || !page.teamMembers?.length) return;
+
+  list.innerHTML = page.teamMembers.map((member) => `
+    <article class="card team-member-card fade-in-up">
+      ${renderTeamMemberPhoto(member)}
+      <h3 style="margin-bottom: 4px;">${escapeHtml(member.name)}</h3>
+      <p class="eyebrow" style="margin-bottom: 12px;">${escapeHtml(member.role || "")}</p>
+      <p style="font-size: 0.92rem; margin-bottom: 0;">${escapeHtml(member.bio || "")}</p>
+    </article>
+  `).join("");
 }
 
 function applyPageBody(page) {

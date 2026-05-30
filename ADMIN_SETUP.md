@@ -17,7 +17,8 @@ Admin access is managed in the **`admin_users`** table in Supabase (see migratio
 | Return to admin | While logged in, public pages show a floating **Admin** button (bottom-right) |
 | Create another admin | **Settings** → Admin team (super admins only) |
 | Remove a standard admin | **Settings** → Admin team → **Remove** (super admins only) |
-| Export data | **Settings** → choose format (Excel, CSV, JSON) and record type |
+| Export data | **Settings** → pick **From/To** dates, format (Excel, CSV, JSON), and record type |
+| Offline invoices | **Invoices** → create locked-price quote, Square link, optional Gmail send — see `OFFLINE_INVOICES_SETUP.md` |
 
 ### Super admin vs standard admin
 
@@ -30,6 +31,7 @@ Admin access is managed in the **`admin_users`** table in Supabase (see migratio
 1. **SQL Editor** → run `supabase/migrations/20250530_admin_users_delete.sql`
 2. **SQL Editor** → run `supabase/migrations/20250531_admin_superuser.sql`
 3. **Edge Functions** → deploy `admin-create-user` and `admin-delete-user` (JWT verify **OFF**)
+4. **Offline invoices** → run `supabase/migrations/20250536_offline_invoices.sql`, deploy invoice functions, configure Gmail per `OFFLINE_INVOICES_SETUP.md`
 
 ---
 

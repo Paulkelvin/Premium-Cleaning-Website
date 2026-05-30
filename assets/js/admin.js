@@ -97,6 +97,10 @@ const VIEW_META = {
   inbox: { title: "Contact Inbox", subtitle: "Customer inquiries and messages" },
   quotes: { title: "Quote Requests", subtitle: "Estimate requests from the quote wizard" },
   bookings: { title: "Bookings", subtitle: "Appointments, payment, and schedule details" },
+  invoices: {
+    title: "Offline invoices",
+    subtitle: "Create locked-price quotes and send Square payment links by email"
+  },
   settings: { title: "Settings", subtitle: "Workspace configuration" }
 };
 
@@ -145,9 +149,12 @@ const FIELD_CONFIG = {
     { key: "preferred_date", label: "Preferred date", type: "date" },
     { key: "preferred_time", label: "Preferred time" },
     { key: "address", label: "Address", wide: true },
+    { key: "source", label: "Source" },
     { key: "payment_method", label: "Payment method" },
     { key: "payment_status", label: "Payment status" },
     { key: "estimated_total", label: "Estimate", type: "currency" },
+    { key: "admin_notes", label: "Admin notes", wide: true },
+    { key: "invoice_sent_at", label: "Invoice emailed", type: "date" },
     { key: "quote_id", label: "Quote ID", type: "mono" },
     { key: "consent", label: "Consent", type: "boolean" },
     { key: "status", label: "Status" },
@@ -394,6 +401,16 @@ function renderStatusActions(table, row, status) {
   if (row.phone) {
     actions.push(
       `<a class="admin-btn admin-btn--ghost" href="tel:${escapeHtml(String(row.phone).replace(/\D/g, ""))}"><i data-lucide="phone"></i> Call</a>`
+    );
+  }
+  if (table === "bookings" && row.source === "admin" && row.square_checkout_url) {
+    actions.push(
+      `<button class="admin-btn admin-btn--ghost" type="button" data-booking-copy-link="${escapeHtml(row.id)}"><i data-lucide="link"></i> Copy pay link</button>`
+    );
+  }
+  if (table === "bookings" && row.source === "admin" && row.payment_status !== "paid") {
+    actions.push(
+      `<button class="admin-btn admin-btn--ghost" type="button" data-booking-open-invoice="${escapeHtml(row.id)}"><i data-lucide="receipt"></i> Invoices</button>`
     );
   }
   if (status === "new") {
@@ -932,16 +949,51 @@ function flattenRecord(row) {
   return copy;
 }
 
-function getExportRows(scope) {
+function getExportDateRange() {
+  const fromVal = document.querySelector("[data-admin-export-from]")?.value?.trim();
+  const toVal = document.querySelector("[data-admin-export-to]")?.value?.trim();
+  if (!fromVal || !toVal) {
+    showAdminToast("Choose a start date and end date for the report.");
+    return null;
+  }
+  const from = new Date(`${fromVal}T00:00:00`);
+  const to = new Date(`${toVal}T23:59:59.999`);
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+    showAdminToast("Invalid date range.");
+    return null;
+  }
+  if (from > to) {
+    showAdminToast("Start date must be on or before the end date.");
+    return null;
+  }
+  return { from: fromVal, to: toVal, fromTime: from.getTime(), toTime: to.getTime() };
+}
+
+function recordInExportRange(row, range) {
+  if (!row?.created_at) return false;
+  const created = new Date(row.created_at).getTime();
+  if (Number.isNaN(created)) return false;
+  return created >= range.fromTime && created <= range.toTime;
+}
+
+function filterTableRows(table, range) {
+  return (dashboardCache[table] || []).filter((row) => recordInExportRange(row, range));
+}
+
+function getExportRows(scope, range) {
   if (scope === "all") {
     return [
-      ...dashboardCache.contact_submissions.map((row) => ({ record_type: "contact", ...flattenRecord(row) })),
-      ...dashboardCache.quote_requests.map((row) => ({ record_type: "quote", ...flattenRecord(row) })),
-      ...dashboardCache.bookings.map((row) => ({ record_type: "booking", ...flattenRecord(row) }))
+      ...filterTableRows("contact_submissions", range).map((row) => ({ record_type: "contact", ...flattenRecord(row) })),
+      ...filterTableRows("quote_requests", range).map((row) => ({ record_type: "quote", ...flattenRecord(row) })),
+      ...filterTableRows("bookings", range).map((row) => ({ record_type: "booking", ...flattenRecord(row) }))
     ];
   }
   const label = scope === "contact_submissions" ? "contact" : scope === "quote_requests" ? "quote" : "booking";
-  return (dashboardCache[scope] || []).map((row) => ({ record_type: label, ...flattenRecord(row) }));
+  return filterTableRows(scope, range).map((row) => ({ record_type: label, ...flattenRecord(row) }));
+}
+
+function exportFilenameStamp(range) {
+  return `${range.from}_to_${range.to}`;
 }
 
 function downloadBlob(blob, filename) {
@@ -991,7 +1043,7 @@ function exportRecords() {
     ];
     const csv = `\uFEFF${lines.join("\n")}`;
     downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `rs-cleaning-export-${stamp}.csv`);
-    showAdminToast("CSV export downloaded.", "success");
+    showAdminToast(`CSV export downloaded (${rows.length} records).`, "success");
     return;
   }
 
@@ -1003,13 +1055,13 @@ function exportRecords() {
   if (scope === "all") {
     const workbook = XLSX.utils.book_new();
     const sheets = [
-      ["Contacts", dashboardCache.contact_submissions],
-      ["Quotes", dashboardCache.quote_requests],
-      ["Bookings", dashboardCache.bookings]
+      ["Contacts", filterTableRows("contact_submissions", range)],
+      ["Quotes", filterTableRows("quote_requests", range)],
+      ["Bookings", filterTableRows("bookings", range)]
     ];
     sheets.forEach(([name, data]) => {
       const sheetRows = data.map(flattenRecord);
-      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(sheetRows.length ? sheetRows : [{ note: "No records" }]), name);
+      XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(sheetRows.length ? sheetRows : [{ note: "No records in this date range" }]), name);
     });
     XLSX.writeFile(workbook, `rs-cleaning-export-${stamp}.xlsx`);
   } else {
@@ -1018,7 +1070,24 @@ function exportRecords() {
     XLSX.utils.book_append_sheet(workbook, XLSX.utils.json_to_sheet(rows), sheetName);
     XLSX.writeFile(workbook, `rs-cleaning-${sheetName.toLowerCase()}-${stamp}.xlsx`);
   }
-  showAdminToast("Excel export downloaded.", "success");
+  showAdminToast(`Excel export downloaded (${rows.length} records).`, "success");
+}
+
+function initExportDateDefaults() {
+  const fromInput = document.querySelector("[data-admin-export-from]");
+  const toInput = document.querySelector("[data-admin-export-to]");
+  if (!fromInput || !toInput || fromInput.value || toInput.value) return;
+
+  const today = new Date();
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const toIso = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+  fromInput.value = toIso(startOfMonth);
+  toInput.value = toIso(today);
 }
 
 async function initDashboard() {
@@ -1197,6 +1266,13 @@ function switchView(targetView) {
   if (subtitle) subtitle.textContent = meta.subtitle;
   if (targetView === "settings") {
     loadSettingsView();
+    initExportDateDefaults();
+  }
+  if (targetView === "invoices" && typeof window.initAdminInvoicesView === "function") {
+    window.initAdminInvoicesView();
+  }
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
   }
 }
 
@@ -1262,9 +1338,52 @@ function initAdminNavigation() {
   });
 }
 
+async function copyBookingPayLink(bookingId) {
+  const row = (dashboardCache.bookings || []).find((item) => item.id === bookingId);
+  if (!row?.square_checkout_url) {
+    showAdminToast("No payment link yet. Open Invoices to create one.");
+    return;
+  }
+  await navigator.clipboard.writeText(row.square_checkout_url);
+  showAdminToast("Payment link copied.", "success");
+}
+
+async function openInvoiceForBooking(bookingId) {
+  switchView("invoices");
+  const row = (dashboardCache.bookings || []).find((item) => item.id === bookingId);
+  if (!row) return;
+  if (typeof window.initAdminInvoicesView === "function") {
+    await window.initAdminInvoicesView();
+  }
+  if (typeof window.fillAdminInvoiceFromRow === "function") {
+    window.fillAdminInvoiceFromRow(row);
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const copyBtn = event.target.closest("[data-booking-copy-link]");
+  if (copyBtn) {
+    event.preventDefault();
+    copyBookingPayLink(copyBtn.getAttribute("data-booking-copy-link")).catch((error) => {
+      showAdminToast(error.message || "Could not copy link.");
+    });
+    return;
+  }
+  const invoiceBtn = event.target.closest("[data-booking-open-invoice]");
+  if (invoiceBtn) {
+    event.preventDefault();
+    openInvoiceForBooking(invoiceBtn.getAttribute("data-booking-open-invoice"));
+  }
+});
+
+window.getAdminToken = getAdminToken;
+window.showAdminToast = showAdminToast;
+window.initDashboard = initDashboard;
+
 initDashboard();
 document.addEventListener("DOMContentLoaded", () => {
   initAdminNavigation();
   initKpiNavigation();
   initSettingsHandlers();
+  initExportDateDefaults();
 });

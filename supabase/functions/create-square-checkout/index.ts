@@ -9,7 +9,7 @@ const corsHeaders = {
 /** Keep pricing in sync with assets/js/config.js */
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 100,
+    minimumJob: 0.5,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -144,7 +144,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, estimated_total, service_type, full_name, payment_method, payment_status, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+        "id, estimated_total, pricing_locked, service_type, full_name, payment_method, payment_status, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
       )
       .eq("id", bookingId)
       .single();
@@ -164,9 +164,15 @@ Deno.serve(async (req) => {
       throw new Error("Service area must be confirmed before checkout");
     }
 
-    const { total } = computeBookingTotal(booking);
+    let total = 0;
+    if (booking.pricing_locked && Number(booking.estimated_total) > 0) {
+      total = Math.round(Number(booking.estimated_total) * 100) / 100;
+    } else {
+      total = computeBookingTotal(booking).total;
+    }
     const amountCents = Math.round(total * 100);
-    if (!Number.isFinite(amountCents) || amountCents < 100) {
+    const minCents = booking.pricing_locked ? 50 : 100;
+    if (!Number.isFinite(amountCents) || amountCents < minCents) {
       throw new Error("Could not calculate a valid checkout total for this booking");
     }
 

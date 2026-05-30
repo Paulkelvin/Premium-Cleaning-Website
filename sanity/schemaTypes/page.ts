@@ -27,5 +27,20 @@ export const page = defineType({
         ],
       }],
     }),
+    defineField({
+      name: 'teamMembers',
+      title: 'Team Members',
+      description: 'Used on the About page team section.',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          defineField({name: 'name', title: 'Name', type: 'string'}),
+          defineField({name: 'role', title: 'Role', type: 'string'}),
+          defineField({name: 'bio', title: 'Bio', type: 'text'}),
+          imageField('photo', 'Photo', 'Upload a headshot. Leave empty to show a placeholder until you add one.'),
+        ],
+      }],
+    }),
   ],
 })

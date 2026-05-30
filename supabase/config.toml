@@ -9,3 +9,12 @@ verify_jwt = false
 
 [functions.square-webhook]
 verify_jwt = false
+
+[functions.admin-create-invoice]
+verify_jwt = false
+
+[functions.admin-invoice-checkout]
+verify_jwt = false
+
+[functions.send-payment-invoice]
+verify_jwt = false

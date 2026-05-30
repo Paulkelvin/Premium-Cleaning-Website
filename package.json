@@ -14,7 +14,9 @@
     "sanity:sync-service-areas": "sanity exec scripts/sync-service-areas.cjs --with-user-token",
     "sanity:sync-website": "sanity exec scripts/sync-website-to-sanity.cjs --with-user-token",
     "sanity:sync-stock-images": "sanity exec scripts/sync-stock-service-images.cjs --with-user-token",
-    "sanity:strip-legacy-urls": "sanity exec scripts/strip-legacy-url-fields.cjs --with-user-token"
+    "sanity:strip-legacy-urls": "sanity exec scripts/strip-legacy-url-fields.cjs --with-user-token",
+    "sanity:sync-about": "sanity exec scripts/sync-about-team.cjs --with-user-token",
+    "supabase:deploy-invoices": "supabase functions deploy admin-create-invoice && supabase functions deploy admin-invoice-checkout && supabase functions deploy send-payment-invoice"
   },
   "dependencies": {
     "@sanity/vision": "^3.99.0",
