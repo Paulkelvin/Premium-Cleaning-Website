@@ -18,7 +18,11 @@
   let lastMatch = null;
 
   function normalize(value) {
-    return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .replace(/,?\s*(md|maryland)\.?$/i, "")
+      .replace(/\s+/g, " ");
   }
 
   function levenshtein(a, b) {
@@ -41,10 +45,11 @@
     const digits = query.replace(/\D/g, "");
     if (digits.length < 5) return null;
     const zip = digits.slice(0, 5);
-    return window.SERVICE_AREAS.find((area) => {
-      if (area.zips?.includes(zip)) return true;
-      return area.zipPrefixes?.some((prefix) => zip.startsWith(prefix));
-    }) || null;
+    const exact = window.SERVICE_AREAS.find((area) => area.zips?.includes(zip));
+    if (exact) return exact;
+    return window.SERVICE_AREAS.find((area) =>
+      area.zipPrefixes?.some((prefix) => zip.startsWith(prefix))
+    ) || null;
   }
 
   function matchByName(query) {
@@ -52,15 +57,18 @@
     if (!q) return null;
 
     const exact = window.SERVICE_AREAS.find((area) => {
-      const names = [area.name, ...(area.aliases || [])].map(normalize);
-      return names.some((name) => name === q || q.includes(name) || name.includes(q));
+      const names = [area.name, ...(area.aliases || []), ...(area.cities || [])].map(normalize);
+      return names.some((name) => {
+        if (!name) return false;
+        return name === q || q.includes(name) || name.includes(q);
+      });
     });
     if (exact) return { area: exact, fuzzy: false };
 
     let best = null;
     let bestScore = Infinity;
     window.SERVICE_AREAS.forEach((area) => {
-      [area.name, ...(area.aliases || [])].forEach((label) => {
+      [area.name, ...(area.aliases || []), ...(area.cities || [])].forEach((label) => {
         const score = levenshtein(q, normalize(label));
         if (score < bestScore) {
           bestScore = score;

@@ -33,6 +33,7 @@ const TEAM = [
     name: 'Ryann Sargent',
     role: 'Founder & Owner',
     bio: 'Ryann leads operations, scheduling, quality control, and client experience with the same standards of organization, confidentiality, and care that shaped her professional background.',
+    photoFile: 'rscleaningcollective_founder.jpg',
   },
   {
     name: 'Nikki Hare',
@@ -88,7 +89,7 @@ async function run() {
     })
     .commit()
 
-  console.log('About page synced: founder section + 3 team members (Nikki photo uploaded).')
+  console.log('About page synced: founder section + 3 team members (Ryann + Nikki photos uploaded).')
 }
 
 run().catch((err) => {

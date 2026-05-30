@@ -343,8 +343,11 @@ function teamMemberInitials(name) {
 }
 
 function renderTeamMemberPhoto(member) {
-  if (member.photoUrl) {
-    return `<img class="team-member-photo" src="${escapeHtml(member.photoUrl)}" alt="${escapeHtml(member.name)}" width="400" height="400" decoding="async" loading="lazy">`;
+  const isFounder = /ryann\s+sargent/i.test(String(member.name || ""));
+  const photoSrc = member.photoUrl || (isFounder ? "assets/images/rscleaningcollective_founder.jpg" : "");
+  if (photoSrc) {
+    const founderClass = isFounder ? " team-member-photo--founder" : "";
+    return `<img class="team-member-photo${founderClass}" src="${escapeHtml(photoSrc)}" alt="${escapeHtml(member.name)}" width="400" height="400" decoding="async" loading="lazy">`;
   }
   return `<div class="team-member-photo team-member-photo--placeholder" aria-hidden="true"><span>${escapeHtml(teamMemberInitials(member.name))}</span></div>`;
 }
@@ -489,7 +492,8 @@ function applyService(services) {
 function applyFaqs(faqs) {
   const list = document.querySelector("[data-faq-list]");
   if (!list || !faqs.length) return;
-  list.innerHTML = faqs.map((item, index) => `
+  const visibleFaqs = document.body.dataset.sanityPage === "home" ? faqs.slice(0, 3) : faqs;
+  list.innerHTML = visibleFaqs.map((item, index) => `
     <div class="faq-item ${index === 0 ? "is-open" : ""}">
       <button class="faq-trigger" type="button">
         <span>${escapeHtml(item.question)}</span>
@@ -513,7 +517,6 @@ function renderReviewCard(item, variant) {
           ${avatar}
           <div class="review-meta">
             <strong>${escapeHtml(item.customerName)}</strong>
-            <span>${escapeHtml(item.location || item.serviceType || "")}</span>
           </div>
         </div>
         <p class="review-text">${escapeHtml(item.quote)}</p>
@@ -528,7 +531,6 @@ function renderReviewCard(item, variant) {
     <article class="card testimonial" style="flex: 0 0 calc(33.333% - 16px); min-width: 300px;">
       <blockquote>"${escapeHtml(item.quote)}"</blockquote>
       <strong>${escapeHtml(item.customerName)}</strong>
-      <p style="margin-top:4px; font-size:0.85rem;">${escapeHtml(item.serviceType || "")}</p>
     </article>
   `;
 }
@@ -556,27 +558,38 @@ function applyGallery(items) {
   });
 }
 
+function buildServiceAreaCards(areas) {
+  const configAreas = Array.isArray(window.SERVICE_AREAS) ? window.SERVICE_AREAS : [];
+  const source = configAreas.length
+    ? configAreas.map((cfg) => {
+        const match = (areas || []).find((area) => area.name === cfg.name);
+        return {
+          name: cfg.name,
+          cities: cfg.cities || cfg.nearbyAreas || match?.nearbyAreas || [],
+        };
+      })
+    : (areas || []).map((area) => ({
+        name: area.name,
+        cities: area.nearbyAreas || [],
+      }));
+
+  return source.map((area) => {
+    const cities = (area.cities || []).filter(Boolean);
+    const cityList = cities.length
+      ? `<ul class="service-area-cities">${cities.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+      : "";
+    return `
+      <article class="card service-area-card">
+        <h3>${escapeHtml(area.name)}</h3>
+        ${cityList}
+      </article>
+    `;
+  }).join("");
+}
+
 function applyServiceAreas(areas) {
   const target = document.querySelector("[data-service-area-list]");
   if (!target) return;
-  if (areas.length) {
-    target.innerHTML = areas.map((area) => `
-      <article class="card service-area-card">
-        <h3>${escapeHtml(area.name)}</h3>
-        ${area.nearbyAreas?.length ? `
-          <ul class="feature-list">${area.nearbyAreas.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-        ` : ""}
-      </article>
-    `).join("");
-    return;
-  }
-  const configAreas = Array.isArray(window.CLEANCO_CONFIG?.serviceAreas)
-    ? window.CLEANCO_CONFIG.serviceAreas.filter(Boolean)
-    : [];
-  if (!configAreas.length) return;
-  target.innerHTML = configAreas.map((name) => `
-    <article class="card service-area-card">
-      <h3>${escapeHtml(name)}</h3>
-    </article>
-  `).join("");
+  const html = buildServiceAreaCards(areas);
+  if (html) target.innerHTML = html;
 }

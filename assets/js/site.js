@@ -665,8 +665,8 @@ function createBrandLogoImg({ admin = false } = {}) {
     img.width = 40;
     img.height = 40;
   } else {
-    img.width = 168;
-    img.height = 56;
+    img.width = 220;
+    img.height = 72;
   }
   return img;
 }
@@ -692,8 +692,8 @@ function initSiteMeta() {
   if (document.querySelector('link[rel="icon"]')) return;
   const link = document.createElement("link");
   link.rel = "icon";
-  link.type = "image/jpeg";
-  link.href = siteAssetPath("favicon.jpeg");
+  link.type = "image/png";
+  link.href = siteAssetPath("rscleaningcollective-logo.PNG");
   document.head.appendChild(link);
 }
 
