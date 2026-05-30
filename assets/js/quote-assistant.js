@@ -442,8 +442,16 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   const discount = pricingConfig.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
-  const areaMeta = getServiceAreaMeta();
-  const travelFee = areaMeta?.travelFee ? Number(areaMeta.travelFee) : 0;
+  let travelFee = 0;
+  let areaName = "";
+  if (session && (session.service_area_name != null || session.travel_fee != null)) {
+    areaName = String(session.service_area_name || "").trim();
+    travelFee = Math.max(0, Number(session.travel_fee) || 0);
+  } else {
+    const areaMeta = getServiceAreaMeta();
+    travelFee = areaMeta?.travelFee != null ? Math.max(0, Number(areaMeta.travelFee) || 0) : 0;
+    areaName = String(areaMeta?.name || "").trim();
+  }
   subtotal += travelFee;
 
   return {
@@ -456,7 +464,7 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
     addonsPrice,
     discount,
     travelFee,
-    areaName: areaMeta?.name || ""
+    areaName
   };
 }
 
@@ -750,7 +758,6 @@ function buildSubmissionPayload(form, table) {
       payload.square_feet = String(parseSqft("", beds, baths));
     }
   }
-  payload.estimated_total = pricing.total || payload.estimated_total || 0;
   payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
 
   if (table === "bookings") {
@@ -758,19 +765,35 @@ function buildSubmissionPayload(form, table) {
     if (payload.payment_method !== "pay_online") {
       payload.payment_method = "pay_at_service";
     }
-    const normalizedAreaName = String(pricing.areaName || payload.service_area_name || "").trim();
-    const normalizedTravelFee = Number.isFinite(Number(pricing.travelFee))
-      ? Number(pricing.travelFee)
-      : Number(payload.travel_fee || 0) || 0;
 
-    // Keep online checkout resilient for legacy sessions without service-area metadata.
-    if (!normalizedAreaName && payload.payment_method === "pay_online") {
-      payload.service_area_name = "Outside service area";
-      payload.travel_fee = 35;
+    const quoteSession =
+      typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
+
+    if (quoteSession?.quote_id) {
+      const sessionTotal = Number(quoteSession.estimated_total);
+      payload.estimated_total =
+        Number.isFinite(sessionTotal) && sessionTotal > 0 ? sessionTotal : pricing.total;
+      payload.service_area_name = String(
+        quoteSession.service_area_name || payload.service_area_name || pricing.areaName || ""
+      ).trim();
+      payload.travel_fee = Math.max(0, Number(quoteSession.travel_fee) || 0);
+      payload.pricing_locked = true;
+      if (quoteSession.square_feet != null && quoteSession.square_feet !== "") {
+        payload.square_feet = String(quoteSession.square_feet);
+      }
+      if (quoteSession.size_input_mode === "sqft") {
+        payload.bedrooms = quoteSession.bedrooms ?? "";
+        payload.bathrooms = quoteSession.bathrooms ?? "";
+      }
     } else {
-      payload.service_area_name = normalizedAreaName;
-      payload.travel_fee = normalizedTravelFee;
+      payload.estimated_total = pricing.total || payload.estimated_total || 0;
+      payload.service_area_name = String(
+        pricing.areaName || payload.service_area_name || ""
+      ).trim();
+      payload.travel_fee = Math.max(0, Number(pricing.travelFee) || Number(payload.travel_fee) || 0);
     }
+  } else {
+    payload.estimated_total = pricing.total || payload.estimated_total || 0;
   }
 
   return { payload, pricing };
@@ -1027,10 +1050,14 @@ function initQuoteAssistant(formContainer = document) {
   function scrollQuoteStepIntoView({ behavior = "smooth" } = {}) {
     if (!isQuoteStudio) return;
     const activeStep = steps[currentStepIndex];
-    const anchor = isBooking
-      ? (activeStep?.querySelector(".field, .book-schedule-block") || form.querySelector(".quote-form-nav") || stepScrollAnchor)
-      : stepScrollAnchor;
-    scrollElementToQuoteTop(anchor, { behavior, extraOffset: isBooking ? 20 : 8 });
+    let anchor = stepScrollAnchor;
+    if (isBooking) {
+      anchor =
+        root.querySelector(".quote-step-banner")
+        || activeStep?.querySelector(".quote-review-card, .book-schedule-block")
+        || stepScrollAnchor;
+    }
+    scrollElementToQuoteTop(anchor, { behavior, extraOffset: isBooking ? 12 : 8 });
   }
 
   const stepKicker = root.querySelector("#quoteProgressText");
@@ -1294,9 +1321,7 @@ function initQuoteAssistant(formContainer = document) {
       bubble.classList.remove("is-typing", "is-fading");
       setStepContentVisible(true);
       remeasureExpandable();
-      if (!isBooking) {
-        scrollQuoteStepIntoView({ behavior: scrollBehavior });
-      }
+      scrollQuoteStepIntoView({ behavior: scrollBehavior });
     };
 
     if (instant || (coachInitialPaint && isQuoteStudio && !isBooking)) {
@@ -1337,9 +1362,7 @@ function initQuoteAssistant(formContainer = document) {
           setTimeout(() => {
             setStepContentVisible(true);
             remeasureExpandable();
-            if (!isBooking) {
-              scrollQuoteStepIntoView({ behavior: scrollBehavior });
-            }
+            scrollQuoteStepIntoView({ behavior: scrollBehavior });
           }, 280);
         }
       }

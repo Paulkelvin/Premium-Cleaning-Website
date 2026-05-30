@@ -16,7 +16,7 @@ const TABLE_COLUMNS = {
     "bedrooms", "bathrooms", "square_feet", "add_ons", "frequency",
     "preferred_date", "preferred_time", "address", "message",
     "estimated_total", "service_area_name", "travel_fee",
-    "payment_method", "quote_id", "consent"
+    "payment_method", "quote_id", "pricing_locked", "consent"
   ]
 };
 

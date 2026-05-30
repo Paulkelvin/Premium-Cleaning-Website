@@ -86,10 +86,14 @@ function resolveTravelFee(areaName?: string | null, rawTravelFee?: string | null
     return AREA_FEE_RULES[normalizedArea];
   }
 
-  const numericFee = Math.max(0, Number(rawTravelFee || 0) || 0);
-  if (normalizedArea && numericFee > 0) {
-    return numericFee;
+  if (rawTravelFee != null && String(rawTravelFee).trim() !== "") {
+    return Math.max(0, Number(rawTravelFee) || 0);
   }
+
+  if (normalizedArea) {
+    return 0;
+  }
+
   return 35;
 }
 
@@ -226,7 +230,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, payment_method, payment_status, square_order_id, service_type, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+        "id, estimated_total, payment_method, payment_status, square_order_id, service_type, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
       )
       .eq("id", bookingId)
       .single();
@@ -248,7 +252,11 @@ Deno.serve(async (req) => {
       throw new Error("Service area must be confirmed before payment confirmation");
     }
 
-    const { total } = computeBookingTotal(booking);
+    const storedTotal = Number(booking.estimated_total);
+    const total =
+      Number.isFinite(storedTotal) && storedTotal > 0
+        ? Math.round(storedTotal * 100) / 100
+        : computeBookingTotal(booking).total;
     const expectedAmountCents = Math.round(total * 100);
     if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 100) {
       throw new Error("Could not determine a valid booking total");

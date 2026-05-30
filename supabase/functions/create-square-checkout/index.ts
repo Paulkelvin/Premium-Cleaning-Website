@@ -87,12 +87,14 @@ function resolveTravelFee(areaName?: string | null, rawTravelFee?: string | null
     return AREA_FEE_RULES[normalizedArea];
   }
 
-  const numericFee = Math.max(0, Number(rawTravelFee || 0) || 0);
-  if (normalizedArea && numericFee > 0) {
-    // Unknown but explicitly confirmed area from checker/session.
-    return numericFee;
+  if (rawTravelFee != null && String(rawTravelFee).trim() !== "") {
+    return Math.max(0, Number(rawTravelFee) || 0);
   }
-  // No confirmed area -> treat as outside zone default.
+
+  if (normalizedArea) {
+    return 0;
+  }
+
   return 35;
 }
 
@@ -164,9 +166,10 @@ Deno.serve(async (req) => {
       throw new Error("Service area must be confirmed before checkout");
     }
 
+    const storedTotal = Number(booking.estimated_total);
     let total = 0;
-    if (booking.pricing_locked && Number(booking.estimated_total) > 0) {
-      total = Math.round(Number(booking.estimated_total) * 100) / 100;
+    if (Number.isFinite(storedTotal) && storedTotal > 0) {
+      total = Math.round(storedTotal * 100) / 100;
     } else {
       total = computeBookingTotal(booking).total;
     }
