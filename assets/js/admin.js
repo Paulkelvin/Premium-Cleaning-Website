@@ -354,21 +354,49 @@ function rowMatchesStatusFilter(row, filter) {
   return (row.status || "new") === filter;
 }
 
+function normalizeFrequency(value) {
+  const text = String(value || "").trim().toLowerCase();
+  if (!text) return "one-time";
+  if (text === "one-time" || text === "one time" || text === "onetime") return "one-time";
+  if (text === "weekly") return "weekly";
+  if (text === "bi-weekly" || text === "biweekly" || text === "every 2 weeks") return "bi-weekly";
+  if (text === "monthly") return "monthly";
+  return "one-time";
+}
+
+function isRepeatFrequency(value) {
+  const normalized = normalizeFrequency(value);
+  return normalized === "weekly" || normalized === "bi-weekly" || normalized === "monthly";
+}
+
+function rowMatchesFrequencyFilter(row, filter) {
+  if (!filter || filter === "all") return true;
+  const frequency = normalizeFrequency(row.frequency);
+  if (filter === "repeat") return isRepeatFrequency(frequency);
+  if (filter === "one-time") return frequency === "one-time";
+  return frequency === filter;
+}
+
 function getToolbarState(table) {
   const toolbar = document.querySelector(`[data-admin-toolbar='${table}']`);
-  if (!toolbar) return { query: "", status: "all" };
+  if (!toolbar) return { query: "", status: "all", frequency: "all" };
   const search = toolbar.querySelector("[data-admin-search]");
   const statusFilter = toolbar.querySelector("[data-admin-status-filter]");
+  const frequencyFilter = toolbar.querySelector("[data-admin-frequency-filter]");
   return {
     query: (search?.value || "").trim().toLowerCase(),
-    status: statusFilter?.value || "all"
+    status: statusFilter?.value || "all",
+    frequency: frequencyFilter?.value || "all"
   };
 }
 
 function filterRows(table, rows) {
-  const { query, status } = getToolbarState(table);
+  const { query, status, frequency } = getToolbarState(table);
   return rows.filter(
-    (row) => rowMatchesSearch(row, query) && rowMatchesStatusFilter(row, status)
+    (row) =>
+      rowMatchesSearch(row, query) &&
+      rowMatchesStatusFilter(row, status) &&
+      rowMatchesFrequencyFilter(row, frequency)
   );
 }
 
@@ -477,14 +505,14 @@ function renderRecord(table, row, { forceExpanded } = {}) {
 }
 
 function renderEmptyState(table, filtered) {
-  const { query, status } = getToolbarState(table);
-  const hasFilters = query || status !== "all";
+  const { query, status, frequency } = getToolbarState(table);
+  const hasFilters = query || status !== "all" || frequency !== "all";
   if (hasFilters && filtered) {
     return `
       <div class="admin-empty">
         <i data-lucide="search-x"></i>
         <p><strong>No matches</strong></p>
-        <p>Try a different search or status filter.</p>
+        <p>Try a different search, status, or frequency filter.</p>
       </div>
     `;
   }
@@ -605,6 +633,115 @@ function renderActivity(allRows) {
     })
     .join("");
   refreshIcons();
+}
+
+function toMoney(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+function safePercent(part, whole) {
+  if (!whole) return 0;
+  return Math.round((part / whole) * 1000) / 10;
+}
+
+function buildFrequencyMix(bookings) {
+  const buckets = {
+    "one-time": 0,
+    weekly: 0,
+    "bi-weekly": 0,
+    monthly: 0,
+    other: 0
+  };
+  bookings.forEach((row) => {
+    const freq = normalizeFrequency(row.frequency);
+    if (Object.prototype.hasOwnProperty.call(buckets, freq)) {
+      buckets[freq] += 1;
+    } else {
+      buckets.other += 1;
+    }
+  });
+  return buckets;
+}
+
+function renderAnalytics() {
+  const target = document.querySelector("[data-admin-analytics]");
+  if (!target) return;
+
+  const quotes = dashboardCache.quote_requests || [];
+  const bookings = dashboardCache.bookings || [];
+  const validBookings = bookings.filter((row) => Number(row.estimated_total || 0) > 0);
+  const totalRevenue = validBookings.reduce((sum, row) => sum + Number(row.estimated_total || 0), 0);
+  const avgTicket = validBookings.length ? totalRevenue / validBookings.length : 0;
+
+  const clientKeys = new Set();
+  bookings.forEach((row) => {
+    const key = String(row.email || row.phone || "").trim().toLowerCase();
+    if (key) clientKeys.add(key);
+  });
+
+  const repeatClients = new Set();
+  bookings.forEach((row) => {
+    const key = String(row.email || row.phone || "").trim().toLowerCase();
+    if (!key) return;
+    if (isRepeatFrequency(row.frequency)) repeatClients.add(key);
+  });
+
+  const repeatRate = safePercent(repeatClients.size, clientKeys.size);
+  const bookingsFromQuotes = bookings.filter((row) => Boolean(row.quote_id)).length;
+  const quoteToBookingRate = safePercent(bookingsFromQuotes, quotes.length);
+  const mix = buildFrequencyMix(bookings);
+  const mixMax = Math.max(...Object.values(mix), 1);
+
+  const adminInvoices = bookings.filter((row) => row.source === "admin");
+  const invoicePipeline = {
+    draft: adminInvoices.filter((row) => row.payment_status === "invoice_draft").length,
+    pending: adminInvoices.filter((row) => row.payment_status === "pending_payment").length,
+    sent: adminInvoices.filter((row) => row.payment_status === "invoice_sent").length,
+    paid: adminInvoices.filter((row) => row.payment_status === "paid").length
+  };
+
+  target.innerHTML = `
+    <article class="admin-analytic-card">
+      <h3>Revenue snapshot</h3>
+      <p><strong>${toMoney(totalRevenue)}</strong> from ${validBookings.length} bookings</p>
+      <span>Avg ticket: ${toMoney(avgTicket)}</span>
+    </article>
+    <article class="admin-analytic-card">
+      <h3>Repeat client rate</h3>
+      <p><strong>${repeatRate}%</strong> repeat clients</p>
+      <span>${repeatClients.size} of ${clientKeys.size || 0} clients have non one-time frequency</span>
+    </article>
+    <article class="admin-analytic-card">
+      <h3>Quote to booking</h3>
+      <p><strong>${quoteToBookingRate}%</strong> conversion</p>
+      <span>${bookingsFromQuotes} quote-linked bookings from ${quotes.length} quotes</span>
+    </article>
+    <article class="admin-analytic-card">
+      <h3>Invoice pipeline</h3>
+      <p><strong>${adminInvoices.length}</strong> admin invoices</p>
+      <span>Draft ${invoicePipeline.draft} · Pending ${invoicePipeline.pending} · Sent ${invoicePipeline.sent} · Paid ${invoicePipeline.paid}</span>
+    </article>
+    <article class="admin-analytic-card admin-analytic-card--wide">
+      <h3>Frequency mix</h3>
+      <div class="admin-frequency-bars">
+        ${[
+          ["one-time", "One-time", mix["one-time"]],
+          ["weekly", "Weekly", mix.weekly],
+          ["bi-weekly", "Bi-weekly", mix["bi-weekly"]],
+          ["monthly", "Monthly", mix.monthly]
+        ]
+          .map(
+            ([key, label, count]) => `
+          <div class="admin-frequency-bar-row">
+            <span>${label}</span>
+            <div class="admin-frequency-bar-track"><i style="width:${Math.max(8, Math.round((count / mixMax) * 100))}%"></i></div>
+            <strong>${count}</strong>
+          </div>`
+          )
+          .join("")}
+      </div>
+    </article>
+  `;
 }
 
 function refreshIcons() {
@@ -1008,22 +1145,27 @@ function downloadBlob(blob, filename) {
 function exportRecords() {
   const format = document.querySelector("[data-admin-export-format]")?.value || "xlsx";
   const scope = document.querySelector("[data-admin-export-scope]")?.value || "all";
-  const stamp = new Date().toISOString().slice(0, 10);
-  const rows = getExportRows(scope);
+  const range = getExportDateRange();
+  if (!range) return;
+  const stamp = exportFilenameStamp(range);
+  const rows = getExportRows(scope, range);
 
   if (!rows.length) {
-    showAdminToast("No records to export for that selection.");
+    showAdminToast(`No records found between ${range.from} and ${range.to}.`);
     return;
   }
 
   if (format === "json") {
     const payload = {
       exported_at: new Date().toISOString(),
+      date_from: range.from,
+      date_to: range.to,
       scope,
+      record_count: rows.length,
       records: rows
     };
     downloadBlob(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }), `rs-cleaning-export-${stamp}.json`);
-    showAdminToast("JSON export downloaded.", "success");
+    showAdminToast(`JSON export downloaded (${rows.length} records).`, "success");
     return;
   }
 
@@ -1112,6 +1254,7 @@ async function initDashboard() {
       dashboardCache[table].map((row) => ({ table, ...row }))
     );
     renderActivity(all);
+    renderAnalytics();
     updateCounts();
     updateSignedInLabel();
   } finally {
@@ -1226,7 +1369,7 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("change", (event) => {
-  const filter = event.target.closest("[data-admin-status-filter]");
+  const filter = event.target.closest("[data-admin-status-filter], [data-admin-frequency-filter]");
   if (!filter) return;
   const toolbar = filter.closest("[data-admin-toolbar]");
   const table = toolbar?.getAttribute("data-admin-toolbar");

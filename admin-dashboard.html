@@ -115,6 +115,16 @@
         </article>
       </div>
 
+      <section class="admin-panel admin-analytics-panel" data-view-content="dashboard">
+        <div class="admin-panel-head">
+          <div>
+            <h2>Business analytics</h2>
+            <span>Conversion, repeat clients, revenue, and frequency mix</span>
+          </div>
+        </div>
+        <div class="admin-analytics-grid" data-admin-analytics></div>
+      </section>
+
       <section class="admin-panel" data-view-content="dashboard">
         <div class="admin-panel-head">
           <h2>Recent activity</h2>
@@ -163,12 +173,22 @@
             <i data-lucide="search"></i>
             <input type="search" placeholder="Search name, email, phone…" data-admin-search autocomplete="off">
           </label>
-          <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
-            <option value="all">All statuses</option>
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="resolved">Resolved</option>
-          </select>
+          <div class="admin-toolbar-filters">
+            <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
+              <option value="all">All statuses</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="resolved">Resolved</option>
+            </select>
+            <select class="admin-toolbar-select" data-admin-frequency-filter aria-label="Filter by frequency">
+              <option value="all">All frequencies</option>
+              <option value="repeat">Repeat only</option>
+              <option value="one-time">One-time only</option>
+              <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
           <div class="admin-toolbar-actions">
             <button class="admin-btn admin-btn--ghost" type="button" data-admin-expand-all>Expand all</button>
             <button class="admin-btn admin-btn--ghost" type="button" data-admin-collapse-all>Collapse all</button>
@@ -190,12 +210,22 @@
             <i data-lucide="search"></i>
             <input type="search" placeholder="Search name, email, phone…" data-admin-search autocomplete="off">
           </label>
-          <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
-            <option value="all">All statuses</option>
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="resolved">Resolved</option>
-          </select>
+          <div class="admin-toolbar-filters">
+            <select class="admin-toolbar-select" data-admin-status-filter aria-label="Filter by status">
+              <option value="all">All statuses</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="resolved">Resolved</option>
+            </select>
+            <select class="admin-toolbar-select" data-admin-frequency-filter aria-label="Filter by frequency">
+              <option value="all">All frequencies</option>
+              <option value="repeat">Repeat only</option>
+              <option value="one-time">One-time only</option>
+              <option value="weekly">Weekly</option>
+              <option value="bi-weekly">Bi-weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
           <div class="admin-toolbar-actions">
             <button class="admin-btn admin-btn--ghost" type="button" data-admin-expand-all>Expand all</button>
             <button class="admin-btn admin-btn--ghost" type="button" data-admin-collapse-all>Collapse all</button>
@@ -214,20 +244,21 @@
         <div class="admin-invoices-layout">
           <form class="admin-invoice-form" data-invoice-form novalidate>
             <h3>New or edit invoice</h3>
-            <div class="admin-invoice-grid">
-              <label class="admin-settings-field">
-                <span>Customer name</span>
+            <p class="admin-invoice-lead">Charge for <strong>one cleaning visit</strong>. Frequency only adjusts the suggested price (repeat-client discount)—it is not a subscription.</p>
+            <div class="admin-invoice-grid admin-invoice-grid--compact">
+              <label class="admin-invoice-field">
+                <span>Name</span>
                 <input type="text" name="full_name" required autocomplete="name">
               </label>
-              <label class="admin-settings-field">
+              <label class="admin-invoice-field">
                 <span>Email</span>
                 <input type="email" name="email" required autocomplete="email">
               </label>
-              <label class="admin-settings-field">
+              <label class="admin-invoice-field">
                 <span>Phone</span>
                 <input type="tel" name="phone" autocomplete="tel">
               </label>
-              <label class="admin-settings-field">
+              <label class="admin-invoice-field">
                 <span>Service</span>
                 <select name="service_type" required>
                   <option value="Standard cleaning">Standard cleaning</option>
@@ -236,79 +267,87 @@
                   <option value="Office cleaning">Office cleaning</option>
                 </select>
               </label>
-              <label class="admin-settings-field">
-                <span>Property type</span>
-                <select name="property_type">
-                  <option value="House">House</option>
-                  <option value="Apartment">Apartment</option>
-                  <option value="Condo">Condo</option>
-                  <option value="Office">Office</option>
-                </select>
-              </label>
-              <label class="admin-settings-field">
-                <span>Bedrooms</span>
-                <input type="number" name="bedrooms" min="0" max="20" value="2">
-              </label>
-              <label class="admin-settings-field">
-                <span>Bathrooms</span>
-                <input type="number" name="bathrooms" min="0" max="20" value="1" step="0.5">
-              </label>
-              <label class="admin-settings-field">
-                <span>Square feet</span>
-                <input type="text" name="square_feet" inputmode="numeric" placeholder="Optional — estimate used if blank">
-              </label>
-              <label class="admin-settings-field">
-                <span>Frequency</span>
-                <select name="frequency">
-                  <option value="One-time">One-time</option>
-                  <option value="Weekly">Weekly</option>
-                  <option value="Bi-weekly">Bi-weekly</option>
-                  <option value="Monthly">Monthly</option>
-                </select>
-              </label>
-              <label class="admin-settings-field">
-                <span>Service area</span>
+              <label class="admin-invoice-field">
+                <span>Area</span>
                 <select name="service_area_name" required></select>
               </label>
-              <label class="admin-settings-field admin-settings-field--wide">
-                <span>Address</span>
-                <input type="text" name="address" placeholder="Service address">
+              <label class="admin-invoice-field admin-invoice-field--freq">
+                <span>How often they clean</span>
+                <select name="frequency" aria-describedby="invoice-freq-help">
+                  <option value="One-time">One-time (no discount)</option>
+                  <option value="Weekly">Weekly (−20% per visit)</option>
+                  <option value="Bi-weekly">Every 2 weeks (−15%)</option>
+                  <option value="Monthly">Monthly (−10%)</option>
+                </select>
               </label>
-              <label class="admin-settings-field">
-                <span>Preferred date</span>
-                <input type="date" name="preferred_date">
+              <label class="admin-invoice-field admin-invoice-field--narrow">
+                <span>Beds</span>
+                <input type="number" name="bedrooms" min="0" max="20" value="2">
               </label>
-              <label class="admin-settings-field">
-                <span>Preferred time</span>
-                <input type="text" name="preferred_time" placeholder="e.g. Morning">
+              <label class="admin-invoice-field admin-invoice-field--narrow">
+                <span>Baths</span>
+                <input type="number" name="bathrooms" min="0" max="20" value="1" step="0.5">
               </label>
             </div>
-            <fieldset class="admin-invoice-addons-fieldset">
-              <legend>Add-ons</legend>
-              <div class="admin-invoice-addons" data-invoice-addons></div>
-            </fieldset>
-            <label class="admin-settings-field admin-settings-field--wide">
-              <span>Note for customer (optional)</span>
-              <textarea name="message" rows="2" placeholder="Shown on the invoice email"></textarea>
-            </label>
-            <label class="admin-settings-field admin-settings-field--wide">
-              <span>Internal notes</span>
-              <textarea name="admin_notes" rows="2" placeholder="Admin only — not emailed"></textarea>
-            </label>
+            <p class="admin-invoice-freq-help" id="invoice-freq-help" data-invoice-freq-help></p>
+            <details class="admin-invoice-more">
+              <summary>More details (address, add-ons, notes)</summary>
+              <div class="admin-invoice-more-body">
+                <div class="admin-invoice-grid admin-invoice-grid--compact">
+                  <label class="admin-invoice-field">
+                    <span>Property</span>
+                    <select name="property_type">
+                      <option value="House">House</option>
+                      <option value="Apartment">Apartment</option>
+                      <option value="Condo">Condo</option>
+                      <option value="Office">Office</option>
+                    </select>
+                  </label>
+                  <label class="admin-invoice-field">
+                    <span>Sq ft</span>
+                    <input type="text" name="square_feet" inputmode="numeric" placeholder="Optional">
+                  </label>
+                  <label class="admin-invoice-field">
+                    <span>Date</span>
+                    <input type="date" name="preferred_date">
+                  </label>
+                  <label class="admin-invoice-field">
+                    <span>Time</span>
+                    <input type="text" name="preferred_time" placeholder="Morning">
+                  </label>
+                  <label class="admin-invoice-field admin-invoice-field--wide">
+                    <span>Address</span>
+                    <input type="text" name="address" placeholder="Service address">
+                  </label>
+                </div>
+                <fieldset class="admin-invoice-addons-fieldset">
+                  <legend>Add-ons</legend>
+                  <div class="admin-invoice-addons" data-invoice-addons></div>
+                </fieldset>
+                <label class="admin-invoice-field admin-invoice-field--wide">
+                  <span>Customer note (on email)</span>
+                  <textarea name="message" rows="2"></textarea>
+                </label>
+                <label class="admin-invoice-field admin-invoice-field--wide">
+                  <span>Internal notes</span>
+                  <textarea name="admin_notes" rows="2"></textarea>
+                </label>
+              </div>
+            </details>
             <div class="admin-invoice-pricing">
-              <p>Suggested total: <strong data-invoice-suggested>—</strong></p>
-              <label class="admin-settings-field">
-                <span>Amount to charge ($)</span>
+              <p>Suggested (this visit): <strong data-invoice-suggested>—</strong></p>
+              <label class="admin-invoice-field admin-invoice-field--amount">
+                <span>Charge ($)</span>
                 <input type="number" name="estimated_total" min="0.5" step="0.01" required>
               </label>
             </div>
             <div class="admin-invoice-form-actions">
-              <button class="admin-btn admin-btn--primary" type="button" data-invoice-save><i data-lucide="save"></i> Save invoice</button>
-              <button class="admin-btn admin-btn--ghost" type="button" data-invoice-create-link><i data-lucide="link"></i> Save &amp; create link</button>
-              <button class="admin-btn admin-btn--ghost" type="button" data-invoice-send-email><i data-lucide="send"></i> Send email</button>
+              <button class="admin-btn admin-btn--primary" type="button" data-invoice-save><i data-lucide="save"></i> Save</button>
+              <button class="admin-btn admin-btn--ghost" type="button" data-invoice-create-link title="Save and create a new Square link for this visit"><i data-lucide="link"></i> Pay link</button>
+              <button class="admin-btn admin-btn--ghost" type="button" data-invoice-send-email><i data-lucide="send"></i> Email</button>
               <button class="admin-btn admin-btn--ghost" type="button" data-invoice-reset>New</button>
             </div>
-            <p class="admin-invoice-hint">Email sending uses Gmail once Google secrets are set in Supabase (<code>OFFLINE_INVOICES_SETUP.md</code>).</p>
+            <p class="admin-invoice-hint">Pay link = Square URL for this invoice only. <strong>New pay link</strong> in the list replaces an old link if you changed the price.</p>
             <div class="form-state admin-settings-state" data-invoice-form-state role="status"></div>
           </form>
           <aside class="admin-invoice-list-wrap">

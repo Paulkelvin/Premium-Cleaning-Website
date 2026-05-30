@@ -98,6 +98,24 @@
     return data;
   }
 
+  const FREQUENCY_HELP = {
+    "One-time":
+      "One-time: full price for a single visit. The customer pays this amount once—not multiple visits.",
+    Weekly:
+      "Weekly: 20% off the per-visit estimate (they plan to clean every week). Square still charges one visit today; book future weeks separately.",
+    "Bi-weekly":
+      "Every 2 weeks: 15% off one visit’s price. Not twice per week—cleaning about every 14 days. No end date in the system; each invoice is one payment.",
+    Monthly:
+      "Monthly: 10% off one visit’s price (about once a month). Customer pays once now; schedule the next month when ready.",
+  };
+
+  function updateFrequencyHelp(frequency) {
+    const help = document.querySelector("[data-invoice-freq-help]");
+    if (!help) return;
+    const freq = String(frequency || "One-time").trim() || "One-time";
+    help.textContent = FREQUENCY_HELP[freq] || FREQUENCY_HELP["One-time"];
+  }
+
   function updateSuggestedTotal() {
     const form = document.querySelector("[data-invoice-form]");
     if (!form) return;
@@ -105,6 +123,7 @@
     const suggested = calculateSuggestedTotal(payload);
     const suggestedEl = document.querySelector("[data-invoice-suggested]");
     const amountInput = form.querySelector('[name="estimated_total"]');
+    updateFrequencyHelp(payload.frequency);
     if (suggestedEl) {
       suggestedEl.textContent = suggested > 0 ? `$${suggested.toFixed(2)}` : "—";
     }
@@ -174,7 +193,7 @@
             <div class="admin-invoice-item-actions">
               <button type="button" class="admin-btn admin-btn--ghost admin-btn--small" data-invoice-edit="${row.id}">Edit</button>
               ${hasLink ? `<button type="button" class="admin-btn admin-btn--ghost admin-btn--small" data-invoice-copy="${row.id}">Copy link</button>` : ""}
-              ${!paid ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-checkout="${row.id}">${hasLink ? "Refresh link" : "Create link"}</button>` : ""}
+              ${!paid ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-checkout="${row.id}" title="Generate a new Square payment URL (use after price changes)">${hasLink ? "New pay link" : "Pay link"}</button>` : ""}
               ${!paid && hasLink ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-send="${row.id}">Send email</button>` : ""}
             </div>
           </div>
