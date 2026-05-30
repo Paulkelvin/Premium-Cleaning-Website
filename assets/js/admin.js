@@ -377,26 +377,42 @@ function rowMatchesFrequencyFilter(row, filter) {
   return frequency === filter;
 }
 
+function normalizePaymentStatus(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function rowMatchesPaymentFilter(row, filter, table) {
+  if (table !== "bookings" || !filter || filter === "all") return true;
+  const paymentStatus = normalizePaymentStatus(row.payment_status);
+  if (filter === "paid") return paymentStatus === "paid";
+  if (filter === "pending") return paymentStatus === "pending_payment";
+  if (filter === "unpaid") return paymentStatus !== "paid";
+  return true;
+}
+
 function getToolbarState(table) {
   const toolbar = document.querySelector(`[data-admin-toolbar='${table}']`);
-  if (!toolbar) return { query: "", status: "all", frequency: "all" };
+  if (!toolbar) return { query: "", status: "all", frequency: "all", payment: "all" };
   const search = toolbar.querySelector("[data-admin-search]");
   const statusFilter = toolbar.querySelector("[data-admin-status-filter]");
   const frequencyFilter = toolbar.querySelector("[data-admin-frequency-filter]");
+  const paymentFilter = toolbar.querySelector("[data-admin-payment-filter]");
   return {
     query: (search?.value || "").trim().toLowerCase(),
     status: statusFilter?.value || "all",
-    frequency: frequencyFilter?.value || "all"
+    frequency: frequencyFilter?.value || "all",
+    payment: paymentFilter?.value || "all"
   };
 }
 
 function filterRows(table, rows) {
-  const { query, status, frequency } = getToolbarState(table);
+  const { query, status, frequency, payment } = getToolbarState(table);
   return rows.filter(
     (row) =>
       rowMatchesSearch(row, query) &&
       rowMatchesStatusFilter(row, status) &&
-      rowMatchesFrequencyFilter(row, frequency)
+      rowMatchesFrequencyFilter(row, frequency) &&
+      rowMatchesPaymentFilter(row, payment, table)
   );
 }
 
@@ -457,14 +473,29 @@ function renderStatusActions(table, row, status) {
   return actions.join("");
 }
 
+function renderPaymentBadge(row, table) {
+  if (table !== "bookings") return "";
+  const paymentStatus = normalizePaymentStatus(row.payment_status);
+  if (paymentStatus === "paid") {
+    return `<span class="status paid">paid</span>`;
+  }
+  if (paymentStatus === "pending_payment") {
+    return `<span class="status pending-payment">pending</span>`;
+  }
+  return "";
+}
+
 function renderRecord(table, row, { forceExpanded } = {}) {
   const status = row.status || "new";
+  const paymentStatus = normalizePaymentStatus(row.payment_status);
+  const isPaidBooking = table === "bookings" && paymentStatus === "paid";
   const title = getRowTitle(row);
   const summary = getRowSummary(table, row);
   const expanded = forceExpanded === true;
   const bodyId = `record-body-${table}-${row.id}`;
   const estimateBadge =
     table !== "contact_submissions" ? getEstimateBadge(row) : "";
+  const paymentBadge = renderPaymentBadge(row, table);
 
   const message = row.message
     ? `
@@ -476,12 +507,15 @@ function renderRecord(table, row, { forceExpanded } = {}) {
     : "";
 
   return `
-    <article class="admin-record${expanded ? " is-expanded" : ""}" data-record-id="${escapeHtml(row.id)}" data-admin-record data-table="${table}">
+    <article class="admin-record${expanded ? " is-expanded" : ""}${isPaidBooking ? " admin-record--paid" : ""}" data-record-id="${escapeHtml(row.id)}" data-admin-record data-table="${table}">
       <div class="admin-record-head">
         <button type="button" class="admin-record-toggle" aria-expanded="${expanded}" aria-controls="${bodyId}">
           <span class="admin-record-chevron" aria-hidden="true"></span>
           <span class="admin-record-title-wrap">
-            <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+            <span class="admin-record-statuses">
+              <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+              ${paymentBadge}
+            </span>
             <span class="admin-record-heading">
               <strong class="admin-record-name">${escapeHtml(title)}</strong>
               ${estimateBadge}
@@ -505,14 +539,14 @@ function renderRecord(table, row, { forceExpanded } = {}) {
 }
 
 function renderEmptyState(table, filtered) {
-  const { query, status, frequency } = getToolbarState(table);
-  const hasFilters = query || status !== "all" || frequency !== "all";
+  const { query, status, frequency, payment } = getToolbarState(table);
+  const hasFilters = query || status !== "all" || frequency !== "all" || payment !== "all";
   if (hasFilters && filtered) {
     return `
       <div class="admin-empty">
         <i data-lucide="search-x"></i>
         <p><strong>No matches</strong></p>
-        <p>Try a different search, status, or frequency filter.</p>
+        <p>Try a different search or filter.</p>
       </div>
     `;
   }
@@ -617,6 +651,7 @@ function renderActivity(allRows) {
   target.innerHTML = sorted
     .map((row) => {
       const status = row.status || "new";
+      const paymentBadge = renderPaymentBadge(row, row.table);
       const icon = ACTIVITY_ICONS[row.table] || "circle";
       return `
       <a class="admin-activity-item" href="#" data-activity-jump="${row.table}">
@@ -626,7 +661,10 @@ function renderActivity(allRows) {
           <strong>${escapeHtml(getRowTitle(row))}</strong>
           <span>${escapeHtml(getRowSummary(row.table, row) || "New submission")}</span>
         </div>
-        <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+        <span class="admin-activity-statuses">
+          <span class="status ${escapeHtml(status)}">${escapeHtml(status)}</span>
+          ${paymentBadge}
+        </span>
         <time>${formatTimestamp(row.created_at)}</time>
       </a>
     `;
@@ -1369,7 +1407,9 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("change", (event) => {
-  const filter = event.target.closest("[data-admin-status-filter], [data-admin-frequency-filter]");
+  const filter = event.target.closest(
+    "[data-admin-status-filter], [data-admin-frequency-filter], [data-admin-payment-filter]"
+  );
   if (!filter) return;
   const toolbar = filter.closest("[data-admin-toolbar]");
   const table = toolbar?.getAttribute("data-admin-toolbar");

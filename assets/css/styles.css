@@ -3125,6 +3125,22 @@ body.admin-login-page {
 .status.new { background: #fef3c7; color: #b45309; }
 .status.contacted { background: #dbeafe; color: #1d4ed8; }
 .status.resolved { background: #d1fae5; color: #047857; }
+.status.paid { background: #ede9fe; color: #5b21b6; }
+.status.pending-payment { background: #ffedd5; color: #c2410c; }
+
+.admin-record-statuses,
+.admin-activity-statuses {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-record--paid {
+  border-color: rgba(91, 33, 182, 0.28);
+  background: linear-gradient(180deg, rgba(237, 233, 254, 0.45) 0%, #fff 42%);
+  box-shadow: inset 3px 0 0 #7c3aed;
+}
 
 .admin-analytics-panel {
   margin-bottom: 18px;
