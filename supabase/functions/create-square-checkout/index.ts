@@ -9,7 +9,7 @@ const corsHeaders = {
 /** Keep pricing in sync with assets/js/config.js */
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 0.5,
+    minimumJob: 1, // TEMP: sync with assets/js/config.js — restore after live payment check
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,

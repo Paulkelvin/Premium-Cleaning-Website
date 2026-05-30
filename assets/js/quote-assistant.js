@@ -2,7 +2,8 @@ function getPricingConfig() {
   const cfg = window.CLEANCO_CONFIG?.pricing;
   if (cfg?.rates && cfg?.addOns) return cfg;
   return {
-    minimumJob: 0.5,
+    minimumJob: 1,
+    minSqft: 1,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -26,6 +27,16 @@ function getPricingConfig() {
       "One-time": 0.0
     }
   };
+}
+
+function minSqftForQuote() {
+  const min = Number(getPricingConfig().minSqft);
+  return Number.isFinite(min) && min > 0 ? min : 200;
+}
+
+function initQuoteSqftMin() {
+  const sqftInput = document.querySelector("#quoteSqft");
+  if (sqftInput) sqftInput.min = String(minSqftForQuote());
 }
 
 const ADDON_VALUE_ALIASES = {
@@ -259,6 +270,7 @@ window.clearQuoteContext = clearQuoteContextStorage;
 document.addEventListener("DOMContentLoaded", () => {
   initQuotePrefill();
   initQuoteContext();
+  initQuoteSqftMin();
   initQuoteAssistant();
 });
 
@@ -300,7 +312,7 @@ function hasCompleteBedBathMetrics(form, session = null) {
 
 function hasCompleteSqftMetrics(form, session = null) {
   const { sqft } = readSpaceMetrics(form, session);
-  return Number.isInteger(sqft) && sqft >= 200;
+  return Number.isInteger(sqft) && sqft >= minSqftForQuote();
 }
 
 function hasValidSpaceMetrics(form, session = null) {
@@ -316,9 +328,10 @@ function inferSizeInputModeFromSession(session) {
   const bathsRaw = String(session.bathrooms ?? "").trim();
   const sqft = sqftRaw === "" ? NaN : parseInt(sqftRaw.replace(/,/g, ""), 10);
   const hasBedsBaths = bedsRaw !== "" && bathsRaw !== "";
-  if (Number.isInteger(sqft) && sqft >= 200 && !hasBedsBaths) return "sqft";
+  const minSqft = minSqftForQuote();
+  if (Number.isInteger(sqft) && sqft >= minSqft && !hasBedsBaths) return "sqft";
   if (hasBedsBaths) return "beds_baths";
-  if (Number.isInteger(sqft) && sqft >= 200) return "sqft";
+  if (Number.isInteger(sqft) && sqft >= minSqft) return "sqft";
   return "beds_baths";
 }
 
@@ -356,8 +369,9 @@ function applySizeInputMode(form, mode, { clearInactive = false } = {}) {
   if (sqftInput) sqftInput.disabled = !isSqft;
 
   if (hint) {
+    const minSqft = minSqftForQuote();
     hint.textContent = isSqft
-      ? "Enter your square footage (at least 200). We'll use that for your estimate."
+      ? `Enter your square footage (at least ${minSqft}). We'll use that for your estimate.`
       : "Enter bedrooms and bathrooms—we'll estimate square footage for your quote.";
   }
 }
@@ -1398,9 +1412,10 @@ function initQuoteAssistant(formContainer = document) {
     const { beds, baths, sqft } = readSpaceMetrics(form);
 
     if (mode === "sqft") {
-      if (!Number.isInteger(sqft) || sqft < 200) {
+      const minSqft = minSqftForQuote();
+      if (!Number.isInteger(sqft) || sqft < minSqft) {
         if (!silent) {
-          showStudioToast(root, "Enter your square footage (at least 200).", "error");
+          showStudioToast(root, `Enter your square footage (at least ${minSqft}).`, "error");
           form.querySelector("#quoteSqft")?.focus?.({ preventScroll: true });
         }
         return false;

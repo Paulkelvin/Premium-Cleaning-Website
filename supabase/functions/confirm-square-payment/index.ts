@@ -8,7 +8,7 @@ const corsHeaders = {
 
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 0.5,
+    minimumJob: 1,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
