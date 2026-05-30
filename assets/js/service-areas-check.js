@@ -132,7 +132,7 @@
     if (!raw) {
       resultEl.hidden = false;
       resultEl.className = "area-check-result area-check-result--error";
-      resultEl.innerHTML = "<strong>Enter a ZIP or area name</strong><p>Try “Charles County” or “Washington, DC”.</p>";
+      resultEl.innerHTML = "<strong>Enter a ZIP or area name</strong><p>Try “Charles County” or “Mechanicsville”.</p>";
       suggestEl.hidden = true;
       continueBtn.hidden = true;
       return;

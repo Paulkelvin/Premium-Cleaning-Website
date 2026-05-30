@@ -106,7 +106,7 @@ function parseConfig() {
     phone: pick('phone'),
     email: pick('email'),
     serviceAreaSummary: pick('serviceArea'),
-    operatingHours: 'Monday to Saturday, 8am to 6pm',
+    operatingHours: '',
     footerDescription: 'Premium local cleaning for homes, rentals, and workplaces.',
     socialLinks: [],
     primaryCtaLabel: 'Request quote',

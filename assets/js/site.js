@@ -733,12 +733,10 @@ function applyContactOverrides() {
     if (contactHeading) {
       const contactList = contactHeading.parentElement?.querySelector("ul");
       if (contactList) {
-        const hoursLine = contactList.querySelector("li:last-child")?.textContent || "Mon-Sat, 8am-6pm";
         contactList.innerHTML = `
           <li>${phone ? `<a href="tel:${phone.replace(/[^+\d]/g, "")}">${phone}</a>` : ""}</li>
           <li>${email ? (email.includes("@") ? `<a href="mailto:${email}">${email}</a>` : email) : ""}</li>
           <li>${address || serviceAreaSummary}</li>
-          <li>${hoursLine}</li>
         `;
       }
     }

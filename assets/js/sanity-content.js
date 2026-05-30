@@ -191,6 +191,7 @@ function applySettings(settings) {
     ...settings,
     phone: settings.phone || cfg.phone,
     email: settings.email || cfg.email,
+    address: cfg.address,
     serviceAreaSummary: settings.serviceAreaSummary || cfg.serviceArea,
   };
   document.querySelectorAll(".brand span:last-child").forEach((node) => {
@@ -205,6 +206,45 @@ function applySettings(settings) {
     if (!normalized.email) return;
     text(node, normalized.email);
     attr(node, "href", `mailto:${normalized.email}`);
+  });
+  const normalizedAddress = normalized.address || window.CLEANCO_CONFIG?.address || "";
+  document.querySelectorAll("p, span, li, a").forEach((node) => {
+    const current = String(node.textContent || "");
+    if (!current) return;
+    if (/^\s*mon(?:day)?\s*-\s*sat(?:urday)?[\s,]*\d/i.test(current) || /^\s*mon-sat[\s,]/i.test(current)) {
+      node.remove();
+      return;
+    }
+    if (/ryannrslegalcollective\.com/i.test(current)) {
+      node.textContent = current.replace(/ryannrslegalcollective\.com/gi, normalized.email || "ryann@rslegalcollective.com");
+    }
+    if (/3990\s*dockser drive,\s*mechanicsville,\s*md\s*20659/i.test(current)) {
+      node.textContent = current.replace(/3990\s*dockser drive,\s*mechanicsville,\s*md\s*20659/gi, normalizedAddress);
+    }
+  });
+  const footerContactItems = document.querySelectorAll(".site-footer h3 + ul li");
+  footerContactItems.forEach((node) => {
+    const raw = String(node.textContent || "").trim();
+    if (!raw) return;
+    if (/@?rslegalcollective\.com/i.test(raw)) {
+      node.textContent = normalized.email || raw;
+      return;
+    }
+    if (/dockser drive/i.test(raw) || /3990\s*dockser/i.test(raw)) {
+      node.textContent = normalized.address || (window.CLEANCO_CONFIG?.address || raw);
+      return;
+    }
+    if (/mon|sat|am|pm|hour/i.test(raw)) {
+      node.remove();
+    }
+  });
+  document.querySelectorAll(".site-footer h3").forEach((heading) => {
+    if (!/areas?/i.test(String(heading.textContent || ""))) return;
+    const list = heading.nextElementSibling;
+    if (!list || list.tagName !== "UL") return;
+    const items = Array.isArray(cfg.serviceAreas) ? cfg.serviceAreas.filter(Boolean) : [];
+    if (!items.length) return;
+    list.innerHTML = items.map((name) => `<li>${escapeHtml(name)}</li>`).join("");
   });
   document.querySelectorAll(".site-footer p").forEach((node) => {
     if (node.textContent.includes("Premium local cleaning")) text(node, normalized.footerDescription);
@@ -519,26 +559,24 @@ function applyGallery(items) {
 function applyServiceAreas(areas) {
   const target = document.querySelector("[data-service-area-list]");
   if (!target) return;
-  const configAreas = Array.isArray(window.CLEANCO_CONFIG?.serviceAreas)
-    ? window.CLEANCO_CONFIG.serviceAreas.filter(Boolean)
-    : [];
-  if (configAreas.length) {
-    target.innerHTML = configAreas.map((name) => `
+  if (areas.length) {
+    target.innerHTML = areas.map((area) => `
       <article class="card service-area-card">
-        <h3>${escapeHtml(name)}</h3>
+        <h3>${escapeHtml(area.name)}</h3>
+        ${area.nearbyAreas?.length ? `
+          <ul class="feature-list">${area.nearbyAreas.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        ` : ""}
       </article>
     `).join("");
     return;
   }
-  if (!areas.length) return;
-  target.innerHTML = areas.map((area) => `
+  const configAreas = Array.isArray(window.CLEANCO_CONFIG?.serviceAreas)
+    ? window.CLEANCO_CONFIG.serviceAreas.filter(Boolean)
+    : [];
+  if (!configAreas.length) return;
+  target.innerHTML = configAreas.map((name) => `
     <article class="card service-area-card">
-      <h3>${escapeHtml(area.name)}</h3>
-      ${area.region ? `<p class="service-area-region">${escapeHtml(area.region)}</p>` : ""}
-      ${area.localSeoCopy ? `<p>${escapeHtml(area.localSeoCopy)}</p>` : ""}
-      ${area.nearbyAreas?.length ? `
-        <ul class="feature-list">${area.nearbyAreas.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-      ` : ""}
+      <h3>${escapeHtml(name)}</h3>
     </article>
   `).join("");
 }

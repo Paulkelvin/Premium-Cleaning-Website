@@ -2,16 +2,14 @@ window.CLEANCO_CONFIG = {
   businessName: "RS Cleaning Collective",
   // Update phone in Sanity siteSettings when the client provides their real number.
   phone: "202-262-6379",
-  email: "Ryannrslegalcollective.com",
-  address: "3990 dockser drive, Mechanicsville, Md 20659",
-  serviceArea: "Charles County, St. Mary's County, Calvert County, Prince George's County, Southern Anne Arundel County, and Washington, DC",
+  email: "ryann@rslegalcollective.com",
+  address: "39940 Dockser Drive, Mechanicsville, MD 20659",
+  serviceArea: "Charles County, St. Mary's County, Calvert County, and Prince George's County",
   serviceAreas: [
     "Charles County",
     "St. Mary's County",
     "Calvert County",
-    "Prince George's County",
-    "Southern Anne Arundel County",
-    "Washington, DC"
+    "Prince George's County"
   ],
   supabaseUrl: "https://hbacogyhftngwoxenttv.supabase.co",
   supabaseAnonKey: "sb_publishable_jCivAQateqBu5rCK1IbmbQ_zNB4E39g",

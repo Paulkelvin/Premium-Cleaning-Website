@@ -15,8 +15,6 @@ const EXPECTED_IDS = new Set([
   'area-st-marys',
   'area-calvert',
   'area-prince-georges',
-  'area-anne-arundel-south',
-  'area-washington-dc',
 ])
 
 function loadServiceAreas() {
