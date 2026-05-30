@@ -129,15 +129,19 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  height: 100%;
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
+  align-self: center;
   gap: 14px;
   font-weight: 800;
   font-size: 1.35rem;
   font-family: 'Outfit', sans-serif;
+  line-height: 0;
+  max-height: 100%;
 }
 
 .brand-mark {
@@ -181,11 +185,21 @@ h3 {
     drop-shadow(0 0 8px rgba(15, 79, 207, 0.22));
 }
 
+.site-header .brand {
+  flex-shrink: 0;
+}
+
 .site-header .brand-logo {
   background: #090e0d;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
-  padding: 6px 10px;
+  padding: 4px 10px;
+  max-height: calc(var(--header-height) - 18px);
+  height: auto;
+  width: auto;
+  max-width: min(260px, 46vw);
+  object-fit: contain;
+  object-position: center;
   box-shadow:
     0 3px 10px rgba(13, 20, 34, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -7489,7 +7503,13 @@ body.admin-login-page {
   text-align: center;
 }
 
-.services-story-hero .hero-content--overlay h1 {
+.services-story-hero.hero--overlay .hero-content--overlay {
+  max-width: min(920px, 100%);
+  width: 100%;
+  text-align: center;
+}
+
+.services-story-hero.hero--overlay .hero-content--overlay h1 {
   max-width: none;
   width: 100%;
   font-size: clamp(1.75rem, 4vw, 2.65rem);
@@ -9133,6 +9153,14 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 560 / 360;
+  max-height: 380px;
+}
+
+.areas-map-bubble--center .areas-map-hub-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
 }
 
 .areas-map-bubble circle {
@@ -9161,7 +9189,8 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   stroke: var(--blue);
 }
 
-.areas-map-bubble--center text {
+.areas-map-bubble--center text,
+.areas-map-bubble--center .areas-map-hub-label {
   fill: var(--white);
 }
 
