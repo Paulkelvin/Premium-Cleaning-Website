@@ -604,7 +604,7 @@ function renderRows(table, rows, { forceExpanded } = {}) {
 function updatePanelCount(table, allRows, filteredRows) {
   const chip = document.querySelector(`[data-admin-panel-count='${table}']`);
   if (!chip) return;
-  const newCount = allRows.filter((r) => (r.status || "new") === "new").length;
+  const newCount = countNewRows(allRows);
   const showing = filteredRows.length;
   const total = allRows.length;
   if (showing === total) {
@@ -708,8 +708,13 @@ function renderAnalytics() {
   const quotes = dashboardCache.quote_requests || [];
   const bookings = dashboardCache.bookings || [];
   const validBookings = bookings.filter((row) => Number(row.estimated_total || 0) > 0);
+  const zeroTotalBookings = bookings.length - validBookings.length;
   const totalRevenue = validBookings.reduce((sum, row) => sum + Number(row.estimated_total || 0), 0);
   const avgTicket = validBookings.length ? totalRevenue / validBookings.length : 0;
+  const revenueBookingLabel =
+    zeroTotalBookings > 0
+      ? `${validBookings.length} of ${bookings.length} bookings with revenue`
+      : `${bookings.length} booking${bookings.length === 1 ? "" : "s"}`;
 
   const clientKeys = new Set();
   bookings.forEach((row) => {
@@ -741,7 +746,7 @@ function renderAnalytics() {
   target.innerHTML = `
     <article class="admin-analytic-card">
       <h3>Revenue snapshot</h3>
-      <p><strong>${toMoney(totalRevenue)}</strong> from ${validBookings.length} bookings</p>
+      <p><strong>${toMoney(totalRevenue)}</strong> from ${revenueBookingLabel}</p>
       <span>Avg ticket: ${toMoney(avgTicket)}</span>
     </article>
     <article class="admin-analytic-card">
@@ -766,7 +771,8 @@ function renderAnalytics() {
           ["one-time", "One-time", mix["one-time"]],
           ["weekly", "Weekly", mix.weekly],
           ["bi-weekly", "Bi-weekly", mix["bi-weekly"]],
-          ["monthly", "Monthly", mix.monthly]
+          ["monthly", "Monthly", mix.monthly],
+          ...(mix.other > 0 ? [["other", "Other", mix.other]] : [])
         ]
           .map(
             ([key, label, count]) => `
@@ -808,45 +814,58 @@ function updateSignedInLabel() {
   label.title = email;
 }
 
+function isNewWorkflowStatus(row) {
+  return (row.status || "new") === "new";
+}
+
+function countNewRows(rows) {
+  return rows.filter(isNewWorkflowStatus).length;
+}
+
+function setNavCount(table, rows, viewTarget) {
+  const badge = document.querySelector(`[data-nav-count='${table}']`);
+  const navItem = document.querySelector(`[data-view-target='${viewTarget}']`);
+  const total = rows.length;
+  const newCount = countNewRows(rows);
+
+  if (badge) {
+    badge.textContent = total;
+    badge.hidden = total === 0;
+    badge.title =
+      newCount > 0
+        ? `${total} total · ${newCount} new`
+        : `${total} total`;
+  }
+  if (navItem) {
+    navItem.classList.toggle("admin-nav-item--attention", newCount > 0);
+    navItem.title =
+      newCount > 0 ? `${newCount} new ${table.replace(/_/g, " ")}` : "";
+  }
+}
+
 function updateCounts() {
   const all = TABLES.flatMap((table) =>
     dashboardCache[table].map((row) => ({ table, ...row }))
   );
 
-  const newCount = all.filter((row) => (row.status || "new") === "new").length;
+  const newCount = all.filter(isNewWorkflowStatus).length;
+  const contacts = dashboardCache.contact_submissions;
+  const quotes = dashboardCache.quote_requests;
+  const bookings = dashboardCache.bookings;
+
   const contactsEl = document.querySelector("[data-count='contacts']");
   const quotesEl = document.querySelector("[data-count='quotes']");
   const bookingsEl = document.querySelector("[data-count='bookings']");
   const newEl = document.querySelector("[data-count='new']");
 
   if (newEl) newEl.textContent = newCount;
-  if (contactsEl) contactsEl.textContent = dashboardCache.contact_submissions.length;
-  if (quotesEl) quotesEl.textContent = dashboardCache.quote_requests.length;
-  if (bookingsEl) bookingsEl.textContent = dashboardCache.bookings.length;
+  if (contactsEl) contactsEl.textContent = contacts.length;
+  if (quotesEl) quotesEl.textContent = quotes.length;
+  if (bookingsEl) bookingsEl.textContent = bookings.length;
 
-  const navContacts = document.querySelector("[data-nav-count='contacts']");
-  const navQuotes = document.querySelector("[data-nav-count='quotes']");
-  const navBookings = document.querySelector("[data-nav-count='bookings']");
-
-  if (navContacts) {
-    navContacts.textContent = dashboardCache.contact_submissions.filter(
-      (r) => (r.status || "new") === "new"
-    ).length;
-  }
-  if (navQuotes) {
-    navQuotes.textContent = dashboardCache.quote_requests.filter(
-      (r) => (r.status || "new") === "new"
-    ).length;
-  }
-  if (navBookings) {
-    navBookings.textContent = dashboardCache.bookings.filter(
-      (r) => (r.status || "new") === "new"
-    ).length;
-  }
-
-  document.querySelectorAll("[data-nav-count]").forEach((badge) => {
-    badge.hidden = Number(badge.textContent) === 0;
-  });
+  setNavCount("contacts", contacts, "inbox");
+  setNavCount("quotes", quotes, "quotes");
+  setNavCount("bookings", bookings, "bookings");
 }
 
 function renderAllTables() {

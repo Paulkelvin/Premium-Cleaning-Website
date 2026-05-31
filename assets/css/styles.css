@@ -2454,6 +2454,10 @@ body.admin-login-page {
   display: none;
 }
 
+.admin-nav-item--attention .admin-nav-badge {
+  box-shadow: inset 0 0 0 1px rgba(255, 196, 120, 0.45);
+}
+
 .admin-sidebar-footer {
   padding: 12px 10px 16px;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
