@@ -55,70 +55,63 @@ function initFooterLegalLinks() {
 }
 
 function bootSiteUi() {
-  initBrandLogos();
-  initSiteMeta();
+  document.documentElement.classList.add("js");
 
-  // 1. Current Year Footer
-  document.querySelectorAll("[data-year]").forEach((node) => {
-    node.textContent = new Date().getFullYear();
-  });
+  try {
+    initBrandLogos();
+    initSiteMeta();
 
-  initFooterLegalLinks();
-  initFooterQuickPolicyLinks();
-
-  // 2. Lucide Icons Setup
-  if (typeof lucide !== "undefined") {
-    lucide.createIcons();
-  }
-
-  // 3. Smooth Mobile Hamburger Menu
-  const navToggle = document.querySelector(".nav-toggle");
-  const siteNav = document.querySelector(".site-nav");
-  if (navToggle && siteNav) {
-    navToggle.addEventListener("click", () => {
-      const isOpen = siteNav.classList.toggle("is-open");
-      navToggle.setAttribute("aria-expanded", String(isOpen));
-      navToggle.innerHTML = isOpen ? "✕" : "☰";
+    document.querySelectorAll("[data-year]").forEach((node) => {
+      node.textContent = new Date().getFullYear();
     });
 
-    // Close menu when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!navToggle.contains(e.target) && !siteNav.contains(e.target) && siteNav.classList.contains("is-open")) {
-        siteNav.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
-        navToggle.innerHTML = "☰";
-      }
+    initFooterLegalLinks();
+    initFooterQuickPolicyLinks();
+
+    if (typeof lucide !== "undefined") {
+      lucide.createIcons();
+    }
+
+    const navToggle = document.querySelector(".nav-toggle");
+    const siteNav = document.querySelector(".site-nav");
+    if (navToggle && siteNav) {
+      navToggle.addEventListener("click", () => {
+        const isOpen = siteNav.classList.toggle("is-open");
+        navToggle.setAttribute("aria-expanded", String(isOpen));
+        navToggle.innerHTML = isOpen ? "✕" : "☰";
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!navToggle.contains(e.target) && !siteNav.contains(e.target) && siteNav.classList.contains("is-open")) {
+          siteNav.classList.remove("is-open");
+          navToggle.setAttribute("aria-expanded", "false");
+          navToggle.innerHTML = "☰";
+        }
+      });
+    }
+
+    initAccordions();
+    initOnPageSliders();
+    initLightboxTriggers();
+    initScrollReveal();
+    initScrollRevealSafetyNet();
+    initReviewsSectionReveal();
+    initHomepageBubbles();
+    initGalleryFilters();
+    initTestimonialSlider();
+    initHomeReviewsCarousel();
+    initContactPage();
+    applyContactOverrides();
+    initAdminReturnLink();
+
+    document.querySelectorAll("[data-copy-config]").forEach((node) => {
+      const key = node.getAttribute("data-copy-config");
+      if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
     });
+  } catch (error) {
+    console.error("Site UI bootstrap error:", error);
+    revealAllScrollContent();
   }
-
-  // 4. Smooth FAQ Accordion Toggle
-  initAccordions();
-
-  // 5. Before & After Slider & Lightbox Setup
-  initOnPageSliders();
-  initLightboxTriggers();
-
-  // 6. Scroll Animations (Scroll Reveal)
-  initScrollReveal();
-  initScrollRevealSafetyNet();
-  initReviewsSectionReveal();
-
-  // 7. Cleaning Theme Microanimations
-  initHomepageBubbles();
-  initGalleryFilters();
-
-  // 8. Testimonial Slider
-  initTestimonialSlider();
-  initHomeReviewsCarousel();
-  initContactPage();
-  applyContactOverrides();
-  initAdminReturnLink();
-
-  // Config Copy Bindings
-  document.querySelectorAll("[data-copy-config]").forEach((node) => {
-    const key = node.getAttribute("data-copy-config");
-    if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
-  });
 }
 
 document.addEventListener("DOMContentLoaded", bootSiteUi);
@@ -568,6 +561,26 @@ function scheduleScrollRevealSafetyCheck() {
   scrollRevealSafetyTimer = window.setTimeout(revealVisibleInViewport, 120);
 }
 
+function revealAllScrollContent() {
+  document.querySelectorAll(REVEAL_SELECTORS).forEach(revealElement);
+}
+
+function initScrollRevealSafetyNet() {
+  if (window.__scrollRevealSafetyBound) return;
+  window.__scrollRevealSafetyBound = true;
+
+  window.addEventListener("scroll", scheduleScrollRevealSafetyCheck, { passive: true });
+  window.addEventListener("resize", scheduleScrollRevealSafetyCheck, { passive: true });
+  window.addEventListener("pageshow", () => {
+    scheduleScrollRevealSafetyCheck();
+    window.setTimeout(revealVisibleInViewport, 0);
+  });
+
+  window.setTimeout(revealVisibleInViewport, 350);
+  window.setTimeout(revealVisibleInViewport, 1200);
+  window.setTimeout(revealAllScrollContent, 3500);
+}
+
 function initReviewsSectionReveal() {
   const section = document.querySelector(".reviews-section");
   if (!section || section.dataset.reviewsRevealBound === "true") return;
@@ -625,13 +638,9 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
     scrollRevealObserver.observe(el);
   });
 
+  revealVisibleInViewport();
   if (revealVisibleNow) {
-    document.querySelectorAll(`${REVEAL_SELECTORS}:not(.appeared)`).forEach((el) => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight * 0.92 && rect.bottom > 0) {
-        window.setTimeout(() => revealElement(el), 20);
-      }
-    });
+    revealVisibleInViewport();
   }
 }
 

@@ -3849,6 +3849,13 @@ body.admin-login-page {
    ================================================================ */
 
 /* Scroll reveal fade-in-up */
+html:not(.js) .fade-in-up,
+html:not(.js) .fade-in-left,
+html:not(.js) .fade-in-right {
+  opacity: 1;
+  transform: none;
+}
+
 .fade-in-up,
 .fade-in-left,
 .fade-in-right {
