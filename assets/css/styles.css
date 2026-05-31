@@ -9783,10 +9783,11 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   z-index: 1;
 }
 
-.gallery-page-hero-split {
+.gallery-page-hero-layout {
   position: relative;
   z-index: 2;
   max-width: none;
+  min-height: min(400px, 48vh);
 }
 
 .gallery-page-hero-copy {
@@ -9817,7 +9818,7 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 .gallery-page-hero-visual {
   position: absolute;
   left: auto;
-  right: -12%;
+  right: -8%;
   top: 50%;
   bottom: auto;
   width: min(58vw, 720px);
@@ -9865,28 +9866,40 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
 @media (max-width: 900px) {
   .gallery-page-hero {
-    padding: 32px 0 44px;
+    padding: 28px 0 36px;
   }
 
-  .gallery-page-hero-split {
+  .gallery-page-hero-layout {
     min-height: 0;
+    overflow: hidden;
   }
 
   .gallery-page-hero-copy {
-    max-width: min(100%, 420px);
-    padding-right: 12px;
+    max-width: none;
+    padding-right: 0;
   }
 
   .gallery-page-hero-visual {
-    right: -30%;
-    width: min(72vw, 400px);
-    height: min(300px, 44vh);
+    position: relative;
+    float: right;
+    top: auto;
+    right: -6%;
+    transform: none;
+    width: min(68vw, 400px);
+    height: auto;
+    max-height: none;
+    margin: 0 0 10px 12px;
+    shape-outside: margin-box;
+    shape-margin: 10px;
   }
 
   .gallery-page-hero-image {
-    object-fit: cover;
+    width: 100%;
+    height: auto;
+    max-height: min(340px, 50vh);
+    object-fit: contain;
     object-position: left center;
-    opacity: 0.95;
+    opacity: 0.98;
   }
 
   .gallery-page-hero-copy h1 {
@@ -9895,33 +9908,32 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
   .gallery-page-hero-copy .gallery-filters {
     max-width: 100%;
+    clear: none;
   }
 }
 
 @media (max-width: 640px) {
   .gallery-page-hero {
-    padding: 28px 0 36px;
-  }
-
-  .gallery-page-hero-split {
-    min-height: 0;
-    position: relative;
-    z-index: 2;
-  }
-
-  .gallery-page-hero-copy {
-    max-width: 52%;
+    padding: 24px 0 32px;
   }
 
   .gallery-page-hero-visual {
-    right: -36%;
-    width: min(78vw, 320px);
-    height: min(220px, 36vh);
+    float: right;
+    right: -5%;
+    width: min(74vw, 360px);
+    margin: 0 0 8px 10px;
+    shape-margin: 8px;
   }
 
   .gallery-page-hero-image {
-    object-fit: cover;
+    max-height: min(320px, 54vh);
+    object-fit: contain;
     object-position: left center;
+  }
+
+  .gallery-page-hero-copy h1 {
+    font-size: clamp(1.45rem, 6.2vw, 1.85rem);
+    line-height: 1.15;
   }
 
   .gallery-page-hero-copy .gallery-filters {
