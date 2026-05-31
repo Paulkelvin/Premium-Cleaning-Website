@@ -45,6 +45,7 @@ const TEAM = [
     name: 'Jamilla Abdul-Muhaimin',
     role: 'Operations Coordinator',
     bio: 'Jamilla manages behind-the-scenes coordination and systems support so each visit stays consistent, organized, and aligned with the quality RS is known for.',
+    photoFile: 'Jamilla Abdul-Muhaimin.jpg',
   },
 ]
 

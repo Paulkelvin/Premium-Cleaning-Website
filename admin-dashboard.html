@@ -62,11 +62,6 @@
     </aside>
 
     <main class="admin-main" data-admin-main>
-      <div class="admin-loading" data-admin-loading hidden aria-hidden="true">
-        <span class="admin-loading-spinner"></span>
-        <span>Refreshing…</span>
-      </div>
-
       <header class="admin-topbar">
         <div class="admin-topbar-copy">
           <h1 data-admin-title>Dashboard</h1>
@@ -76,9 +71,11 @@
           <a class="admin-btn admin-btn--ghost admin-view-site-btn" href="index.html" data-admin-view-site title="Open public website">
             <i data-lucide="globe"></i> View website
           </a>
-          <button class="admin-btn admin-btn--ghost admin-refresh-btn" type="button" data-admin-refresh title="Refresh data">
-            <i data-lucide="refresh-cw"></i> Refresh
+          <button class="admin-btn admin-btn--ghost admin-refresh-btn" type="button" data-admin-refresh title="Refresh data" aria-busy="false">
+            <i data-lucide="refresh-cw" class="admin-refresh-icon" aria-hidden="true"></i>
+            <span data-admin-refresh-label>Refresh</span>
           </button>
+          <span class="admin-sync-status" data-admin-loading hidden aria-live="polite">Refreshing…</span>
           <span class="admin-live-pill"><span class="admin-live-dot"></span> Live</span>
           <span class="admin-user-label" data-admin-user-label>Admin</span>
         </div>

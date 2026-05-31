@@ -28,12 +28,30 @@ let dashboardCache = {
 };
 
 let currentAdminProfile = { email: "", role: "admin" };
+let dashboardRefreshInFlight = null;
+let dashboardLoadingCount = 0;
+const DASHBOARD_FETCH_TIMEOUT_MS = 25000;
 
 function getAdminHeaders() {
   return {
     apikey: adminConfig.supabaseAnonKey,
     Authorization: `Bearer ${getAdminToken()}`
   };
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = DASHBOARD_FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Request timed out. Check your connection and try again.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 async function verifyAdminEmail(email, token) {
@@ -793,13 +811,29 @@ function refreshIcons() {
 }
 
 function setDashboardLoading(loading) {
-  const el = document.querySelector("[data-admin-loading]");
+  dashboardLoadingCount = Math.max(
+    0,
+    dashboardLoadingCount + (loading ? 1 : -1)
+  );
+  const active = dashboardLoadingCount > 0;
+  const status = document.querySelector("[data-admin-loading]");
   const main = document.querySelector("[data-admin-main]");
-  if (el) {
-    el.hidden = !loading;
-    el.setAttribute("aria-hidden", String(!loading));
+  const refreshBtn = document.querySelector("[data-admin-refresh]");
+  const refreshLabel = document.querySelector("[data-admin-refresh-label]");
+
+  if (status) {
+    status.hidden = !active;
+    status.setAttribute("aria-hidden", String(!active));
   }
-  if (main) main.classList.toggle("is-loading", loading);
+  if (main) main.classList.toggle("is-loading", active);
+  if (refreshBtn) {
+    refreshBtn.disabled = active;
+    refreshBtn.classList.toggle("is-refreshing", active);
+    refreshBtn.setAttribute("aria-busy", String(active));
+  }
+  if (refreshLabel) {
+    refreshLabel.textContent = active ? "Refreshing…" : "Refresh";
+  }
 }
 
 function updateSignedInLabel() {
@@ -931,7 +965,7 @@ async function fetchTable(table) {
     return JSON.parse(localStorage.getItem(localTables[table]) || "[]");
   }
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${adminConfig.supabaseUrl}/rest/v1/${table}?select=*&order=created_at.desc`,
     { headers: getAdminHeaders() }
   );
@@ -994,7 +1028,7 @@ async function fetchCurrentAdminProfile() {
     return { email, role: isSuper ? "superuser" : "admin" };
   }
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${adminConfig.supabaseUrl}/rest/v1/admin_users?email=eq.${encodeURIComponent(email)}&select=email,role`,
     { headers: getAdminHeaders() }
   );
@@ -1291,31 +1325,47 @@ function initExportDateDefaults() {
 
 async function initDashboard() {
   if (!document.querySelector("[data-dashboard]")) return;
-  if (!(await assertAdminSession())) {
-    clearAdminSession();
-    window.location.href = "admin-login.html";
-    return;
-  }
+  if (dashboardRefreshInFlight) return dashboardRefreshInFlight;
 
-  setDashboardLoading(true);
+  dashboardRefreshInFlight = (async () => {
+    if (!(await assertAdminSession())) {
+      clearAdminSession();
+      window.location.href = "admin-login.html";
+      return;
+    }
+
+    setDashboardLoading(true);
+    try {
+      currentAdminProfile = await fetchCurrentAdminProfile();
+      const entries = await Promise.all(
+        TABLES.map(async (table) => [table, await fetchTable(table)])
+      );
+      dashboardCache = Object.fromEntries(entries);
+
+      renderAllTables();
+
+      const all = TABLES.flatMap((table) =>
+        dashboardCache[table].map((row) => ({ table, ...row }))
+      );
+      renderActivity(all);
+      renderAnalytics();
+      updateCounts();
+      updateSignedInLabel();
+    } catch (error) {
+      console.error(error);
+      showAdminToast(
+        error?.message || "Could not refresh dashboard. Try again.",
+        "error"
+      );
+    } finally {
+      setDashboardLoading(false);
+    }
+  })();
+
   try {
-    currentAdminProfile = await fetchCurrentAdminProfile();
-    const entries = await Promise.all(
-      TABLES.map(async (table) => [table, await fetchTable(table)])
-    );
-    dashboardCache = Object.fromEntries(entries);
-
-    renderAllTables();
-
-    const all = TABLES.flatMap((table) =>
-      dashboardCache[table].map((row) => ({ table, ...row }))
-    );
-    renderActivity(all);
-    renderAnalytics();
-    updateCounts();
-    updateSignedInLabel();
+    return await dashboardRefreshInFlight;
   } finally {
-    setDashboardLoading(false);
+    dashboardRefreshInFlight = null;
   }
 }
 
@@ -1436,7 +1486,7 @@ document.addEventListener("change", (event) => {
 });
 
 document.querySelector("[data-admin-refresh]")?.addEventListener("click", () => {
-  initDashboard();
+  initDashboard().catch((error) => console.error(error));
 });
 
 document.querySelector("[data-admin-logout]")?.addEventListener("click", () => {

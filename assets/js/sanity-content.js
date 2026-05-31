@@ -344,7 +344,11 @@ function teamMemberInitials(name) {
 
 function renderTeamMemberPhoto(member) {
   const isFounder = /ryann\s+sargent/i.test(String(member.name || ""));
-  const photoSrc = member.photoUrl || (isFounder ? "assets/images/rscleaningcollective_founder.jpg" : "");
+  const name = String(member.name || "");
+  let photoSrc = member.photoUrl || (isFounder ? "assets/images/rscleaningcollective_founder.jpg" : "");
+  if (!photoSrc && /jamilla\s+abdul-muhaimin/i.test(name)) {
+    photoSrc = "assets/images/Jamilla%20Abdul-Muhaimin.jpg";
+  }
   if (photoSrc) {
     const founderClass = isFounder ? " team-member-photo--founder" : "";
     return `<img class="team-member-photo${founderClass}" src="${escapeHtml(photoSrc)}" alt="${escapeHtml(member.name)}" width="400" height="400" decoding="async" loading="lazy">`;
