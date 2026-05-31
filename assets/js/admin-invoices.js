@@ -12,7 +12,7 @@
   }
 
   function getPricing() {
-    return config.pricing || { minimumJob: 0.5, rates: {}, addOns: {}, frequencyDiscounts: {} };
+    return config.pricing || { minimumJob: 125, minSqft: 500, rates: {}, addOns: {}, frequencyDiscounts: {} };
   }
 
   function parseAddons(value) {
@@ -35,7 +35,7 @@
     if (!rate || sqft <= 0) return 0;
 
     let base = sqft * rate;
-    const minimum = Number(pricing.minimumJob) || 0.5;
+    const minimum = Number(pricing.minimumJob) || 125;
     if (base > 0 && base < minimum) base = minimum;
 
     let addons = 0;

@@ -2,8 +2,8 @@ function getPricingConfig() {
   const cfg = window.CLEANCO_CONFIG?.pricing;
   if (cfg?.rates && cfg?.addOns) return cfg;
   return {
-    minimumJob: 0.5,
-    minSqft: 200,
+    minimumJob: 125,
+    minSqft: 500,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -31,7 +31,7 @@ function getPricingConfig() {
 
 function minSqftForQuote() {
   const min = Number(getPricingConfig().minSqft);
-  return Number.isFinite(min) && min > 0 ? min : 200;
+  return Number.isFinite(min) && min > 0 ? min : 500;
 }
 
 function initQuoteSqftMin() {
@@ -479,7 +479,7 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   }
 
   let basePrice = sqft * pricingConfig.rates[serviceType];
-  const minimumJob = pricingConfig.minimumJob ?? 0.5;
+  const minimumJob = pricingConfig.minimumJob ?? 125;
   if (basePrice > 0 && basePrice < minimumJob) basePrice = minimumJob;
 
   let addonsPrice = 0;

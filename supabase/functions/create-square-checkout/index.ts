@@ -9,7 +9,7 @@ const corsHeaders = {
 /** Keep pricing in sync with assets/js/config.js */
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 0.5,
+    minimumJob: 125,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
       total = computeBookingTotal(booking).total;
     }
     const amountCents = Math.round(total * 100);
-    const minCents = booking.pricing_locked ? 50 : 100;
+    const minCents = 12500;
     if (!Number.isFinite(amountCents) || amountCents < minCents) {
       throw new Error("Could not calculate a valid checkout total for this booking");
     }

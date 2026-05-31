@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
     }
 
     const amountCents = Math.round(total * 100);
-    const minCents = booking.pricing_locked ? 50 : 100;
+    const minCents = 12500;
     if (amountCents < minCents) {
       throw new Error(`Amount must be at least $${(minCents / 100).toFixed(2)} for Square checkout`);
     }

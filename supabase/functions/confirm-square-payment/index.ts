@@ -8,7 +8,7 @@ const corsHeaders = {
 
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 0.5,
+    minimumJob: 125,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -258,7 +258,7 @@ Deno.serve(async (req) => {
         ? Math.round(storedTotal * 100) / 100
         : computeBookingTotal(booking).total;
     const expectedAmountCents = Math.round(total * 100);
-    if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 100) {
+    if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 12500) {
       throw new Error("Could not determine a valid booking total");
     }
 
