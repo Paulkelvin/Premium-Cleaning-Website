@@ -47,7 +47,8 @@
     const discount = pricing.frequencyDiscounts?.[freq] || 0;
     subtotal -= subtotal * discount;
     subtotal += Math.max(0, Number(data.travel_fee) || 0);
-    return Math.round(subtotal * 100) / 100;
+    const rounded = Math.round(subtotal * 100) / 100;
+    return rounded > 0 && rounded < minimum ? minimum : rounded;
   }
 
   function readForm(form) {

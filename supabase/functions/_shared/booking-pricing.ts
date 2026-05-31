@@ -126,8 +126,12 @@ export function computeBookingTotal(booking: BookingPricingInput) {
   const discount = pricing.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
+  const rounded = Math.round(subtotal * 100) / 100;
+  const total =
+    rounded > 0 && rounded < pricing.minimumJob ? pricing.minimumJob : rounded;
+
   return {
-    total: Math.round(subtotal * 100) / 100,
+    total,
     sqft,
     serviceType,
     freq,

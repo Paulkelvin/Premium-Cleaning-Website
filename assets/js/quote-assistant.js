@@ -34,6 +34,14 @@ function minSqftForQuote() {
   return Number.isFinite(min) && min > 0 ? min : 500;
 }
 
+function enforceMinimumJobTotal(amount, minimumJob) {
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  const min = Number(minimumJob) || 125;
+  const rounded = Math.round(n * 100) / 100;
+  return rounded > 0 && rounded < min ? min : rounded;
+}
+
 function initQuoteSqftMin() {
   const sqftInput = document.querySelector("#quoteSqft");
   if (sqftInput) sqftInput.min = String(minSqftForQuote());
@@ -501,8 +509,11 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   }, bookingAddress);
   subtotal += travelFee;
 
+  const preFloorTotal = Math.round(subtotal * 100) / 100;
+  const total = enforceMinimumJobTotal(preFloorTotal, minimumJob);
+
   return {
-    total: Math.round(subtotal * 100) / 100,
+    total,
     sqft,
     serviceType,
     freq,
@@ -851,8 +862,11 @@ function buildSubmissionPayload(form, table) {
     }
     if (quoteSession?.quote_id) {
       const sessionTotal = Number(quoteSession.estimated_total);
+      const recalcTotal = Number(pricing.total) || 0;
       payload.estimated_total =
-        Number.isFinite(sessionTotal) && sessionTotal > 0 ? sessionTotal : pricing.total;
+        Number.isFinite(sessionTotal) && sessionTotal > 0
+          ? Math.max(sessionTotal, recalcTotal)
+          : recalcTotal;
       payload.service_area_name = bookingArea.areaName;
       payload.travel_fee = bookingArea.travelFee;
       if (quoteSession.square_feet != null && quoteSession.square_feet !== "") {

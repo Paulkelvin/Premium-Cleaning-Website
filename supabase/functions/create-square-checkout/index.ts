@@ -66,7 +66,10 @@ function computeBookingTotal(booking: Record<string, string | null | undefined>)
   const travelFee = resolveTravelFee(booking.service_area_name, booking.travel_fee);
   subtotal += travelFee;
 
-  return { total: Math.round(subtotal * 100) / 100 };
+  const rounded = Math.round(subtotal * 100) / 100;
+  const total =
+    rounded > 0 && rounded < pricing.minimumJob ? pricing.minimumJob : rounded;
+  return { total };
 }
 
 const AREA_FEE_RULES: Record<string, number> = {
@@ -217,11 +220,10 @@ Deno.serve(async (req) => {
     }
 
     const storedTotal = Number(booking.estimated_total);
-    let total = 0;
-    if (Number.isFinite(storedTotal) && storedTotal > 0) {
+    const computedTotal = computeBookingTotal(booking).total;
+    let total = computedTotal;
+    if (Number.isFinite(storedTotal) && storedTotal > total) {
       total = Math.round(storedTotal * 100) / 100;
-    } else {
-      total = computeBookingTotal(booking).total;
     }
     const amountCents = Math.round(total * 100);
     const minCents = 12500;

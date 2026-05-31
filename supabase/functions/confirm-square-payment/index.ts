@@ -65,7 +65,10 @@ function computeBookingTotal(booking: Record<string, string | null | undefined>)
   const travelFee = resolveTravelFee(booking.service_area_name, booking.travel_fee);
   subtotal += travelFee;
 
-  return { total: Math.round(subtotal * 100) / 100 };
+  const rounded = Math.round(subtotal * 100) / 100;
+  const total =
+    rounded > 0 && rounded < pricing.minimumJob ? pricing.minimumJob : rounded;
+  return { total };
 }
 
 const AREA_FEE_RULES: Record<string, number> = {
@@ -253,10 +256,11 @@ Deno.serve(async (req) => {
     }
 
     const storedTotal = Number(booking.estimated_total);
-    const total =
-      Number.isFinite(storedTotal) && storedTotal > 0
-        ? Math.round(storedTotal * 100) / 100
-        : computeBookingTotal(booking).total;
+    const computedTotal = computeBookingTotal(booking).total;
+    let total = computedTotal;
+    if (Number.isFinite(storedTotal) && storedTotal > total) {
+      total = Math.round(storedTotal * 100) / 100;
+    }
     const expectedAmountCents = Math.round(total * 100);
     if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 12500) {
       throw new Error("Could not determine a valid booking total");

@@ -13,7 +13,7 @@ Last updated: 2026-05-31
 | Setting | Value | Applies to |
 |--------|-------|------------|
 | **minSqft** | **500** | Customer enters square footage directly (HTML `min` + validation) |
-| **minimumJob** | **$125** | Base price after `sqft × rate`; if base is &gt; $0 and &lt; $125, base becomes **$125** |
+| **minimumJob** | **$125** | Base after `sqft × rate` (raised to $125 if needed), then again on the **final total** after frequency discount and travel if still below $125 |
 
 Beds/baths mode does **not** use `minSqft`. It uses the estimator below (e.g. 1 bed / 1 bath → **950 sq ft**).
 
@@ -110,6 +110,8 @@ Address matching is flexible: full address, ZIP, city, or county substring (see 
 ```
 total = round((discounted + travelFee) × 100) / 100
 ```
+
+If `total > 0` and `total < minimumJob` ($125), set `total = 125`. (Weekly/bi-weekly/monthly discounts can otherwise push a $125 base below the job minimum.)
 
 ---
 
