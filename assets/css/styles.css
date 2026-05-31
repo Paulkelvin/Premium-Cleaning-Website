@@ -9880,6 +9880,7 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   .gallery-page-hero-layout {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     min-height: min(380px, 48vh);
     width: 100%;
     overflow: visible;
@@ -9888,11 +9889,15 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   .gallery-page-hero-copy {
     position: relative;
     z-index: 2;
-    max-width: none;
     width: 100%;
+    max-width: 70%;
+    margin-left: 0;
+    margin-right: auto;
+    padding-left: 0;
     padding-right: 0;
     box-sizing: border-box;
     text-align: left;
+    align-self: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -9902,8 +9907,10 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   .gallery-page-hero-copy h1,
   .gallery-page-hero-copy > p:not(.eyebrow),
   .gallery-page-hero-copy .gallery-filters {
-    max-width: none;
+    max-width: 100%;
+    margin-left: 0;
     margin-right: 0;
+    padding-left: 0;
     padding-right: 0;
   }
 
@@ -9960,7 +9967,8 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
 @media (max-width: 640px) {
   .gallery-page-hero {
-    padding: 28px 0 36px;
+    padding: 24px 0;
+    min-height: min(380px, 50vh);
   }
 
   .gallery-page-hero-layout {
