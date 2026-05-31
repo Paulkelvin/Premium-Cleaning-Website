@@ -95,7 +95,6 @@ function initFooterLegalLinks() {
   const cancellationHref = `${prefix}cancellation-policy.html`;
   const privacyHref = `${prefix}privacy.html`;
   const termsHref = `${prefix}terms.html`;
-  const adminHref = `${prefix}admin-login.html`;
 
   document.querySelectorAll(".footer-bottom > span:last-child").forEach((row) => {
     if (row.querySelector(`a[href="${cancellationHref}"]`)) return;
@@ -111,10 +110,6 @@ function initFooterLegalLinks() {
     const sep = document.createTextNode(" · ");
     terms.parentNode.insertBefore(sep, terms);
     terms.parentNode.insertBefore(cancellation, sep);
-
-    if (!row.querySelector(`a[href="${adminHref}"]`) && row.textContent.includes("Admin")) {
-      /* footer already has admin link in markup */
-    }
   });
 }
 
