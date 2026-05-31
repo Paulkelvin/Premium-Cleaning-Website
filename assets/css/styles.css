@@ -176,11 +176,22 @@ h3 {
 }
 
 .brand-logo--admin {
-  height: 40px;
-  max-width: 40px;
+  height: 56px;
+  max-width: 200px;
+  width: auto;
   filter:
     drop-shadow(0 1px 1px rgba(9, 14, 13, 0.5))
     drop-shadow(0 0 6px rgba(15, 79, 207, 0.16));
+}
+
+.admin-brand .brand-logo--admin {
+  height: 60px;
+  max-width: 210px;
+}
+
+.admin-login-brand .brand-logo--admin {
+  height: 56px;
+  max-width: 220px;
 }
 
 .site-footer .brand-logo {
@@ -9960,7 +9971,6 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   }
 
   .gallery-page-hero-copy .gallery-filters {
-    max-width: 100%;
     justify-content: flex-start;
   }
 }
@@ -9973,6 +9983,10 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
   .gallery-page-hero-layout {
     min-height: min(340px, 44vh);
+  }
+
+  .gallery-page-hero-copy {
+    max-width: 68%;
   }
 
   .gallery-page-hero-visual {
