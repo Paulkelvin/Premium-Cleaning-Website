@@ -1617,7 +1617,7 @@ body[data-sanity-page="home"] .gallery-card .gallery-outcome {
 
 @keyframes reviewsMarquee {
   from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  to { transform: translateX(var(--reviews-marquee-distance, -50%)); }
 }
 
 .reviews-marquee-track .review-card {
@@ -7644,11 +7644,11 @@ html:not(.js) .fade-in-right {
   max-width: 720px;
 }
 
-.services-story-hero .hero-content-wrap--overlay {
+.services-story-hero.hero--overlay .hero-content-wrap--overlay {
   align-items: center;
   justify-content: center;
-  min-height: auto;
-  padding: 44px 0 40px;
+  min-height: min(52vh, 560px);
+  padding: 48px 0 52px;
 }
 
 .services-story-hero .hero-content--overlay {
@@ -7656,6 +7656,9 @@ html:not(.js) .fade-in-right {
   max-width: 920px;
   margin: 0 auto;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .services-story-hero.hero--overlay .hero-content--overlay {
@@ -7681,6 +7684,19 @@ html:not(.js) .fade-in-right {
 .services-story-hero .hero-content--overlay .eyebrow,
 .services-story-hero .hero-actions {
   justify-content: center;
+}
+
+.services-story-hero .hero-content--overlay .eyebrow {
+  width: 100%;
+  text-align: center;
+}
+
+.services-story-hero .hero-content--overlay .policy-note {
+  width: 100%;
+  max-width: 36ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 .services-story-hero .hero-content--overlay h1,
@@ -9862,14 +9878,14 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   }
 
   .gallery-page-hero-visual {
-    right: -6%;
-    width: min(46vw, 320px);
-    height: min(260px, 40vh);
+    right: -30%;
+    width: min(72vw, 400px);
+    height: min(300px, 44vh);
   }
 
   .gallery-page-hero-image {
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: left center;
     opacity: 0.95;
   }
 
@@ -9894,18 +9910,18 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   }
 
   .gallery-page-hero-copy {
-    max-width: 56%;
+    max-width: 52%;
   }
 
   .gallery-page-hero-visual {
-    right: 4px;
-    width: min(44vw, 168px);
-    height: min(148px, 28vh);
+    right: -36%;
+    width: min(78vw, 320px);
+    height: min(220px, 36vh);
   }
 
   .gallery-page-hero-image {
-    object-fit: contain;
-    object-position: center center;
+    object-fit: cover;
+    object-position: left center;
   }
 
   .gallery-page-hero-copy .gallery-filters {

@@ -264,6 +264,26 @@ function initTestimonialSlider() {
   });
 }
 
+function syncHomeReviewsMarqueeDistance(track) {
+  if (!track) return;
+  const cards = track.querySelectorAll(".review-card");
+  if (cards.length < 2) {
+    track.style.removeProperty("--reviews-marquee-distance");
+    return;
+  }
+  const half = Math.ceil(cards.length / 2);
+  const first = cards[0];
+  const firstDup = cards[half];
+  if (!first || !firstDup) {
+    track.style.removeProperty("--reviews-marquee-distance");
+    return;
+  }
+  const distance = firstDup.offsetLeft - first.offsetLeft;
+  if (distance > 0) {
+    track.style.setProperty("--reviews-marquee-distance", `-${distance}px`);
+  }
+}
+
 function initHomeReviewsCarousel() {
   const track = document.getElementById("homeReviewsTrack");
   if (!track || track.dataset.bound === "true") return;
@@ -301,16 +321,28 @@ function initHomeReviewsCarousel() {
 
   track.querySelectorAll(".review-card").forEach(setupReviewCardScroll);
 
-  const originalCards = [...track.children];
+  const originalCards = [...track.children].filter((node) => node.classList?.contains("review-card"));
   originalCards.forEach((card) => {
     track.appendChild(card.cloneNode(true));
   });
   track.querySelectorAll(".review-card").forEach(setupReviewCardScroll);
 
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    track.style.animation = "none";
+  const applyMarqueeMotion = () => {
+    syncHomeReviewsMarqueeDistance(track);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.style.animation = reduceMotion ? "none" : "";
+  };
+
+  applyMarqueeMotion();
+  if (!track.dataset.marqueeResizeBound) {
+    track.dataset.marqueeResizeBound = "true";
+    window.addEventListener("resize", () => {
+      window.requestAnimationFrame(() => syncHomeReviewsMarqueeDistance(track));
+    });
   }
 }
+
+window.initHomeReviewsCarousel = initHomeReviewsCarousel;
 
 // Accordions logic
 function initAccordions() {

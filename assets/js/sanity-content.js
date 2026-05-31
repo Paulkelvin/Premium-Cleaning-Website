@@ -545,6 +545,9 @@ function applyHomeReviews(testimonials) {
   if (!track || !testimonials.length) return;
   delete track.dataset.bound;
   track.innerHTML = testimonials.map((item) => renderReviewCard(item, "home")).join("");
+  if (typeof window.initHomeReviewsCarousel === "function") {
+    window.initHomeReviewsCarousel();
+  }
 }
 
 function applyTestimonials(testimonials) {
