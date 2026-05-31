@@ -9871,11 +9871,17 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
 
 @media (max-width: 900px) {
   .gallery-page-hero {
-    padding: 32px 0 40px;
+    display: flex;
+    align-items: center;
+    padding: 28px 0;
+    min-height: min(420px, 52vh);
   }
 
   .gallery-page-hero-layout {
+    display: flex;
+    align-items: center;
     min-height: min(380px, 48vh);
+    width: 100%;
     overflow: visible;
   }
 
@@ -9887,6 +9893,9 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
     padding-right: 0;
     box-sizing: border-box;
     text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .gallery-page-hero-copy .eyebrow,
