@@ -16,13 +16,33 @@ const mimeTypes = {
   ".svg": "image/svg+xml"
 };
 
+function resolveFilePath(normalized) {
+  const filePath = path.join(root, normalized);
+  if (!filePath.startsWith(root)) return null;
+
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    return filePath;
+  }
+
+  if (!path.extname(normalized) && fs.existsSync(`${filePath}.html`)) {
+    return `${filePath}.html`;
+  }
+
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+    const siblingHtml = path.join(root, `${normalized}.html`);
+    if (fs.existsSync(siblingHtml)) return siblingHtml;
+  }
+
+  return filePath;
+}
+
 const server = http.createServer((request, response) => {
   const requestPath = decodeURIComponent(new URL(request.url, `http://localhost:${port}`).pathname);
   const cleanPath = requestPath === "/" ? "index.html" : requestPath.replace(/^\/+/, "");
   const normalized = path.normalize(cleanPath).replace(/^(\.\.[/\\])+/, "");
-  const filePath = path.join(root, normalized);
+  const filePath = resolveFilePath(normalized);
 
-  if (!filePath.startsWith(root)) {
+  if (!filePath || !filePath.startsWith(root)) {
     response.writeHead(403);
     response.end("Forbidden");
     return;

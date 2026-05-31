@@ -108,6 +108,7 @@ h3 {
   left: 0;
   width: 100%;
   z-index: 1000;
+  overflow: visible;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -3946,12 +3947,17 @@ html:not(.js) .fade-in-right {
     display: inline-grid;
   }
 
+  .nav-wrap {
+    position: relative;
+  }
+
   .site-nav {
     display: flex;
     position: absolute;
-    left: 20px;
-    right: 20px;
-    top: var(--header-height);
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 1100;
     background: var(--white);
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -3970,6 +3976,36 @@ html:not(.js) .fade-in-right {
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+    max-height: min(70vh, 520px);
+    overflow: auto;
+  }
+
+  .site-nav:not(.is-open) {
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+
+  body.nav-menu-open::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    background: rgba(9, 14, 13, 0.35);
+    pointer-events: auto;
+  }
+
+  body.nav-menu-open .site-header {
+    z-index: 1200;
+  }
+
+  .site-nav a:not(.button) {
+    display: block;
+    padding: 10px 0;
+    position: relative;
+    z-index: 1;
   }
 
   .site-nav a:not(.button)::after {

@@ -1,5 +1,69 @@
 // site.js - Premium Interactive Interactions and UI Polish
 
+const BRAND_LOGO_FILE = "rscleaningcollective-logo.PNG";
+
+function getSiteAssetPrefix() {
+  const path = String(window.location.pathname || "").replace(/\\/g, "/");
+  return /\/services\//i.test(path) ? "../" : "";
+}
+
+function siteAssetPath(filename) {
+  return `${getSiteAssetPrefix()}assets/images/${filename}`;
+}
+
+function createBrandLogoImg({ admin = false } = {}) {
+  const img = document.createElement("img");
+  img.className = admin ? "brand-logo brand-logo--admin" : "brand-logo";
+  img.src = siteAssetPath(BRAND_LOGO_FILE);
+  img.alt = "RS Cleaning Collective";
+  img.decoding = "async";
+  if (admin) {
+    img.width = 40;
+    img.height = 40;
+  } else {
+    img.width = 220;
+    img.height = 72;
+  }
+  return img;
+}
+
+function initBrandLogos() {
+  document.querySelectorAll(".brand").forEach((brand) => {
+    const existing = brand.querySelector(".brand-logo");
+    const mark = brand.querySelector(".brand-mark");
+    const nameSpan = brand.querySelector("span:not(.brand-mark):not(.brand-logo)");
+
+    if (existing) {
+      existing.src = siteAssetPath(BRAND_LOGO_FILE);
+      if (mark) mark.remove();
+      if (nameSpan) nameSpan.remove();
+      return;
+    }
+
+    const img = createBrandLogoImg();
+    if (mark) mark.replaceWith(img);
+    else brand.prepend(img);
+    if (nameSpan) nameSpan.remove();
+  });
+
+  document.querySelectorAll(".admin-brand-mark, .admin-login-mark").forEach((mark) => {
+    if (mark.querySelector(".brand-logo") || mark.classList.contains("brand-logo")) return;
+    mark.replaceWith(createBrandLogoImg({ admin: true }));
+  });
+}
+
+function initSiteMeta() {
+  const href = siteAssetPath(BRAND_LOGO_FILE);
+  let link = document.querySelector('link[rel="icon"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    link.type = "image/png";
+    document.head.appendChild(link);
+  }
+  link.href = href;
+}
+
 function getSitePathPrefix() {
   return /\/services\//i.test(window.location.pathname) ? "../" : "";
 }
@@ -74,19 +138,57 @@ function bootSiteUi() {
 
     const navToggle = document.querySelector(".nav-toggle");
     const siteNav = document.querySelector(".site-nav");
-    if (navToggle && siteNav) {
-      navToggle.addEventListener("click", () => {
-        const isOpen = siteNav.classList.toggle("is-open");
-        navToggle.setAttribute("aria-expanded", String(isOpen));
-        navToggle.innerHTML = isOpen ? "✕" : "☰";
+    if (navToggle && siteNav && siteNav.dataset.navBound !== "true") {
+      siteNav.dataset.navBound = "true";
+
+      const closeMobileNav = () => {
+        siteNav.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.innerHTML = "☰";
+        document.body.classList.remove("nav-menu-open");
+      };
+
+      const openMobileNav = () => {
+        siteNav.classList.add("is-open");
+        navToggle.setAttribute("aria-expanded", "true");
+        navToggle.innerHTML = "✕";
+        document.body.classList.add("nav-menu-open");
+      };
+
+      const navigateFromNavLink = (link, e) => {
+        const href = link.getAttribute("href");
+        if (!href || href.startsWith("#")) return;
+        if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
+        const targetUrl = new URL(href, window.location.href).href;
+        closeMobileNav();
+        window.location.href = targetUrl;
+      };
+
+      navToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (siteNav.classList.contains("is-open")) closeMobileNav();
+        else openMobileNav();
       });
 
+      siteNav.addEventListener("click", (e) => {
+        const link = e.target.closest("a[href]");
+        if (!link || !siteNav.contains(link)) return;
+        e.preventDefault();
+        e.stopPropagation();
+        navigateFromNavLink(link, e);
+      });
+
+      siteNav.addEventListener("touchend", (e) => {
+        const link = e.target.closest("a[href]");
+        if (!link || !siteNav.contains(link) || !siteNav.classList.contains("is-open")) return;
+        e.preventDefault();
+        navigateFromNavLink(link, e);
+      }, { passive: false });
+
       document.addEventListener("click", (e) => {
-        if (!navToggle.contains(e.target) && !siteNav.contains(e.target) && siteNav.classList.contains("is-open")) {
-          siteNav.classList.remove("is-open");
-          navToggle.setAttribute("aria-expanded", "false");
-          navToggle.innerHTML = "☰";
-        }
+        if (!siteNav.classList.contains("is-open")) return;
+        if (navToggle.contains(e.target) || siteNav.contains(e.target)) return;
+        closeMobileNav();
       });
     }
 
@@ -769,70 +871,6 @@ function initContactPage() {
       textarea.placeholder = "Preferred days/times for a call, your space, or any questions…";
     }
   }
-}
-
-const BRAND_LOGO_FILE = "rscleaningcollective-logo.PNG";
-
-function getSiteAssetPrefix() {
-  const path = String(window.location.pathname || "").replace(/\\/g, "/");
-  return /\/services\//i.test(path) ? "../" : "";
-}
-
-function siteAssetPath(filename) {
-  return `${getSiteAssetPrefix()}assets/images/${filename}`;
-}
-
-function createBrandLogoImg({ admin = false } = {}) {
-  const img = document.createElement("img");
-  img.className = admin ? "brand-logo brand-logo--admin" : "brand-logo";
-  img.src = siteAssetPath(BRAND_LOGO_FILE);
-  img.alt = "RS Cleaning Collective";
-  img.decoding = "async";
-  if (admin) {
-    img.width = 40;
-    img.height = 40;
-  } else {
-    img.width = 220;
-    img.height = 72;
-  }
-  return img;
-}
-
-function initBrandLogos() {
-  document.querySelectorAll(".brand").forEach((brand) => {
-    const existing = brand.querySelector(".brand-logo");
-    const mark = brand.querySelector(".brand-mark");
-    const nameSpan = brand.querySelector("span:not(.brand-mark):not(.brand-logo)");
-
-    if (existing) {
-      existing.src = siteAssetPath(BRAND_LOGO_FILE);
-      if (mark) mark.remove();
-      if (nameSpan) nameSpan.remove();
-      return;
-    }
-
-    const img = createBrandLogoImg();
-    if (mark) mark.replaceWith(img);
-    else brand.prepend(img);
-    if (nameSpan) nameSpan.remove();
-  });
-
-  document.querySelectorAll(".admin-brand-mark, .admin-login-mark").forEach((mark) => {
-    if (mark.querySelector(".brand-logo") || mark.classList.contains("brand-logo")) return;
-    mark.replaceWith(createBrandLogoImg({ admin: true }));
-  });
-}
-
-function initSiteMeta() {
-  const href = siteAssetPath(BRAND_LOGO_FILE);
-  let link = document.querySelector('link[rel="icon"]');
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "icon";
-    link.type = "image/png";
-    document.head.appendChild(link);
-  }
-  link.href = href;
 }
 
 function applyContactOverrides() {

@@ -33,7 +33,7 @@ for (let file of files) {
 }
 
 // 3. Copy SEO / static root files
-const rootStaticFiles = ['sitemap.xml', 'robots.txt'];
+const rootStaticFiles = ['sitemap.xml', 'robots.txt', '_redirects'];
 for (const file of rootStaticFiles) {
   const src = path.join(__dirname, file);
   if (fs.existsSync(src)) {
