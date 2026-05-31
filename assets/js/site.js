@@ -1,8 +1,33 @@
 // site.js - Premium Interactive Interactions and UI Polish
 
+function getSitePathPrefix() {
+  return /\/services\//i.test(window.location.pathname) ? "../" : "";
+}
+
+function initFooterQuickPolicyLinks() {
+  const prefix = getSitePathPrefix();
+  const href = `${prefix}cancellation-policy.html`;
+
+  document.querySelectorAll(".footer-grid").forEach((grid) => {
+    const quickHeading = [...grid.querySelectorAll("h3")].find(
+      (node) => node.textContent.trim().toLowerCase() === "quick links"
+    );
+    if (!quickHeading) return;
+    const list = quickHeading.parentElement?.querySelector("ul");
+    if (!list || list.querySelector("[data-footer-cancellation]")) return;
+
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = href;
+    link.setAttribute("data-footer-cancellation", "");
+    link.textContent = "Cancellation policy";
+    item.appendChild(link);
+    list.appendChild(item);
+  });
+}
+
 function initFooterLegalLinks() {
-  const inServices = /\/services\//i.test(window.location.pathname);
-  const prefix = inServices ? "../" : "";
+  const prefix = getSitePathPrefix();
   const cancellationHref = `${prefix}cancellation-policy.html`;
   const privacyHref = `${prefix}privacy.html`;
   const termsHref = `${prefix}terms.html`;
@@ -36,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initFooterLegalLinks();
+  initFooterQuickPolicyLinks();
 
   // 2. Lucide Icons Setup
   if (typeof lucide !== "undefined") {
@@ -71,6 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 6. Scroll Animations (Scroll Reveal)
   initScrollReveal();
+  initScrollRevealSafetyNet();
+  initReviewsSectionReveal();
 
   // 7. Cleaning Theme Microanimations
   initHomepageBubbles();
@@ -512,6 +540,53 @@ function revealElement(el) {
   }
 }
 
+function isElementInRevealViewport(el) {
+  const rect = el.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  return rect.top < vh * 0.96 && rect.bottom > vh * 0.04;
+}
+
+function revealVisibleInViewport() {
+  document.querySelectorAll(`${REVEAL_SELECTORS}:not(.appeared)`).forEach((el) => {
+    if (!isElementInRevealViewport(el)) return;
+    revealElement(el);
+    scrollRevealObserver?.unobserve(el);
+  });
+}
+
+let scrollRevealSafetyTimer;
+function scheduleScrollRevealSafetyCheck() {
+  window.clearTimeout(scrollRevealSafetyTimer);
+  scrollRevealSafetyTimer = window.setTimeout(revealVisibleInViewport, 120);
+}
+
+function initReviewsSectionReveal() {
+  const section = document.querySelector(".reviews-section");
+  if (!section || section.dataset.reviewsRevealBound === "true") return;
+  section.dataset.reviewsRevealBound = "true";
+
+  const revealReviewsBlock = () => {
+    section.querySelectorAll(`${REVEAL_SELECTORS}:not(.appeared)`).forEach(revealElement);
+    section.classList.add("is-visible");
+  };
+
+  if (prefersReducedMotion()) {
+    revealReviewsBlock();
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      revealReviewsBlock();
+      observer.disconnect();
+    },
+    { threshold: 0, rootMargin: "120px 0px 120px 0px" }
+  );
+  observer.observe(section);
+  revealVisibleInViewport();
+}
+
 function initScrollReveal({ revealVisibleNow = false } = {}) {
   if (prefersReducedMotion()) {
     document.querySelectorAll(REVEAL_SELECTORS).forEach((el) => revealElement(el));
@@ -526,8 +601,8 @@ function initScrollReveal({ revealVisibleNow = false } = {}) {
         scrollRevealObserver.unobserve(entry.target);
       });
     }, {
-      threshold: 0.04,
-      rootMargin: "0px 0px 14% 0px",
+      threshold: 0.01,
+      rootMargin: "0px 0px 22% 0px",
     });
   }
 
@@ -560,7 +635,9 @@ window.refreshInteractiveFeatures = () => {
   initMagnifiers();
   initOnPageSliders();
   initHomeReviewsCarousel();
+  initReviewsSectionReveal();
   initScrollReveal({ revealVisibleNow: true });
+  scheduleScrollRevealSafetyCheck();
 };
 
 // 7. Cleaning-themed Homepage Bubbles
