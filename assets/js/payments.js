@@ -39,7 +39,8 @@
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.error || "Could not start Square checkout");
+      const detail = data.error || data.message || `Could not start Square checkout (${response.status})`;
+      throw new Error(detail);
     }
     if (!data.checkout_url) {
       throw new Error("Square checkout URL was not returned");

@@ -109,6 +109,29 @@ function getServiceAreaMeta() {
   }
 }
 
+function resolveBookingServiceArea(session, pricing = {}) {
+  const sessionName = session ? String(session.service_area_name || "").trim() : "";
+  if (sessionName) {
+    return {
+      areaName: sessionName,
+      travelFee: Math.max(0, Number(session.travel_fee) || 0)
+    };
+  }
+
+  const meta = getServiceAreaMeta();
+  if (meta?.name) {
+    return {
+      areaName: String(meta.name).trim(),
+      travelFee: Math.max(0, Number(meta.travelFee) || 0)
+    };
+  }
+
+  return {
+    areaName: String(pricing.areaName || "").trim(),
+    travelFee: Math.max(0, Number(pricing.travelFee) || 0)
+  };
+}
+
 const SERVICE_ALIASES = {
   "Move-in / Move-out": "Move-in/Move-out",
   "Move in/out": "Move-in/Move-out"
@@ -442,16 +465,10 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   const discount = pricingConfig.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
-  let travelFee = 0;
-  let areaName = "";
-  if (session && (session.service_area_name != null || session.travel_fee != null)) {
-    areaName = String(session.service_area_name || "").trim();
-    travelFee = Math.max(0, Number(session.travel_fee) || 0);
-  } else {
-    const areaMeta = getServiceAreaMeta();
-    travelFee = areaMeta?.travelFee != null ? Math.max(0, Number(areaMeta.travelFee) || 0) : 0;
-    areaName = String(areaMeta?.name || "").trim();
-  }
+  const { areaName, travelFee } = resolveBookingServiceArea(session, {
+    areaName: getServiceAreaMeta()?.name || "",
+    travelFee: getServiceAreaMeta()?.travelFee
+  });
   subtotal += travelFee;
 
   return {
@@ -648,6 +665,32 @@ function initServiceTooltips(root) {
   });
 }
 
+function ensureBookingHiddenField(form, name) {
+  if (form.querySelector(`[name="${name}"]`)) return;
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = name;
+  form.appendChild(input);
+}
+
+function ensureBookingContactFields(form, session) {
+  if (!session) return;
+  [
+    "full_name", "email", "phone", "service_type", "property_type",
+    "bedrooms", "bathrooms", "square_feet", "frequency", "add_ons"
+  ].forEach((name) => ensureBookingHiddenField(form, name));
+  setFormValue(form, "full_name", session.full_name);
+  setFormValue(form, "email", session.email);
+  setFormValue(form, "phone", formatPhoneDigits(session.phone));
+  setFormValue(form, "property_type", session.property_type);
+  setFormValue(form, "bedrooms", session.bedrooms);
+  setFormValue(form, "bathrooms", session.bathrooms);
+  setFormValue(form, "square_feet", session.square_feet);
+  setFormValue(form, "service_type", session.service_type);
+  setFormValue(form, "frequency", session.frequency);
+  setAddonValues(form, session.add_ons);
+}
+
 function setFormValue(form, name, value) {
   if (value === undefined || value === null || value === "") return;
   const fields = form.querySelectorAll(`[name="${name}"]`);
@@ -686,19 +729,19 @@ function initQuotePrefill() {
     return;
   }
 
+  const area = resolveBookingServiceArea(session);
+  if (area.areaName && !String(session.service_area_name || "").trim()) {
+    session.service_area_name = area.areaName;
+    session.travel_fee = area.travelFee;
+    if (typeof window.saveQuoteSession === "function") {
+      window.saveQuoteSession(session);
+    }
+  }
+
   if (noQuoteGate) noQuoteGate.hidden = true;
   if (bookFormWrap) bookFormWrap.hidden = false;
 
-  setFormValue(form, "full_name", session.full_name);
-  setFormValue(form, "email", session.email);
-  setFormValue(form, "phone", formatPhoneDigits(session.phone));
-  setFormValue(form, "property_type", session.property_type);
-  setFormValue(form, "bedrooms", session.bedrooms);
-  setFormValue(form, "bathrooms", session.bathrooms);
-  setFormValue(form, "square_feet", session.square_feet);
-  setFormValue(form, "service_type", session.service_type);
-  setFormValue(form, "frequency", session.frequency);
-  setAddonValues(form, session.add_ons);
+  ensureBookingContactFields(form, session);
 
   if (form.querySelector('input[name="size_input_mode"]')) {
     applySizeInputMode(form, inferSizeInputModeFromSession(session));
@@ -769,15 +812,18 @@ function buildSubmissionPayload(form, table) {
     const quoteSession =
       typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
 
+    const bookingArea = resolveBookingServiceArea(quoteSession, pricing);
+    if (quoteSession) {
+      payload.pricing_locked = Boolean(
+        quoteSession.quote_id || Number(quoteSession.estimated_total) > 0
+      );
+    }
     if (quoteSession?.quote_id) {
       const sessionTotal = Number(quoteSession.estimated_total);
       payload.estimated_total =
         Number.isFinite(sessionTotal) && sessionTotal > 0 ? sessionTotal : pricing.total;
-      payload.service_area_name = String(
-        quoteSession.service_area_name || payload.service_area_name || pricing.areaName || ""
-      ).trim();
-      payload.travel_fee = Math.max(0, Number(quoteSession.travel_fee) || 0);
-      payload.pricing_locked = true;
+      payload.service_area_name = bookingArea.areaName;
+      payload.travel_fee = bookingArea.travelFee;
       if (quoteSession.square_feet != null && quoteSession.square_feet !== "") {
         payload.square_feet = String(quoteSession.square_feet);
       }
@@ -787,10 +833,8 @@ function buildSubmissionPayload(form, table) {
       }
     } else {
       payload.estimated_total = pricing.total || payload.estimated_total || 0;
-      payload.service_area_name = String(
-        pricing.areaName || payload.service_area_name || ""
-      ).trim();
-      payload.travel_fee = Math.max(0, Number(pricing.travelFee) || Number(payload.travel_fee) || 0);
+      payload.service_area_name = bookingArea.areaName;
+      payload.travel_fee = bookingArea.travelFee;
     }
   } else {
     payload.estimated_total = pricing.total || payload.estimated_total || 0;
@@ -2268,6 +2312,15 @@ function initQuoteAssistant(formContainer = document) {
         }
         const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
         if (session?.quote_id) payload.quote_id = session.quote_id;
+        if (
+          payload.payment_method === "pay_online"
+          && !String(payload.service_area_name || "").trim()
+        ) {
+          const areaMsg = typeof window.mapSubmissionError === "function"
+            ? window.mapSubmissionError(new Error("service area required"))
+            : "Please confirm your service area on the quote page before paying online.";
+          throw new Error(areaMsg);
+        }
         result = await window.supabaseInsert(table, payload);
       } else if (table === "quote_requests") {
         if (typeof window.supabaseInsert !== "function") {
@@ -2286,8 +2339,8 @@ function initQuoteAssistant(formContainer = document) {
           ...payload,
           quote_id: result.id,
           estimated_total: pricing.total,
-          service_area_name: pricing.areaName || "",
-          travel_fee: Number.isFinite(Number(pricing.travelFee)) ? Number(pricing.travelFee) : 0,
+          service_area_name: resolveBookingServiceArea(null, pricing).areaName,
+          travel_fee: resolveBookingServiceArea(null, pricing).travelFee,
           size_input_mode: getSizeInputMode(form)
         };
         if (typeof window.saveQuoteSession === "function") {
@@ -2312,18 +2365,17 @@ function initQuoteAssistant(formContainer = document) {
         const squareEnabled = typeof window.isSquareCheckoutEnabled === "function" && window.isSquareCheckoutEnabled();
         const canCreateSquareCheckout = payOnline && squareEnabled && typeof window.createSquareCheckout === "function";
 
-        if (typeof window.clearQuoteSession === "function") {
-          window.clearQuoteSession();
-        }
-
         const successState = formContainer.querySelector("#quoteSuccessState");
 
         if (canCreateSquareCheckout && result?.id) {
           showCheckoutLoadingPanel();
           try {
             const checkoutUrl = await window.createSquareCheckout(result.id);
+            if (typeof window.clearQuoteSession === "function") {
+              window.clearQuoteSession();
+            }
             redirectingToCheckout = true;
-            window.location.href = checkoutUrl;
+            window.location.assign(checkoutUrl);
             return;
           } catch (checkoutErr) {
             console.error("Square checkout error:", checkoutErr);
@@ -2345,6 +2397,9 @@ function initQuoteAssistant(formContainer = document) {
             );
           }
         } else {
+          if (typeof window.clearQuoteSession === "function") {
+            window.clearQuoteSession();
+          }
           hideFormChrome();
           if (successState) {
             const msg = successState.querySelector("[data-booking-message]");

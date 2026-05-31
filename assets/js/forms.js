@@ -45,8 +45,8 @@ function mapSubmissionError(error) {
   if (raw.toLowerCase().includes("service area")) {
     return "Please confirm your service area before checkout. If unsure, continue and we'll apply the outside-area review fee.";
   }
-  if (raw.includes("row-level security") || raw.includes("RLS")) {
-    return "We could not save your request yet. Please call or email us directly.";
+  if (raw.includes("row-level security") || raw.includes("RLS") || raw.includes("42501")) {
+    return "We could not save your booking. If paying online, confirm your service area on the quote page (or pick Pay at service). Otherwise call or email us.";
   }
   if (raw.includes("Invalid API key")) {
     return "Our form service is being updated. Please try again shortly or contact us directly.";
@@ -57,6 +57,19 @@ function mapSubmissionError(error) {
   return "Something went wrong sending your message. Please try again or contact us directly.";
 }
 
+function getSupabaseRestHeaders() {
+  const apiKey = config.supabaseFunctionKey || config.supabaseAnonKey;
+  const headers = {
+    apikey: apiKey,
+    "Content-Type": "application/json",
+    Prefer: "return=minimal"
+  };
+  if (typeof apiKey === "string" && apiKey.startsWith("eyJ")) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+  return headers;
+}
+
 async function supabaseInsert(table, payload) {
   const body = sanitizePayload(table, payload);
   const rowId = crypto.randomUUID();
@@ -64,6 +77,8 @@ async function supabaseInsert(table, payload) {
 
   if (table === "bookings") {
     finalizeBookingPayload(body);
+    if (body.consent != null) body.consent = Boolean(body.consent);
+    if (body.pricing_locked != null) body.pricing_locked = Boolean(body.pricing_locked);
   }
 
   if (!hasSupabase) {
@@ -82,12 +97,7 @@ async function supabaseInsert(table, payload) {
 
   const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}`, {
     method: "POST",
-    headers: {
-      "apikey": config.supabaseAnonKey,
-      "Authorization": `Bearer ${config.supabaseAnonKey}`,
-      "Content-Type": "application/json",
-      "Prefer": "return=minimal"
-    },
+    headers: getSupabaseRestHeaders(),
     body: JSON.stringify(body)
   });
 
