@@ -3,6 +3,14 @@
   let activeInvoiceId = null;
   let formInitialized = false;
 
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
   function getAdminHeaders() {
     return {
       apikey: config.supabaseAnonKey,
@@ -168,8 +176,18 @@
     return response.json();
   }
 
-  function paymentStatusLabel(status) {
-    return String(status || "invoice_draft").replace(/_/g, " ");
+  function paymentStatusMeta(status) {
+    const normalized = String(status || "invoice_draft").toLowerCase();
+    if (normalized === "paid") {
+      return { label: "Paid", className: "paid" };
+    }
+    if (normalized === "invoice_sent") {
+      return { label: "Emailed", className: "invoice-sent" };
+    }
+    if (normalized === "pending_payment") {
+      return { label: "Pay link ready", className: "pending-payment" };
+    }
+    return { label: "Draft", className: "invoice-draft" };
   }
 
   function renderInvoiceList(rows) {
@@ -183,24 +201,31 @@
       .map((row) => {
         const paid = row.payment_status === "paid";
         const hasLink = Boolean(row.square_checkout_url);
+        const status = paymentStatusMeta(row.payment_status);
+        const title = row.full_name || row.email || "Invoice";
         return `
         <article class="admin-invoice-item${activeInvoiceId === row.id ? " is-active" : ""}" data-invoice-row="${row.id}">
           <div class="admin-invoice-item-head">
-            <div>
-              <strong>${row.full_name || "Customer"}</strong>
-              <span>${row.email || ""} · $${Number(row.estimated_total || 0).toFixed(2)}</span>
-              <span class="admin-invoice-meta">${paymentStatusLabel(row.payment_status)}${row.invoice_sent_at ? " · emailed" : ""}</span>
+            <div class="admin-invoice-item-copy">
+              <div class="admin-invoice-item-title">
+                <strong>${escapeHtml(title)}</strong>
+                <span class="status ${status.className}">${escapeHtml(status.label)}</span>
+              </div>
+              <span>${escapeHtml(row.email || "No email")} · $${Number(row.estimated_total || 0).toFixed(2)}</span>
+              <span class="admin-invoice-meta">${escapeHtml(row.service_type || "Service")}${row.preferred_date ? ` · ${escapeHtml(row.preferred_date)}` : ""}</span>
             </div>
             <div class="admin-invoice-item-actions">
               <button type="button" class="admin-btn admin-btn--ghost admin-btn--small" data-invoice-edit="${row.id}">Edit</button>
               ${hasLink ? `<button type="button" class="admin-btn admin-btn--ghost admin-btn--small" data-invoice-copy="${row.id}">Copy link</button>` : ""}
               ${!paid ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-checkout="${row.id}" title="Generate a new Square payment URL (use after price changes)">${hasLink ? "New pay link" : "Pay link"}</button>` : ""}
               ${!paid && hasLink ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-send="${row.id}">Send email</button>` : ""}
+              <button type="button" class="admin-btn admin-btn--danger admin-btn--small" data-invoice-delete="${row.id}" data-invoice-title="${escapeHtml(title)}"><i data-lucide="trash-2"></i> Delete</button>
             </div>
           </div>
         </article>`;
       })
       .join("");
+    if (typeof lucide !== "undefined") lucide.createIcons();
   }
 
   function fillForm(row) {
@@ -363,8 +388,35 @@
       const copyBtn = event.target.closest("[data-invoice-copy]");
       const checkoutBtn = event.target.closest("[data-invoice-checkout]");
       const sendBtn = event.target.closest("[data-invoice-send]");
+      const deleteBtn = event.target.closest("[data-invoice-delete]");
 
       try {
+        if (deleteBtn) {
+          const id = deleteBtn.dataset.invoiceDelete;
+          const title = deleteBtn.dataset.invoiceTitle || "this invoice";
+          const rows = await fetchAdminInvoices();
+          const row = rows.find((item) => item.id === id);
+          const paid = row?.payment_status === "paid";
+          const message = paid
+            ? `Delete paid invoice for "${title}"? This removes the dashboard record only—not a Square refund.`
+            : `Delete invoice for "${title}"? This cannot be undone.`;
+          if (!window.confirm(message)) return;
+          if (typeof window.deleteAdminRecord !== "function") {
+            throw new Error("Delete is unavailable. Refresh the dashboard and try again.");
+          }
+          deleteBtn.disabled = true;
+          await window.deleteAdminRecord("bookings", id);
+          if (activeInvoiceId === id) resetForm();
+          setFormState("", "");
+          if (typeof window.showAdminToast === "function") {
+            window.showAdminToast("Invoice deleted.", "success");
+          }
+          await refreshInvoiceList();
+          if (typeof window.initDashboard === "function") {
+            await window.initDashboard();
+          }
+          return;
+        }
         if (editBtn) {
           const rows = await fetchAdminInvoices();
           const row = rows.find((item) => item.id === editBtn.dataset.invoiceEdit);
@@ -390,6 +442,7 @@
           await sendInvoiceEmail(sendBtn.dataset.invoiceSend);
         }
       } catch (error) {
+        if (deleteBtn) deleteBtn.disabled = false;
         if (typeof window.showAdminToast === "function") window.showAdminToast(error.message);
       }
     });

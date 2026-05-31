@@ -44,6 +44,7 @@
         <a class="admin-nav-item" href="#" data-view-target="invoices">
           <i data-lucide="receipt"></i>
           <span>Invoices</span>
+          <span class="admin-nav-badge" data-nav-count="invoices" hidden>0</span>
         </a>
         <a class="admin-nav-item" href="#" data-view-target="settings">
           <i data-lucide="settings"></i>
@@ -198,7 +199,7 @@
         <div class="admin-panel-head">
           <div>
             <h2>Bookings</h2>
-            <span data-admin-panel-meta="bookings">Scheduled appointments, payment info, and service scope</span>
+            <span data-admin-panel-meta="bookings">Website bookings only—offline invoices live under Invoices</span>
           </div>
           <span class="admin-panel-count" data-admin-panel-count="bookings"></span>
         </div>
@@ -221,6 +222,11 @@
               <option value="weekly">Weekly</option>
               <option value="bi-weekly">Bi-weekly</option>
               <option value="monthly">Monthly</option>
+            </select>
+            <select class="admin-toolbar-select" data-admin-source-filter aria-label="Filter by source">
+              <option value="web">Website bookings</option>
+              <option value="invoice">Offline invoices</option>
+              <option value="all">All records</option>
             </select>
             <select class="admin-toolbar-select" data-admin-payment-filter aria-label="Filter by payment">
               <option value="all">All payments</option>
@@ -355,6 +361,7 @@
           </form>
           <aside class="admin-invoice-list-wrap">
             <h3>Saved invoices</h3>
+            <p class="admin-invoice-list-hint">Swipe on small screens if actions overflow. Delete removes the record (not a Square refund).</p>
             <div class="admin-invoice-list" data-invoice-list></div>
           </aside>
         </div>

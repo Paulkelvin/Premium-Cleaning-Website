@@ -305,6 +305,14 @@ function getRowTitle(row) {
   return row.full_name || row.name || row.email || "New lead";
 }
 
+function isAdminInvoice(row) {
+  return String(row?.source || "").toLowerCase() === "admin";
+}
+
+function isWebBooking(row) {
+  return !isAdminInvoice(row);
+}
+
 function getRowSummary(table, row) {
   if (table === "contact_submissions") {
     return [row.inquiry_type, row.email, row.phone].filter(Boolean).join(" · ");
@@ -316,6 +324,16 @@ function getRowSummary(table, row) {
       row.bedrooms ? `${row.bedrooms} bed` : "",
       row.estimated_total ? `$${Number(row.estimated_total).toFixed(2)}` : ""
     ].filter(Boolean).join(" · ");
+  }
+  if (isAdminInvoice(row)) {
+    return [
+      "Offline invoice",
+      row.service_type,
+      row.estimated_total ? `$${Number(row.estimated_total).toFixed(2)}` : "",
+      String(row.payment_status || "invoice_draft").replace(/_/g, " ")
+    ]
+      .filter(Boolean)
+      .join(" · ");
   }
   return [
     row.service_type,
@@ -408,29 +426,41 @@ function rowMatchesPaymentFilter(row, filter, table) {
   return true;
 }
 
+function rowMatchesSourceFilter(row, filter, table) {
+  if (table !== "bookings" || !filter || filter === "all") return true;
+  if (filter === "web") return isWebBooking(row);
+  if (filter === "invoice") return isAdminInvoice(row);
+  return true;
+}
+
 function getToolbarState(table) {
   const toolbar = document.querySelector(`[data-admin-toolbar='${table}']`);
-  if (!toolbar) return { query: "", status: "all", frequency: "all", payment: "all" };
+  if (!toolbar) {
+    return { query: "", status: "all", frequency: "all", payment: "all", source: "web" };
+  }
   const search = toolbar.querySelector("[data-admin-search]");
   const statusFilter = toolbar.querySelector("[data-admin-status-filter]");
   const frequencyFilter = toolbar.querySelector("[data-admin-frequency-filter]");
   const paymentFilter = toolbar.querySelector("[data-admin-payment-filter]");
+  const sourceFilter = toolbar.querySelector("[data-admin-source-filter]");
   return {
     query: (search?.value || "").trim().toLowerCase(),
     status: statusFilter?.value || "all",
     frequency: frequencyFilter?.value || "all",
-    payment: paymentFilter?.value || "all"
+    payment: paymentFilter?.value || "all",
+    source: sourceFilter?.value || (table === "bookings" ? "web" : "all")
   };
 }
 
 function filterRows(table, rows) {
-  const { query, status, frequency, payment } = getToolbarState(table);
+  const { query, status, frequency, payment, source } = getToolbarState(table);
   return rows.filter(
     (row) =>
       rowMatchesSearch(row, query) &&
       rowMatchesStatusFilter(row, status) &&
       rowMatchesFrequencyFilter(row, frequency) &&
-      rowMatchesPaymentFilter(row, payment, table)
+      rowMatchesPaymentFilter(row, payment, table) &&
+      rowMatchesSourceFilter(row, source, table)
   );
 }
 
@@ -465,14 +495,14 @@ function renderStatusActions(table, row, status) {
       `<a class="admin-btn admin-btn--ghost" href="tel:${escapeHtml(String(row.phone).replace(/\D/g, ""))}"><i data-lucide="phone"></i> Call</a>`
     );
   }
-  if (table === "bookings" && row.source === "admin" && row.square_checkout_url) {
+  if (table === "bookings" && isAdminInvoice(row) && row.square_checkout_url) {
     actions.push(
       `<button class="admin-btn admin-btn--ghost" type="button" data-booking-copy-link="${escapeHtml(row.id)}"><i data-lucide="link"></i> Copy pay link</button>`
     );
   }
-  if (table === "bookings" && row.source === "admin" && row.payment_status !== "paid") {
+  if (table === "bookings" && isAdminInvoice(row)) {
     actions.push(
-      `<button class="admin-btn admin-btn--ghost" type="button" data-booking-open-invoice="${escapeHtml(row.id)}"><i data-lucide="receipt"></i> Invoices</button>`
+      `<button class="admin-btn admin-btn--ghost" type="button" data-booking-open-invoice="${escapeHtml(row.id)}"><i data-lucide="receipt"></i> Edit invoice</button>`
     );
   }
   if (status === "new") {
@@ -494,6 +524,18 @@ function renderStatusActions(table, row, status) {
 function renderPaymentBadge(row, table) {
   if (table !== "bookings") return "";
   const paymentStatus = normalizePaymentStatus(row.payment_status);
+  if (isAdminInvoice(row)) {
+    if (paymentStatus === "paid") {
+      return `<span class="status paid">paid</span>`;
+    }
+    if (paymentStatus === "invoice_sent") {
+      return `<span class="status invoice-sent">emailed</span>`;
+    }
+    if (paymentStatus === "pending_payment") {
+      return `<span class="status pending-payment">pay link</span>`;
+    }
+    return `<span class="status invoice-draft">draft</span>`;
+  }
   if (paymentStatus === "paid") {
     return `<span class="status paid">paid</span>`;
   }
@@ -557,8 +599,13 @@ function renderRecord(table, row, { forceExpanded } = {}) {
 }
 
 function renderEmptyState(table, filtered) {
-  const { query, status, frequency, payment } = getToolbarState(table);
-  const hasFilters = query || status !== "all" || frequency !== "all" || payment !== "all";
+  const { query, status, frequency, payment, source } = getToolbarState(table);
+  const hasFilters =
+    query ||
+    status !== "all" ||
+    frequency !== "all" ||
+    payment !== "all" ||
+    (table === "bookings" && source !== "web");
   if (hasFilters && filtered) {
     return `
       <div class="admin-empty">
@@ -671,10 +718,14 @@ function renderActivity(allRows) {
       const status = row.status || "new";
       const paymentBadge = renderPaymentBadge(row, row.table);
       const icon = ACTIVITY_ICONS[row.table] || "circle";
+      const typeLabel =
+        row.table === "bookings" && isAdminInvoice(row)
+          ? "Invoice"
+          : TABLE_LABELS[row.table];
       return `
-      <a class="admin-activity-item" href="#" data-activity-jump="${row.table}">
+      <a class="admin-activity-item" href="#" data-activity-jump="${row.table === "bookings" && isAdminInvoice(row) ? "invoices" : row.table}">
         <span class="admin-activity-icon"><i data-lucide="${icon}"></i></span>
-        <span class="admin-activity-type">${escapeHtml(TABLE_LABELS[row.table])}</span>
+        <span class="admin-activity-type">${escapeHtml(typeLabel)}</span>
         <div class="admin-activity-copy">
           <strong>${escapeHtml(getRowTitle(row))}</strong>
           <span>${escapeHtml(getRowSummary(row.table, row) || "New submission")}</span>
@@ -725,32 +776,33 @@ function renderAnalytics() {
 
   const quotes = dashboardCache.quote_requests || [];
   const bookings = dashboardCache.bookings || [];
-  const validBookings = bookings.filter((row) => Number(row.estimated_total || 0) > 0);
-  const zeroTotalBookings = bookings.length - validBookings.length;
+  const webBookings = bookings.filter(isWebBooking);
+  const validBookings = webBookings.filter((row) => Number(row.estimated_total || 0) > 0);
+  const zeroTotalBookings = webBookings.length - validBookings.length;
   const totalRevenue = validBookings.reduce((sum, row) => sum + Number(row.estimated_total || 0), 0);
   const avgTicket = validBookings.length ? totalRevenue / validBookings.length : 0;
   const revenueBookingLabel =
     zeroTotalBookings > 0
-      ? `${validBookings.length} of ${bookings.length} bookings with revenue`
-      : `${bookings.length} booking${bookings.length === 1 ? "" : "s"}`;
+      ? `${validBookings.length} of ${webBookings.length} website bookings with revenue`
+      : `${webBookings.length} website booking${webBookings.length === 1 ? "" : "s"}`;
 
   const clientKeys = new Set();
-  bookings.forEach((row) => {
+  webBookings.forEach((row) => {
     const key = String(row.email || row.phone || "").trim().toLowerCase();
     if (key) clientKeys.add(key);
   });
 
   const repeatClients = new Set();
-  bookings.forEach((row) => {
+  webBookings.forEach((row) => {
     const key = String(row.email || row.phone || "").trim().toLowerCase();
     if (!key) return;
     if (isRepeatFrequency(row.frequency)) repeatClients.add(key);
   });
 
   const repeatRate = safePercent(repeatClients.size, clientKeys.size);
-  const bookingsFromQuotes = bookings.filter((row) => Boolean(row.quote_id)).length;
+  const bookingsFromQuotes = webBookings.filter((row) => Boolean(row.quote_id)).length;
   const quoteToBookingRate = safePercent(bookingsFromQuotes, quotes.length);
-  const mix = buildFrequencyMix(bookings);
+  const mix = buildFrequencyMix(webBookings);
   const mixMax = Math.max(...Object.values(mix), 1);
 
   const adminInvoices = bookings.filter((row) => row.source === "admin");
@@ -877,6 +929,27 @@ function setNavCount(table, rows, viewTarget) {
   }
 }
 
+function setInvoiceNavCount(invoices) {
+  const badge = document.querySelector('[data-nav-count="invoices"]');
+  const navItem = document.querySelector('[data-view-target="invoices"]');
+  const unpaid = invoices.filter(
+    (row) => normalizePaymentStatus(row.payment_status) !== "paid"
+  ).length;
+
+  if (badge) {
+    badge.textContent = invoices.length;
+    badge.hidden = invoices.length === 0;
+    badge.title =
+      unpaid > 0
+        ? `${invoices.length} invoices · ${unpaid} awaiting payment`
+        : `${invoices.length} invoice${invoices.length === 1 ? "" : "s"}`;
+  }
+  if (navItem) {
+    navItem.classList.toggle("admin-nav-item--attention", unpaid > 0);
+    navItem.title = unpaid > 0 ? `${unpaid} invoice${unpaid === 1 ? "" : "s"} not paid` : "";
+  }
+}
+
 function updateCounts() {
   const all = TABLES.flatMap((table) =>
     dashboardCache[table].map((row) => ({ table, ...row }))
@@ -885,7 +958,9 @@ function updateCounts() {
   const newCount = all.filter(isNewWorkflowStatus).length;
   const contacts = dashboardCache.contact_submissions;
   const quotes = dashboardCache.quote_requests;
-  const bookings = dashboardCache.bookings;
+  const bookings = dashboardCache.bookings || [];
+  const webBookings = bookings.filter(isWebBooking);
+  const adminInvoices = bookings.filter(isAdminInvoice);
 
   const contactsEl = document.querySelector("[data-count='contacts']");
   const quotesEl = document.querySelector("[data-count='quotes']");
@@ -895,11 +970,12 @@ function updateCounts() {
   if (newEl) newEl.textContent = newCount;
   if (contactsEl) contactsEl.textContent = contacts.length;
   if (quotesEl) quotesEl.textContent = quotes.length;
-  if (bookingsEl) bookingsEl.textContent = bookings.length;
+  if (bookingsEl) bookingsEl.textContent = webBookings.length;
 
   setNavCount("contacts", contacts, "inbox");
   setNavCount("quotes", quotes, "quotes");
-  setNavCount("bookings", bookings, "bookings");
+  setNavCount("bookings", webBookings, "bookings");
+  setInvoiceNavCount(adminInvoices);
 }
 
 function renderAllTables() {
@@ -1477,7 +1553,7 @@ document.addEventListener("input", (event) => {
 
 document.addEventListener("change", (event) => {
   const filter = event.target.closest(
-    "[data-admin-status-filter], [data-admin-frequency-filter], [data-admin-payment-filter]"
+    "[data-admin-status-filter], [data-admin-frequency-filter], [data-admin-payment-filter], [data-admin-source-filter]"
   );
   if (!filter) return;
   const toolbar = filter.closest("[data-admin-toolbar]");
@@ -1631,6 +1707,7 @@ document.addEventListener("click", (event) => {
 window.getAdminToken = getAdminToken;
 window.showAdminToast = showAdminToast;
 window.initDashboard = initDashboard;
+window.deleteAdminRecord = deleteRecord;
 
 initDashboard();
 document.addEventListener("DOMContentLoaded", () => {
