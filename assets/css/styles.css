@@ -157,6 +157,11 @@ h3 {
   box-shadow: 0 8px 20px rgba(12, 84, 255, 0.34);
 }
 
+.brand:has(.brand-logo) .brand-mark,
+.brand:has(.brand-logo) > span:not(.brand-logo) {
+  display: none !important;
+}
+
 .brand-logo {
   display: block;
   width: auto;

@@ -195,6 +195,7 @@ function applySettings(settings) {
     serviceAreaSummary: settings.serviceAreaSummary || cfg.serviceArea,
   };
   document.querySelectorAll(".brand span:last-child").forEach((node) => {
+    if (node.classList.contains("brand-mark") || node.closest(".brand")?.querySelector(".brand-logo")) return;
     if (!node.textContent.includes("Admin")) text(node, normalized.logoText || normalized.businessName);
   });
   document.querySelectorAll("a[href^='tel:']").forEach((node) => {

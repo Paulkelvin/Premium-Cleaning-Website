@@ -54,7 +54,10 @@ function initFooterLegalLinks() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function bootSiteUi() {
+  initBrandLogos();
+  initSiteMeta();
+
   // 1. Current Year Footer
   document.querySelectorAll("[data-year]").forEach((node) => {
     node.textContent = new Date().getFullYear();
@@ -108,17 +111,22 @@ document.addEventListener("DOMContentLoaded", () => {
   initTestimonialSlider();
   initHomeReviewsCarousel();
   initContactPage();
-  initSiteMeta();
-  initBrandLogos();
   applyContactOverrides();
   initAdminReturnLink();
 
-  // 7. Config Copy Bindings
+  // Config Copy Bindings
   document.querySelectorAll("[data-copy-config]").forEach((node) => {
     const key = node.getAttribute("data-copy-config");
     if (window.CLEANCO_CONFIG?.[key]) node.textContent = window.CLEANCO_CONFIG[key];
   });
-});
+}
+
+document.addEventListener("DOMContentLoaded", bootSiteUi);
+
+if (document.body) {
+  initBrandLogos();
+  initSiteMeta();
+}
 
 // Testimonial slider logic
 function initTestimonialSlider() {
@@ -754,9 +762,11 @@ function initContactPage() {
   }
 }
 
+const BRAND_LOGO_FILE = "rscleaningcollective-logo.PNG";
+
 function getSiteAssetPrefix() {
-  const sheet = document.querySelector('link[rel="stylesheet"]')?.href || "";
-  return /\/services\/|\\services\\/.test(sheet) ? "../" : "";
+  const path = String(window.location.pathname || "").replace(/\\/g, "/");
+  return /\/services\//i.test(path) ? "../" : "";
 }
 
 function siteAssetPath(filename) {
@@ -766,7 +776,7 @@ function siteAssetPath(filename) {
 function createBrandLogoImg({ admin = false } = {}) {
   const img = document.createElement("img");
   img.className = admin ? "brand-logo brand-logo--admin" : "brand-logo";
-  img.src = siteAssetPath("rscleaningcollective-logo.PNG");
+  img.src = siteAssetPath(BRAND_LOGO_FILE);
   img.alt = "RS Cleaning Collective";
   img.decoding = "async";
   if (admin) {
@@ -781,9 +791,17 @@ function createBrandLogoImg({ admin = false } = {}) {
 
 function initBrandLogos() {
   document.querySelectorAll(".brand").forEach((brand) => {
-    if (brand.querySelector(".brand-logo")) return;
+    const existing = brand.querySelector(".brand-logo");
     const mark = brand.querySelector(".brand-mark");
-    const nameSpan = brand.querySelector("span:not(.brand-mark)");
+    const nameSpan = brand.querySelector("span:not(.brand-mark):not(.brand-logo)");
+
+    if (existing) {
+      existing.src = siteAssetPath(BRAND_LOGO_FILE);
+      if (mark) mark.remove();
+      if (nameSpan) nameSpan.remove();
+      return;
+    }
+
     const img = createBrandLogoImg();
     if (mark) mark.replaceWith(img);
     else brand.prepend(img);
@@ -797,12 +815,15 @@ function initBrandLogos() {
 }
 
 function initSiteMeta() {
-  if (document.querySelector('link[rel="icon"]')) return;
-  const link = document.createElement("link");
-  link.rel = "icon";
-  link.type = "image/png";
-  link.href = siteAssetPath("rscleaningcollective-logo.PNG");
-  document.head.appendChild(link);
+  const href = siteAssetPath(BRAND_LOGO_FILE);
+  let link = document.querySelector('link[rel="icon"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "icon";
+    link.type = "image/png";
+    document.head.appendChild(link);
+  }
+  link.href = href;
 }
 
 function applyContactOverrides() {
