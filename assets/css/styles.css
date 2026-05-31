@@ -2402,6 +2402,11 @@ body.admin-shell {
   padding-top: 0;
   background: #eef2f8;
   overflow-x: hidden;
+  max-width: 100%;
+}
+
+html:has(body.admin-shell) {
+  overflow-x: hidden;
 }
 
 body.admin-login-page {
@@ -2414,6 +2419,8 @@ body.admin-login-page {
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .admin-sidebar {
@@ -2575,9 +2582,17 @@ body.admin-login-page {
 .admin-main {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
   padding: 20px 24px 28px;
+  overflow-x: hidden;
   overflow-y: auto;
   position: relative;
+  box-sizing: border-box;
+}
+
+[data-admin-table] {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .admin-topbar {
@@ -3717,38 +3732,126 @@ body.admin-login-page {
 
   .admin-sidebar {
     width: 100%;
+    max-width: 100%;
     height: auto;
-    position: relative;
-    flex-direction: row;
-    flex-wrap: wrap;
+    min-height: 0;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    padding-bottom: 0;
+    row-gap: 0;
+    flex-wrap: nowrap;
+    overflow: hidden;
   }
 
   .admin-sidebar-header {
+    grid-area: brand;
     border-bottom: none;
-    padding: 12px 14px;
+    padding: 10px 12px;
+    min-width: 0;
+  }
+
+  .admin-brand {
+    min-width: 0;
+  }
+
+  .admin-brand-text {
+    display: none;
   }
 
   .admin-sidebar-nav {
+    grid-area: nav;
+    display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    padding: 0 8px 10px;
-    flex: 1;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    padding: 0 10px 10px;
+    gap: 6px;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .admin-sidebar-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .admin-sidebar-footer {
+    grid-area: actions;
     border-top: none;
-    padding: 0 10px 10px;
-    width: 100%;
+    padding: 10px 12px;
+    width: auto;
   }
 
   .admin-logout-btn {
-    max-width: 160px;
+    width: auto;
+    max-width: none;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+
+  .admin-nav-item {
+    flex: 0 0 auto;
+    padding: 8px 11px;
+    font-size: 0.8rem;
+    white-space: nowrap;
   }
 
   .admin-main {
-    padding: 16px;
+    padding: 14px 12px 20px;
+  }
+
+  .admin-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .admin-topbar-meta {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .admin-stats {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .admin-kpi {
+    flex: 0 0 min(152px, 42vw);
+    scroll-snap-align: start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .admin-kpi-body strong {
+    font-size: 1.35rem;
+  }
+
+  .admin-kpi-body span {
+    font-size: 0.72rem;
+    line-height: 1.25;
   }
 
   .admin-activity-item {
@@ -3780,12 +3883,18 @@ body.admin-login-page {
 
   .admin-toolbar-filters .admin-toolbar-select {
     flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .admin-panel {
+    padding: 14px 12px 12px;
   }
 }
 
 @media (max-width: 640px) {
-  .admin-stats {
-    grid-template-columns: 1fr;
+  .admin-brand .brand-logo--admin {
+    height: 52px;
+    max-width: min(180px, 52vw);
   }
 
   .admin-record-head {
@@ -3802,13 +3911,14 @@ body.admin-login-page {
     grid-template-columns: 1fr;
   }
 
-  .admin-topbar-meta {
-    flex-wrap: wrap;
-    justify-content: flex-end;
+  .admin-topbar-copy h1 {
+    font-size: 1.2rem;
   }
 
-  .admin-user-label {
-    max-width: 140px;
+  .admin-live-pill,
+  .admin-user-label,
+  .admin-topbar-meta .admin-view-site-btn {
+    display: none;
   }
 
   .admin-analytics-grid {
@@ -3831,6 +3941,10 @@ body.admin-login-page {
   .admin-frequency-bar-row {
     grid-template-columns: 72px minmax(0, 1fr) 24px;
     gap: 6px;
+  }
+
+  .admin-kpi {
+    flex-basis: min(140px, 78vw);
   }
 }
 
