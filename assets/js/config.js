@@ -22,9 +22,8 @@ window.CLEANCO_CONFIG = {
   sanityDataset: "production",
   sanityApiVersion: "2025-05-23",
   pricing: {
-    // TEMPORARY — restore after live payment check: minimumJob 0.5 (or your real floor), minSqft 200
-    minimumJob: 1,
-    minSqft: 1,
+    minimumJob: 0.5,
+    minSqft: 200,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,

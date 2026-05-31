@@ -9,7 +9,7 @@ const corsHeaders = {
 /** Keep pricing in sync with assets/js/config.js */
 function computeBookingTotal(booking: Record<string, string | null | undefined>) {
   const pricing = {
-    minimumJob: 1, // TEMP: sync with assets/js/config.js — restore after live payment check
+    minimumJob: 0.5,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -108,6 +108,39 @@ function bookingNote(bookingId: string) {
   return `booking:${bookingId}`;
 }
 
+const SERVICE_AREA_ZIPS: Record<string, string[]> = {
+  "Charles County": ["20601", "20602", "20603", "20637", "20646", "20658", "20675", "20695"],
+  "St. Mary's County": ["20606", "20622", "20639", "20650", "20653", "20659", "20670", "20674", "20687", "20690"],
+  "Calvert County": ["20657", "20714", "20729", "20732", "20736", "20754", "20751"],
+  "Prince George's County": ["20608", "20613", "20705", "20715", "20716", "20720", "20721", "20735", "20772", "20774"],
+};
+
+const SERVICE_AREA_KEYWORDS: Record<string, string[]> = {
+  "Charles County": ["charles county", "charles co", "waldorf", "la plata", "hughesville", "white plains"],
+  "St. Mary's County": ["st. mary's county", "st marys county", "mechanicsville", "leonardtown", "lexington park", "charlotte hall", "hollywood"],
+  "Calvert County": ["calvert county", "dunkirk", "huntingtown", "prince frederick", "chesapeake beach", "solomons", "lusby"],
+  "Prince George's County": ["prince george's county", "prince georges county", "pg county", "bowie", "upper marlboro", "brandywine", "aquasco"],
+};
+
+function inferServiceAreaFromAddress(raw: string): string {
+  const text = String(raw || "").trim().toLowerCase();
+  if (!text) return "";
+
+  const zipMatch = text.match(/\b(\d{5})(?:-\d{4})?\b/);
+  if (zipMatch) {
+    const zip = zipMatch[1];
+    for (const [name, zips] of Object.entries(SERVICE_AREA_ZIPS)) {
+      if (zips.includes(zip)) return name;
+    }
+  }
+
+  for (const [name, keywords] of Object.entries(SERVICE_AREA_KEYWORDS)) {
+    if (keywords.some((keyword) => text.includes(keyword))) return name;
+  }
+
+  return "";
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -146,7 +179,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, estimated_total, pricing_locked, service_type, full_name, payment_method, payment_status, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+        "id, address, estimated_total, pricing_locked, service_type, full_name, payment_method, payment_status, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
       )
       .eq("id", bookingId)
       .single();
@@ -162,8 +195,25 @@ Deno.serve(async (req) => {
     if (booking.payment_status === "paid") {
       throw new Error("This booking is already paid");
     }
-    if (!String(booking.service_area_name || "").trim()) {
-      throw new Error("Service area must be confirmed before checkout");
+    let serviceAreaName = String(booking.service_area_name || "").trim();
+    if (!serviceAreaName && booking.address) {
+      serviceAreaName = inferServiceAreaFromAddress(String(booking.address));
+      if (serviceAreaName) {
+        await supabase
+          .from("bookings")
+          .update({ service_area_name: serviceAreaName })
+          .eq("id", bookingId);
+      }
+    }
+    if (!serviceAreaName) {
+      serviceAreaName = "Extended travel zone";
+      await supabase
+        .from("bookings")
+        .update({
+          service_area_name: serviceAreaName,
+          travel_fee: resolveTravelFee(serviceAreaName, booking.travel_fee),
+        })
+        .eq("id", bookingId);
     }
 
     const storedTotal = Number(booking.estimated_total);

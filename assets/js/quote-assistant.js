@@ -2,8 +2,8 @@ function getPricingConfig() {
   const cfg = window.CLEANCO_CONFIG?.pricing;
   if (cfg?.rates && cfg?.addOns) return cfg;
   return {
-    minimumJob: 1,
-    minSqft: 1,
+    minimumJob: 0.5,
+    minSqft: 200,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
@@ -109,12 +109,24 @@ function getServiceAreaMeta() {
   }
 }
 
-function resolveBookingServiceArea(session, pricing = {}) {
+function resolveBookingServiceArea(session, pricing = {}, address = "") {
+  const fromAddress = typeof window.resolveServiceAreaFromText === "function"
+    ? window.resolveServiceAreaFromText(address)
+    : null;
+  if (fromAddress?.name) {
+    return {
+      areaName: fromAddress.name,
+      travelFee: fromAddress.travelFee,
+      matched: fromAddress.matched
+    };
+  }
+
   const sessionName = session ? String(session.service_area_name || "").trim() : "";
   if (sessionName) {
     return {
       areaName: sessionName,
-      travelFee: Math.max(0, Number(session.travel_fee) || 0)
+      travelFee: Math.max(0, Number(session.travel_fee) || 0),
+      matched: true
     };
   }
 
@@ -122,13 +134,28 @@ function resolveBookingServiceArea(session, pricing = {}) {
   if (meta?.name) {
     return {
       areaName: String(meta.name).trim(),
-      travelFee: Math.max(0, Number(meta.travelFee) || 0)
+      travelFee: Math.max(0, Number(meta.travelFee) || 0),
+      matched: meta.tier !== "outside"
     };
   }
 
+  const fallbackName = String(pricing.areaName || "").trim();
+  if (fallbackName) {
+    return {
+      areaName: fallbackName,
+      travelFee: Math.max(0, Number(pricing.travelFee) || 0),
+      matched: true
+    };
+  }
+
+  const outside = window.OUTSIDE_AREA_DEFAULT || {
+    name: "Extended travel zone",
+    travelFee: 35
+  };
   return {
-    areaName: String(pricing.areaName || "").trim(),
-    travelFee: Math.max(0, Number(pricing.travelFee) || 0)
+    areaName: outside.name,
+    travelFee: Math.max(0, Number(outside.travelFee) || 35),
+    matched: false
   };
 }
 
@@ -465,10 +492,13 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   const discount = pricingConfig.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
+  const bookingAddress = table === "bookings"
+    ? String(data.get("address") || "").trim()
+    : "";
   const { areaName, travelFee } = resolveBookingServiceArea(session, {
     areaName: getServiceAreaMeta()?.name || "",
     travelFee: getServiceAreaMeta()?.travelFee
-  });
+  }, bookingAddress);
   subtotal += travelFee;
 
   return {
@@ -811,8 +841,9 @@ function buildSubmissionPayload(form, table) {
 
     const quoteSession =
       typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
+    const bookingAddress = String(payload.address || data.get("address") || "").trim();
 
-    const bookingArea = resolveBookingServiceArea(quoteSession, pricing);
+    const bookingArea = resolveBookingServiceArea(quoteSession, pricing, bookingAddress);
     if (quoteSession) {
       payload.pricing_locked = Boolean(
         quoteSession.quote_id || Number(quoteSession.estimated_total) > 0
@@ -2312,15 +2343,6 @@ function initQuoteAssistant(formContainer = document) {
         }
         const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
         if (session?.quote_id) payload.quote_id = session.quote_id;
-        if (
-          payload.payment_method === "pay_online"
-          && !String(payload.service_area_name || "").trim()
-        ) {
-          const areaMsg = typeof window.mapSubmissionError === "function"
-            ? window.mapSubmissionError(new Error("service area required"))
-            : "Please confirm your service area on the quote page before paying online.";
-          throw new Error(areaMsg);
-        }
         result = await window.supabaseInsert(table, payload);
       } else if (table === "quote_requests") {
         if (typeof window.supabaseInsert !== "function") {

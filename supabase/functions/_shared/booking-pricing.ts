@@ -50,7 +50,7 @@ function getPricingConfig(): PricingConfig {
   }
 
   return {
-    minimumJob: 1,
+    minimumJob: 0.5,
     rates: {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
