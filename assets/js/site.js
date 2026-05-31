@@ -2,9 +2,13 @@
 
 const BRAND_LOGO_FILE = "rscleaningcollective-logo.PNG";
 
+function isUnderServicesSection(path) {
+  return /\/services(?:\/|$)/i.test(path);
+}
+
 function getSiteAssetPrefix() {
   const path = String(window.location.pathname || "").replace(/\\/g, "/");
-  return /\/services\//i.test(path) ? "../" : "";
+  return isUnderServicesSection(path) ? "../" : "";
 }
 
 function siteAssetPath(filename) {
@@ -65,7 +69,9 @@ function initSiteMeta() {
 }
 
 function getSitePathPrefix() {
-  return /\/services\//i.test(window.location.pathname) ? "../" : "";
+  return isUnderServicesSection(String(window.location.pathname || "").replace(/\\/g, "/"))
+    ? "../"
+    : "";
 }
 
 function initFooterQuickPolicyLinks() {

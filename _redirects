@@ -1,2 +1,2 @@
-# When /services is requested, serve the services overview page (not the /services/ detail folder).
-/services    /services.html    200
+# Legacy overview URL (root file removed; overview lives at /services/).
+/services.html    /services/    301

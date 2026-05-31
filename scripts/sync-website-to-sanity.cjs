@@ -451,7 +451,7 @@ async function run() {
 
   const pages = [
     ['about', 'about.html'],
-    ['services', 'services.html'],
+    ['services', 'services/index.html'],
     ['quote', 'quote.html'],
     ['book', 'book.html'],
     ['contact', 'contact.html'],
