@@ -96,6 +96,11 @@ function formatFooterAddonLabel(name) {
     .trim();
 }
 
+function getPayNowHref() {
+  if (document.getElementById("pay-now")) return "#pay-now";
+  return `${getSitePathPrefix()}index.html#pay-now`;
+}
+
 function getFooterAddonsHref() {
   const path = String(window.location.pathname || "").replace(/\\/g, "/");
   const onServicesIndex =
@@ -105,18 +110,33 @@ function getFooterAddonsHref() {
 }
 
 function getFooterAddonLinks() {
+  const prefix = getSitePathPrefix();
   const addOns = window.CLEANCO_CONFIG?.pricing?.addOns || {};
   const addonsHref = getFooterAddonsHref();
   const seen = new Set();
+  const links = [];
 
-  return Object.keys(addOns).reduce((links, name) => {
+  const extraServices = [
+    { label: "Junk removal", href: `${prefix}services/junk-removal.html` },
+    { label: "Carpet cleaning", href: `${prefix}services/carpet-cleaning.html` },
+  ];
+
+  extraServices.forEach((item) => {
+    const key = item.label.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    links.push(item);
+  });
+
+  Object.keys(addOns).forEach((name) => {
     const label = formatFooterAddonLabel(name);
     const key = label.toLowerCase();
-    if (seen.has(key)) return links;
+    if (seen.has(key)) return;
     seen.add(key);
     links.push({ label, href: addonsHref });
-    return links;
-  }, []);
+  });
+
+  return links;
 }
 
 function detachLegacyFooterAddons(servicesColumn, grid) {
@@ -240,6 +260,35 @@ function initFooterCatalog() {
   });
 }
 
+function initFooterPayNowLink() {
+  const href = getPayNowHref();
+
+  document.querySelectorAll(".footer-grid").forEach((grid) => {
+    const quickHeading = [...grid.querySelectorAll("h3")].find(
+      (node) => node.textContent.trim().toLowerCase() === "quick links"
+    );
+    if (!quickHeading) return;
+    const list = quickHeading.parentElement?.querySelector("ul");
+    if (!list || list.querySelector("[data-footer-pay-now]")) return;
+
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = href;
+    link.setAttribute("data-footer-pay-now", "");
+    link.textContent = "Pay now";
+    item.appendChild(link);
+
+    const contactItem = [...list.querySelectorAll("a")].find((anchor) =>
+      /contact/i.test(anchor.getAttribute("href") || anchor.textContent)
+    )?.parentElement;
+    if (contactItem) {
+      list.insertBefore(item, contactItem);
+    } else {
+      list.appendChild(item);
+    }
+  });
+}
+
 function initFooterQuickPolicyLinks() {
   const prefix = getSitePathPrefix();
   const href = `${prefix}cancellation-policy.html`;
@@ -297,6 +346,7 @@ function bootSiteUi() {
     });
 
     initFooterLegalLinks();
+    initFooterPayNowLink();
     initFooterQuickPolicyLinks();
     initFooterCatalog();
     document.querySelectorAll(".footer-grid").forEach(normalizeFooterGridLayout);

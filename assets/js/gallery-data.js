@@ -51,8 +51,8 @@
       badge: "Add-on",
     },
     "1b": {
-      title: "Oven cleaning add-on",
-      description: "Inside-oven degrease & detail (add-on service)",
+      title: "Oven deep clean add-on",
+      description: "Inside-oven deep clean, degrease & detail (add-on service)",
       category: "kitchens",
       badge: "Add-on",
     },
@@ -87,8 +87,8 @@
       badge: "Deep Reset",
     },
     "2c": {
-      title: "Bathroom floor refresh",
-      description: "Tile floors swept, mopped & detail-cleaned",
+      title: "Floor refresh",
+      description: "Tile floors swept, mopped & detail-cleaned · Standard care",
       category: "living",
       badge: "Standard Clean",
     },
@@ -147,16 +147,16 @@
       badge: "Move-out Turn",
     },
     "4d": {
-      title: "Shower stall reset",
-      description: "Soap scum and hard water staining removed from shower",
+      title: "Shower stall care",
+      description: "Soap scum and buildup refreshed · Regular care",
       category: "bathrooms",
-      badge: "Deep Reset",
+      badge: "Regular Care",
     },
     "4e": {
       title: "Sliding door track detail",
-      description: "Built-up debris cleared from door tracks & threshold",
+      description: "Built-up debris cleared from tracks · Deep reset",
       category: "moveout",
-      badge: "Full Reset",
+      badge: "Deep Reset",
     },
     "5a": {
       title: "Sliding door track restoration",
@@ -175,6 +175,8 @@
       description: "Spot treatment & deep vacuum — stains lifted from carpet",
       category: "living",
       badge: "Deep Reset",
+      beforeImageUrl: image("After 5c.jpeg"),
+      afterImageUrl: image("Before 5c.jpeg"),
     },
     "5d": {
       title: "Walk-in shower glass detail",

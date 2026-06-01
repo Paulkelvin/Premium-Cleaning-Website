@@ -41,8 +41,13 @@
       if (typeof lucide !== "undefined") lucide.createIcons();
       const params = new URLSearchParams(window.location.search);
       const bookingId = params.get("booking");
+      const isOpenPayment = params.get("open") === "1";
       const ref = document.getElementById("paymentBookingRef");
       const copy = document.querySelector(".quote-success-copy");
+
+      if (isOpenPayment && copy) {
+        copy.textContent = "Thank you. If your payment completed in Square, we have received it. Questions? Call 202-262-6379.";
+      }
 
       if (bookingId && ref) {
         ref.hidden = false;

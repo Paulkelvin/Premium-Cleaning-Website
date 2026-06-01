@@ -2371,8 +2371,7 @@ textarea {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: minmax(220px, 1.15fr) minmax(0, 1fr);
-  column-gap: clamp(32px, 5vw, 72px);
+  grid-template-columns: 1fr;
   row-gap: 28px;
   align-items: start;
   width: 100%;
@@ -2393,6 +2392,33 @@ textarea {
   row-gap: 20px;
   width: 100%;
   min-width: 0;
+}
+
+@media (min-width: 921px) {
+  .site-footer > .section-inner {
+    width: min(1320px, calc(100% - 48px));
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 260px) repeat(5, minmax(0, 1fr));
+    column-gap: clamp(20px, 2.5vw, 40px);
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .footer-brand-col {
+    max-width: none;
+  }
+
+  .footer-nav-columns {
+    display: contents;
+  }
+
+  .footer-col--contact ul li:nth-child(2) {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
 }
 
 .footer-nav-columns > div {
@@ -7138,9 +7164,14 @@ html:not(.js) .fade-in-right {
 }
 
 .quote-nav-next.is-hidden {
-  visibility: hidden;
+  display: none !important;
+}
+
+.quote-page .quote-nav-next.is-hidden {
+  display: inline-flex !important;
+  visibility: visible;
   pointer-events: none;
-  opacity: 0;
+  opacity: 0.42;
 }
 
 .quote-nav-next.is-ready {
@@ -7364,9 +7395,21 @@ html:not(.js) .fade-in-right {
   transform: translateY(-1px);
 }
 
-.quote-nav-back,
-.quote-nav-submit {
+.quote-window:not(.quote-page) .quote-nav-back,
+.quote-window:not(.quote-page) .quote-nav-submit {
   display: none;
+}
+
+.quote-page .quote-nav-back {
+  display: none;
+}
+
+.quote-page .quote-nav-submit {
+  display: none;
+}
+
+.quote-page .quote-nav-next {
+  display: inline-flex;
 }
 
 .quote-success-panel {
@@ -9076,6 +9119,26 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   padding: 0;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.hero--backdrop.hero--no-photo {
+  background:
+    linear-gradient(145deg, #08101f 0%, #0f4fcf 42%, #1a3358 72%, #08101f 100%);
+}
+
+.hero--backdrop.hero--no-photo:not(.hero--overlay) .hero-scrim {
+  background:
+    linear-gradient(105deg, rgba(8, 16, 31, 0.35) 0%, rgba(8, 16, 31, 0.12) 50%, transparent 100%),
+    linear-gradient(to top, rgba(8, 16, 31, 0.25) 0%, transparent 50%);
+}
+
+.why-choose-us-img--logo {
+  object-fit: contain;
+  padding: clamp(20px, 5vw, 36px);
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%);
+  aspect-ratio: auto;
+  max-height: 220px;
+  width: 100%;
 }
 
 .hero--backdrop .hero-bg {
@@ -13395,5 +13458,118 @@ html {
 @media (max-width: 960px) {
   .admin-invoices-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+/* --- Pay now section (homepage + contact) --- */
+.pay-now-section {
+  padding: 64px 0;
+  scroll-margin-top: calc(var(--header-height, 72px) + 16px);
+}
+
+.pay-now-section--compact {
+  padding: 48px 0;
+}
+
+.pay-now-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: clamp(28px, 4vw, 48px);
+  align-items: start;
+}
+
+.pay-now-copy h2 {
+  margin: 0 0 12px;
+}
+
+.pay-now-copy > p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 46ch;
+}
+
+.pay-now-aside {
+  font-size: 0.92rem;
+}
+
+.pay-now-aside a {
+  font-weight: 600;
+}
+
+.pay-form.card {
+  padding: 24px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: 0 12px 32px rgba(9, 29, 60, 0.08);
+  display: grid;
+  gap: 16px;
+}
+
+.pay-amount-wrap {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.pay-amount-wrap:focus-within {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 3px rgba(15, 79, 207, 0.12);
+}
+
+.pay-amount-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #f4f7fb;
+  border-right: 1px solid var(--line);
+}
+
+.pay-amount-wrap input {
+  flex: 1;
+  border: none;
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 0;
+}
+
+.pay-amount-wrap input:focus {
+  outline: none;
+}
+
+.pay-optional {
+  font-style: normal;
+  font-weight: 400;
+  color: var(--muted);
+  font-size: 0.88em;
+}
+
+.pay-submit {
+  width: 100%;
+  justify-content: center;
+}
+
+.pay-form-trust {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.45;
+}
+
+@media (max-width: 860px) {
+  .pay-now-split {
+    grid-template-columns: 1fr;
+  }
+
+  .pay-now-section {
+    padding: 48px 0;
   }
 }
