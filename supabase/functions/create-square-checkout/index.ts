@@ -112,17 +112,17 @@ function bookingNote(bookingId: string) {
 }
 
 const SERVICE_AREA_ZIPS: Record<string, string[]> = {
-  "Charles County": ["20601", "20602", "20603", "20637", "20646", "20658", "20675", "20695"],
-  "St. Mary's County": ["20606", "20622", "20639", "20650", "20653", "20659", "20670", "20674", "20687", "20690"],
-  "Calvert County": ["20657", "20714", "20729", "20732", "20736", "20754", "20751"],
-  "Prince George's County": ["20608", "20613", "20705", "20715", "20716", "20720", "20721", "20735", "20772", "20774"],
+  "Charles County": ["20601", "20602", "20603", "20637", "20646", "20664", "20677", "20695"],
+  "St. Mary's County": ["20609", "20619", "20622", "20636", "20650", "20653", "20659"],
+  "Calvert County": ["20639", "20657", "20678", "20688", "20714", "20732", "20754"],
+  "Prince George's County": ["20608", "20613", "20715", "20716", "20720", "20721", "20769", "20772", "20774"],
 };
 
 const SERVICE_AREA_KEYWORDS: Record<string, string[]> = {
-  "Charles County": ["charles county", "charles co", "waldorf", "la plata", "hughesville", "white plains"],
-  "St. Mary's County": ["st. mary's county", "st marys county", "mechanicsville", "leonardtown", "lexington park", "charlotte hall", "hollywood"],
-  "Calvert County": ["calvert county", "dunkirk", "huntingtown", "prince frederick", "chesapeake beach", "solomons", "lusby"],
-  "Prince George's County": ["prince george's county", "prince georges county", "pg county", "bowie", "upper marlboro", "brandywine", "aquasco"],
+  "Charles County": ["charles county", "charles co", "waldorf", "la plata", "hughesville", "white plains", "newburg", "port tobacco"],
+  "St. Mary's County": ["st. mary's county", "st marys county", "mechanicsville", "leonardtown", "lexington park", "charlotte hall", "hollywood", "california", "avenue"],
+  "Calvert County": ["calvert county", "dunkirk", "huntingtown", "prince frederick", "chesapeake beach", "north beach", "solomons", "lusby"],
+  "Prince George's County": ["prince george's county", "prince georges county", "pg county", "bowie", "upper marlboro", "brandywine", "aquasco", "mitchellville", "woodmore", "glenn dale"],
 };
 
 function inferServiceAreaFromAddress(raw: string): string {

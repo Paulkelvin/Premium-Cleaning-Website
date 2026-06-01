@@ -601,4 +601,7 @@ function applyServiceAreas(areas) {
   if (!target) return;
   const html = buildServiceAreaCards(areas);
   if (html) target.innerHTML = html;
+  if (typeof window.renderServiceAreaTownNotice === "function") {
+    window.renderServiceAreaTownNotice();
+  }
 }

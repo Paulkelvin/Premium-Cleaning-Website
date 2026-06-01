@@ -53,9 +53,15 @@ function initServiceAreaCommunities() {
       </article>
     `;
   }).join("");
+  if (typeof window.renderServiceAreaTownNotice === "function") {
+    window.renderServiceAreaTownNotice();
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   initServiceDetailFaqs();
   initServiceAreaCommunities();
+  if (typeof window.renderServiceAreaTownNotice === "function") {
+    window.renderServiceAreaTownNotice();
+  }
 });
