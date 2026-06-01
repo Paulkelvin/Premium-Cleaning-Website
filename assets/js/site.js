@@ -1,6 +1,6 @@
 // site.js - Premium Interactive Interactions and UI Polish
 
-const BRAND_LOGO_FILE = "rscleaningcollective-logo.PNG";
+const BRAND_LOGO_FILE = "rscleaningcollective_logo.png";
 
 function isUnderServicesSection(path) {
   return /\/services(?:\/|$)/i.test(path);
@@ -74,6 +74,82 @@ function getSitePathPrefix() {
     : "";
 }
 
+function getFooterServiceLinks() {
+  const prefix = getSitePathPrefix();
+  return [
+    { label: "Standard cleaning", href: `${prefix}services/standard-cleaning.html` },
+    { label: "Deep cleaning", href: `${prefix}services/deep-cleaning.html` },
+    { label: "Move-in/out cleaning", href: `${prefix}services/move-in-out-cleaning.html` },
+    { label: "Office cleaning", href: `${prefix}services/office-cleaning.html` },
+    {
+      label: "Short-term rental & Airbnb turnovers",
+      href: `${prefix}services/airbnb-turnover.html`
+    },
+    { label: "Wash & fold", href: `${prefix}services/wash-fold.html` },
+    { label: "Junk removal", href: `${prefix}services/junk-removal.html` },
+    { label: "Carpet cleaning", href: `${prefix}services/carpet-cleaning.html` },
+    {
+      label: "Organization & decluttering",
+      href: `${prefix}services/organization-decluttering.html`
+    }
+  ];
+}
+
+function getFooterAddonLinks() {
+  const prefix = getSitePathPrefix();
+  const addOns = window.CLEANCO_CONFIG?.pricing?.addOns || {};
+  return Object.keys(addOns).map((name) => ({
+    label: name,
+    href: `${prefix}quote.html?addon=${encodeURIComponent(name)}`
+  }));
+}
+
+function initFooterCatalog() {
+  const services = getFooterServiceLinks();
+  const addons = getFooterAddonLinks();
+
+  document.querySelectorAll(".footer-grid").forEach((grid) => {
+    const servicesHeading = [...grid.querySelectorAll("h3")].find(
+      (node) => node.textContent.trim().toLowerCase() === "services"
+    );
+    if (!servicesHeading) return;
+
+    const column = servicesHeading.parentElement;
+    if (!column) return;
+
+    let servicesList = column.querySelector("[data-footer-services]");
+    if (!servicesList) {
+      servicesList = column.querySelector("ul");
+      if (servicesList) servicesList.setAttribute("data-footer-services", "");
+    }
+    if (servicesList) {
+      servicesList.innerHTML = services
+        .map((item) => `<li><a href="${item.href}">${item.label}</a></li>`)
+        .join("");
+    }
+
+    let addonsHeading = column.querySelector("[data-footer-addons-heading]");
+    if (!addonsHeading) {
+      addonsHeading = document.createElement("h3");
+      addonsHeading.className = "footer-subheading";
+      addonsHeading.setAttribute("data-footer-addons-heading", "");
+      addonsHeading.textContent = "Add-ons";
+      column.appendChild(addonsHeading);
+    }
+
+    let addonsList = column.querySelector("[data-footer-addons]");
+    if (!addonsList) {
+      addonsList = document.createElement("ul");
+      addonsList.setAttribute("data-footer-addons", "");
+      column.appendChild(addonsList);
+    }
+
+    addonsList.innerHTML = addons
+      .map((item) => `<li><a href="${item.href}">${item.label}</a></li>`)
+      .join("");
+  });
+}
+
 function initFooterQuickPolicyLinks() {
   const prefix = getSitePathPrefix();
   const href = `${prefix}cancellation-policy.html`;
@@ -132,6 +208,7 @@ function bootSiteUi() {
 
     initFooterLegalLinks();
     initFooterQuickPolicyLinks();
+    initFooterCatalog();
 
     if (typeof lucide !== "undefined") {
       lucide.createIcons();
@@ -910,7 +987,8 @@ function applyContactOverrides() {
   const config = window.CLEANCO_CONFIG || {};
   const phone = String(config.phone || "").trim();
   const email = String(config.email || "").trim();
-  const address = String(config.address || "").trim();
+  const address = String(config.address || config.locationLabel || "").trim();
+  const locationLabel = String(config.locationLabel || "Southern Maryland").trim();
   const serviceAreaSummary = String(config.serviceArea || "").trim();
   const serviceAreas = Array.isArray(config.serviceAreas) ? config.serviceAreas.filter(Boolean) : [];
 
@@ -934,6 +1012,10 @@ function applyContactOverrides() {
     if (serviceAreaSummary) node.textContent = serviceAreaSummary;
   });
 
+  document.querySelectorAll("[data-copy-config='address']").forEach((node) => {
+    if (address) node.textContent = address;
+  });
+
   document.querySelectorAll(".site-footer").forEach((footer) => {
     const headings = [...footer.querySelectorAll("h3")];
     const contactHeading = headings.find((node) => node.textContent.trim().toLowerCase() === "contact");
@@ -945,7 +1027,7 @@ function applyContactOverrides() {
         contactList.innerHTML = `
           <li>${phone ? `<a href="tel:${phone.replace(/[^+\d]/g, "")}">${phone}</a>` : ""}</li>
           <li>${email ? (email.includes("@") ? `<a href="mailto:${email}">${email}</a>` : email) : ""}</li>
-          <li>${address || serviceAreaSummary}</li>
+          <li>${address || locationLabel || serviceAreaSummary}</li>
         `;
       }
     }

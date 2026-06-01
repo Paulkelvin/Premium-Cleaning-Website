@@ -8,7 +8,8 @@ function getPricingConfig() {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
       "Move-in/Move-out": 0.32,
-      "Office cleaning": 0.20
+      "Office cleaning": 0.20,
+      "Short-term rental & Airbnb turnover": 0.18
     },
     addOns: {
       "Wash and fold": 45,
@@ -79,7 +80,8 @@ const SERVICE_SLUG_MAP = {
   "deep-cleaning": "Deep cleaning",
   "move-in-out-cleaning": "Move-in/Move-out",
   "move-in-out": "Move-in/Move-out",
-  "office-cleaning": "Office cleaning"
+  "office-cleaning": "Office cleaning",
+  "airbnb-turnover": "Short-term rental & Airbnb turnover"
 };
 
 const ADDON_SLUG_MAP = {

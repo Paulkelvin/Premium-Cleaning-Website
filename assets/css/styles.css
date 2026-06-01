@@ -170,9 +170,6 @@ h3 {
   max-width: min(280px, 52vw);
   object-fit: contain;
   flex-shrink: 0;
-  filter:
-    drop-shadow(0 1px 1px rgba(9, 14, 13, 0.45))
-    drop-shadow(0 0 8px rgba(15, 79, 207, 0.2));
 }
 
 .brand-logo--admin {
@@ -207,19 +204,17 @@ h3 {
 }
 
 .site-header .brand-logo {
-  background: #090e0d;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  padding: 4px 10px;
-  max-height: calc(var(--header-height) - 18px);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  max-height: calc(var(--header-height) - 12px);
   height: auto;
   width: auto;
-  max-width: min(260px, 46vw);
+  max-width: min(280px, 48vw);
   object-fit: contain;
-  object-position: center;
-  box-shadow:
-    0 3px 10px rgba(13, 20, 34, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  object-position: left center;
+  box-shadow: none;
 }
 
 .brand-apparel-photo {
@@ -251,13 +246,27 @@ h3 {
   height: 100%;
   min-height: 0;
   max-height: 100%;
-  object-fit: contain;
-  object-position: center center;
+  object-fit: cover;
+  object-position: center 12%;
   border-radius: 24px;
 }
 
 .about-team-grid {
   align-items: stretch;
+}
+
+@media (max-width: 720px) {
+  .about-story-origin .image-frame.frame-founder {
+    min-height: 320px;
+    max-height: 420px;
+    aspect-ratio: 1 / 1;
+  }
+
+  .team-member-photo {
+    aspect-ratio: 1 / 1;
+    max-height: 300px;
+    object-position: center 15%;
+  }
 }
 
 .team-member-card {
@@ -269,15 +278,15 @@ h3 {
 .team-member-photo {
   width: 100%;
   aspect-ratio: 4 / 5;
-  object-fit: contain;
-  object-position: center center;
+  object-fit: cover;
+  object-position: center 18%;
   border-radius: 16px;
   margin-bottom: 16px;
   background: linear-gradient(145deg, #e8eef8 0%, #f4f6fb 100%);
 }
 
 .team-member-photo--founder {
-  object-position: center center;
+  object-position: center 12%;
 }
 
 .team-member-photo--placeholder {
@@ -2366,6 +2375,13 @@ textarea {
   font-size: 1.1rem;
   margin-bottom: 18px;
   font-weight: 600;
+}
+
+.footer-grid h3.footer-subheading {
+  font-size: 0.95rem;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  opacity: 0.92;
 }
 
 .footer-grid ul {

@@ -3,7 +3,8 @@ window.CLEANCO_CONFIG = {
   // Update phone in Sanity siteSettings when the client provides their real number.
   phone: "202-262-6379",
   email: "ryann@rslegalcollective.com",
-  address: "39940 Dockser Drive, Mechanicsville, MD 20659",
+  address: "Mechanicsville, MD",
+  locationLabel: "Southern Maryland",
   serviceArea: "Charles County, St. Mary's County, Calvert County, and Prince George's County",
   serviceAreas: [
     "Charles County",
@@ -28,7 +29,8 @@ window.CLEANCO_CONFIG = {
       "Standard cleaning": 0.17,
       "Deep cleaning": 0.28,
       "Move-in/Move-out": 0.32,
-      "Office cleaning": 0.20
+      "Office cleaning": 0.20,
+      "Short-term rental & Airbnb turnover": 0.18
     },
     addOns: {
       "Wash and fold": 45,

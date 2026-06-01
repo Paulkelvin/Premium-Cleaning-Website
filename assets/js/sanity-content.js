@@ -222,6 +222,9 @@ function applySettings(settings) {
     if (/3990\s*dockser drive,\s*mechanicsville,\s*md\s*20659/i.test(current)) {
       node.textContent = current.replace(/3990\s*dockser drive,\s*mechanicsville,\s*md\s*20659/gi, normalizedAddress);
     }
+    if (/39940\s*dockser drive,\s*mechanicsville,\s*md\s*20659/i.test(current)) {
+      node.textContent = current.replace(/39940\s*dockser drive,\s*mechanicsville,\s*md\s*20659/gi, normalizedAddress);
+    }
   });
   const footerContactItems = document.querySelectorAll(".site-footer h3 + ul li");
   footerContactItems.forEach((node) => {
@@ -231,7 +234,7 @@ function applySettings(settings) {
       node.textContent = normalized.email || raw;
       return;
     }
-    if (/dockser drive/i.test(raw) || /3990\s*dockser/i.test(raw)) {
+    if (/dockser drive/i.test(raw) || /3990\s*dockser/i.test(raw) || /39940\s*dockser/i.test(raw)) {
       node.textContent = normalized.address || (window.CLEANCO_CONFIG?.address || raw);
       return;
     }
