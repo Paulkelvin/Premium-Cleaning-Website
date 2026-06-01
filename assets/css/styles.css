@@ -11016,6 +11016,10 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   background: rgba(15, 79, 207, 0.06);
 }
 
+.quote-size-switch-confirm:not([hidden]) {
+  display: block;
+}
+
 .quote-size-switch-confirm-text {
   margin: 0 0 8px;
   font-size: 0.88rem;

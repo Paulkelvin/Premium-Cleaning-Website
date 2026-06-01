@@ -1060,9 +1060,12 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
       return;
     }
 
-    revertModeRadio(committedMode);
     pendingConfirmCallback = () => setMode(targetMode, { clearInactive: true });
+    applySizeInputMode(form, targetMode, { clearInactive: false });
+    const modeInput = form.querySelector(`input[name="size_input_mode"][value="${targetMode}"]`);
+    if (modeInput) modeInput.checked = true;
     showConfirm(targetMode);
+    triggerUpdate();
   };
 
   if (confirmOk) {
@@ -1075,8 +1078,11 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
 
   if (confirmCancel) {
     confirmCancel.addEventListener("click", () => {
-      revertModeRadio(committedMode);
+      pendingConfirmCallback = null;
       hideConfirm();
+      applySizeInputMode(form, committedMode, { clearInactive: false });
+      revertModeRadio(committedMode);
+      triggerUpdate();
     });
   }
 
@@ -1092,6 +1098,8 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
       if (!input.checked) return;
       if (input.value === "Office") {
         requestModeSwitch("sqft");
+      } else {
+        triggerUpdate();
       }
     });
   });
@@ -2363,6 +2371,16 @@ function initQuoteAssistant(formContainer = document) {
       await maybeStartFinalReview();
     });
   }
+
+  form.addEventListener("click", (event) => {
+    if (!event.target.closest(
+      'input[name="property_type"], input[name="size_input_mode"], #quoteBedrooms, #quoteBathrooms, #quoteSqft, .quote-option, .quote-size-mode-option'
+    )) return;
+    queueMicrotask(() => {
+      updateLiveSummary();
+      updateNavState();
+    });
+  });
 
   form.addEventListener("change", (event) => {
     if (event?.target?.matches?.('input[name="service_type"]')) {
