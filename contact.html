@@ -155,6 +155,36 @@
       </div>
     </section>
 
+    <section class="pay-now-band pay-now-band--inline" id="pay-now" aria-labelledby="pay-now-heading-contact">
+      <div class="section-inner pay-now-inner">
+        <div class="pay-now-intro">
+          <p class="eyebrow"><i data-lucide="credit-card"></i> Pay now</p>
+          <h2 id="pay-now-heading-contact" class="pay-now-title">Pay online</h2>
+          <p class="pay-now-lead">Amount, name, and email — then Square checkout (min $1).</p>
+        </div>
+        <form class="pay-now-form" data-open-payment-form novalidate>
+          <div class="pay-now-grid">
+            <label class="pay-now-field">
+              <span class="visually-hidden">Your name</span>
+              <input type="text" name="full_name" required autocomplete="name" placeholder="Your name">
+            </label>
+            <label class="pay-now-field">
+              <span class="visually-hidden">Email</span>
+              <input type="email" name="email" required autocomplete="email" placeholder="Email">
+            </label>
+            <label class="pay-now-field pay-now-field--amount">
+              <span class="pay-now-amount-prefix" aria-hidden="true">$</span>
+              <input type="number" name="amount" required min="1" step="0.01" inputmode="decimal" placeholder="Amount" aria-label="Amount in US dollars, minimum one dollar">
+            </label>
+          </div>
+          <div class="pay-now-submit-row">
+            <button type="submit" class="button small" data-pay-submit>Pay now <i data-lucide="lock"></i></button>
+            <span class="form-state pay-now-state" data-pay-form-state role="status"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
     <section class="contact-details-strip">
       <div class="section-inner">
         <div class="contact-details-grid">
@@ -245,5 +275,7 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
+  <script src="assets/js/payments.js"></script>
+  <script src="assets/js/pay-open.js"></script>
 </body>
 </html>

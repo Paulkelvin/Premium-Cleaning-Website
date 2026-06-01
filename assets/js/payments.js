@@ -23,6 +23,27 @@
     return headers;
   }
 
+  async function createOpenPayment(payload) {
+    if (!isSquareCheckoutEnabled()) {
+      throw new Error("Online payment is not enabled");
+    }
+
+    const response = await fetch(`${config.supabaseUrl}/functions/v1/create-open-payment`, {
+      method: "POST",
+      headers: getFunctionAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || data.message || `Could not start payment (${response.status})`);
+    }
+    if (!data.checkout_url) {
+      throw new Error("Checkout URL was not returned");
+    }
+    return data.checkout_url;
+  }
+
   async function createSquareCheckout(bookingId) {
     if (!bookingId) {
       throw new Error("Missing booking id");
@@ -82,6 +103,7 @@
   }
 
   window.isSquareCheckoutEnabled = isSquareCheckoutEnabled;
+  window.createOpenPayment = createOpenPayment;
   window.createSquareCheckout = createSquareCheckout;
   window.confirmSquarePayment = confirmSquarePayment;
   window.initPaymentReturnBanner = initPaymentReturnBanner;

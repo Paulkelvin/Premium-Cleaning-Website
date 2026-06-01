@@ -7138,9 +7138,14 @@ html:not(.js) .fade-in-right {
 }
 
 .quote-nav-next.is-hidden {
-  visibility: hidden;
+  display: none !important;
+}
+
+.quote-page .quote-nav-next.is-hidden {
+  display: inline-flex !important;
+  visibility: visible;
   pointer-events: none;
-  opacity: 0;
+  opacity: 0.45;
 }
 
 .quote-nav-next.is-ready {
@@ -7364,9 +7369,21 @@ html:not(.js) .fade-in-right {
   transform: translateY(-1px);
 }
 
-.quote-nav-back,
-.quote-nav-submit {
+.quote-window:not(.quote-page) .quote-nav-back,
+.quote-window:not(.quote-page) .quote-nav-submit {
   display: none;
+}
+
+.quote-page .quote-nav-back {
+  display: none;
+}
+
+.quote-page .quote-nav-submit {
+  display: none;
+}
+
+.quote-page .quote-nav-next {
+  display: inline-flex;
 }
 
 .quote-success-panel {
@@ -13394,6 +13411,124 @@ html {
 
 @media (max-width: 960px) {
   .admin-invoices-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Compact Pay now section --- */
+.pay-now-band {
+  padding: 28px 0;
+  background: linear-gradient(180deg, rgba(15, 79, 207, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+  scroll-margin-top: calc(var(--header-height, 72px) + 12px);
+}
+
+.pay-now-band--inline {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+  background: #f8fafc;
+}
+
+.pay-now-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px 24px;
+  align-items: center;
+  max-width: 960px;
+}
+
+.pay-now-title {
+  margin: 4px 0 6px;
+  font-size: clamp(1.15rem, 2vw, 1.35rem);
+}
+
+.pay-now-lead {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.4;
+  max-width: 36ch;
+}
+
+.pay-now-form {
+  margin: 0;
+}
+
+.pay-now-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr minmax(100px, 0.75fr);
+  gap: 8px;
+}
+
+.pay-now-field {
+  display: flex;
+  align-items: stretch;
+  margin: 0;
+}
+
+.pay-now-field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.92rem;
+  background: var(--white);
+}
+
+.pay-now-field input:focus {
+  outline: none;
+  border-color: var(--mint);
+  box-shadow: 0 0 0 2px rgba(15, 79, 207, 0.12);
+}
+
+.pay-now-field--amount {
+  position: relative;
+}
+
+.pay-now-amount-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-weight: 700;
+  color: var(--muted);
+  background: #eef2f8;
+  border: 1px solid var(--line);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+}
+
+.pay-now-field--amount input {
+  border-radius: 0 10px 10px 0;
+}
+
+.pay-now-submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pay-now-submit-row .button {
+  flex-shrink: 0;
+}
+
+.pay-now-state {
+  margin: 0;
+  font-size: 0.82rem;
+  min-height: 0;
+}
+
+.pay-now-state.error {
+  color: #b42318;
+}
+
+@media (max-width: 720px) {
+  .pay-now-inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pay-now-grid {
     grid-template-columns: 1fr;
   }
 }

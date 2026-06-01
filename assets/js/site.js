@@ -96,6 +96,36 @@ function formatFooterAddonLabel(name) {
     .trim();
 }
 
+function getPayNowHref() {
+  if (document.getElementById("pay-now")) return "#pay-now";
+  return `${getSitePathPrefix()}index.html#pay-now`;
+}
+
+function initFooterPayNowLink() {
+  const href = getPayNowHref();
+  document.querySelectorAll(".footer-grid").forEach((grid) => {
+    const quickHeading = [...grid.querySelectorAll("h3")].find(
+      (node) => node.textContent.trim().toLowerCase() === "quick links"
+    );
+    if (!quickHeading) return;
+    const list = quickHeading.parentElement?.querySelector("ul");
+    if (!list || list.querySelector("[data-footer-pay-now]")) return;
+
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = href;
+    link.setAttribute("data-footer-pay-now", "");
+    link.textContent = "Pay now";
+    item.appendChild(link);
+
+    const contactItem = [...list.querySelectorAll("a")].find((a) =>
+      /contact/i.test(a.getAttribute("href") || "") || /contact/i.test(a.textContent)
+    )?.parentElement;
+    if (contactItem) list.insertBefore(item, contactItem);
+    else list.appendChild(item);
+  });
+}
+
 function getFooterAddonsHref() {
   const path = String(window.location.pathname || "").replace(/\\/g, "/");
   const onServicesIndex =
@@ -297,6 +327,7 @@ function bootSiteUi() {
     });
 
     initFooterLegalLinks();
+    initFooterPayNowLink();
     initFooterQuickPolicyLinks();
     initFooterCatalog();
     document.querySelectorAll(".footer-grid").forEach(normalizeFooterGridLayout);
