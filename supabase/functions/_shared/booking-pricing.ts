@@ -21,6 +21,37 @@ const SERVICE_ALIASES: Record<string, string> = {
   "Move in/out": "Move-in/Move-out",
 };
 
+const AIRBNB_SERVICE = "Short-term rental & Airbnb turnover";
+
+const AIRBNB_TIERS = [
+  { minBeds: 0, maxBeds: 1, amount: 150 },
+  { minBeds: 2, maxBeds: 2, amount: 213 },
+  { minBeds: 3, maxBeds: 3, amount: 288 },
+  { minBeds: 4, maxBeds: 99, amount: 400 },
+];
+
+function isAirbnbService(serviceType: string) {
+  return serviceType === AIRBNB_SERVICE;
+}
+
+function resolveAirbnbFlatFee(bedrooms: number) {
+  const beds = Number.isInteger(bedrooms) && bedrooms >= 0 ? bedrooms : 1;
+  const tier =
+    AIRBNB_TIERS.find((entry) => beds >= entry.minBeds && beds <= entry.maxBeds) ||
+    AIRBNB_TIERS[AIRBNB_TIERS.length - 1];
+  return tier.amount;
+}
+
+function inferAirbnbPricingMode(booking: BookingPricingInput) {
+  const bedsRaw = String(booking.bedrooms ?? "").trim();
+  const bathsRaw = String(booking.bathrooms ?? "").trim();
+  const sqft = parseInt(String(booking.square_feet || "").replace(/,/g, ""), 10);
+  if (!bedsRaw && !bathsRaw && sqft > 0) return "sqft";
+  if (bedsRaw && bathsRaw) return "beds_baths";
+  if (sqft > 0) return "sqft";
+  return "beds_baths";
+}
+
 const ADDON_ALIASES: Record<string, string> = {
   oven: "Inside oven",
   fridge: "Inside fridge",
@@ -56,6 +87,7 @@ function getPricingConfig(): PricingConfig {
       "Deep cleaning": 0.28,
       "Move-in/Move-out": 0.32,
       "Office cleaning": 0.20,
+      [AIRBNB_SERVICE]: 0.18,
     },
     addOns: {
       "Wash and fold": 45,
@@ -103,12 +135,33 @@ export function computeBookingTotal(booking: BookingPricingInput) {
   const serviceType = normalizeServiceType(booking.service_type);
   const sqft = parseSqft(booking.square_feet, booking.bedrooms, booking.bathrooms);
   const freq = String(booking.frequency || "One-time").trim() || "One-time";
+  const beds = parseInt(String(booking.bedrooms ?? ""), 10);
+  const baths = parseInt(String(booking.bathrooms ?? ""), 10);
 
-  if (!serviceType || !pricing.rates[serviceType] || sqft <= 0) {
+  if (!serviceType) {
     return { total: 0, sqft, serviceType, freq };
   }
 
-  let basePrice = sqft * pricing.rates[serviceType];
+  let basePrice = 0;
+
+  if (isAirbnbService(serviceType)) {
+    const mode = inferAirbnbPricingMode(booking);
+    if (mode === "sqft") {
+      const sqftOnly = parseInt(String(booking.square_feet || "").replace(/,/g, ""), 10);
+      if (sqftOnly <= 0) return { total: 0, sqft: sqftOnly, serviceType, freq };
+      basePrice = sqftOnly * (pricing.rates[AIRBNB_SERVICE] || 0.18);
+    } else if (Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1) {
+      basePrice = resolveAirbnbFlatFee(beds);
+    } else {
+      return { total: 0, sqft, serviceType, freq };
+    }
+  } else {
+    if (!pricing.rates[serviceType] || sqft <= 0) {
+      return { total: 0, sqft, serviceType, freq };
+    }
+    basePrice = sqft * pricing.rates[serviceType];
+  }
+
   if (basePrice > 0 && basePrice < pricing.minimumJob) {
     basePrice = pricing.minimumJob;
   }
@@ -123,7 +176,9 @@ export function computeBookingTotal(booking: BookingPricingInput) {
     });
 
   let subtotal = basePrice + addonsPrice;
-  const discount = pricing.frequencyDiscounts[freq] || 0;
+  const discount = isAirbnbService(serviceType)
+    ? 0
+    : pricing.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
   const rounded = Math.round(subtotal * 100) / 100;

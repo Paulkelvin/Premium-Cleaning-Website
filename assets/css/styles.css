@@ -6906,6 +6906,16 @@ html:not(.js) .fade-in-right {
   box-shadow: 0 4px 12px rgba(15, 79, 207, 0.12), inset 0 0 0 1px rgba(15, 79, 207, 0.08);
 }
 
+.quote-frequency--airbnb .quote-pill input:disabled + span {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.quote-airbnb-pricing-note {
+  margin-top: 6px;
+  color: var(--mint-dark);
+}
+
 .quote-input-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

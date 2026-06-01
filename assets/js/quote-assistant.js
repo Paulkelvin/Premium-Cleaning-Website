@@ -395,6 +395,59 @@ function inferSizeInputModeFromSession(session) {
   return "beds_baths";
 }
 
+function isAirbnbTurnoverService(serviceType) {
+  return typeof window.isAirbnbTurnoverService === "function"
+    ? window.isAirbnbTurnoverService(normalizeServiceType(serviceType))
+    : normalizeServiceType(serviceType) === "Short-term rental & Airbnb turnover";
+}
+
+function syncQuoteServicePricingUi(form) {
+  const serviceType = normalizeServiceType(
+    form.querySelector('input[name="service_type"]:checked')?.value || ""
+  );
+  const isAirbnb = isAirbnbTurnoverService(serviceType);
+  const hint = form.querySelector("[data-quote-size-hint]");
+  const airbnbNote = form.querySelector("[data-quote-airbnb-pricing-note]");
+  const freqFieldset = form.querySelector("[data-quote-frequency-fieldset]");
+
+  if (airbnbNote) {
+    airbnbNote.hidden = !isAirbnb;
+  }
+
+  if (hint && isAirbnb) {
+    const mode = getSizeInputMode(form);
+    hint.textContent =
+      mode === "sqft"
+        ? "Unusually large rental? Enter square footage—we'll price at $0.18/sq ft."
+        : "Turnovers use a flat rate by bedroom count. Switch to square footage only for larger properties.";
+  } else if (hint) {
+    const minSqft = minSqftForQuote();
+    const mode = getSizeInputMode(form);
+    hint.textContent =
+      mode === "sqft"
+        ? `Enter your square footage (at least ${minSqft}). We'll use that for your estimate.`
+        : "Enter bedrooms and bathrooms—we'll estimate square footage for your quote.";
+  }
+
+  if (freqFieldset) {
+    freqFieldset.classList.toggle("quote-frequency--airbnb", isAirbnb);
+    const oneTime = freqFieldset.querySelector('input[name="frequency"][value="One-time"]');
+    if (isAirbnb && oneTime) {
+      oneTime.checked = true;
+      freqFieldset.querySelectorAll('input[name="frequency"]').forEach((input) => {
+        if (input !== oneTime) {
+          input.checked = false;
+          input.disabled = true;
+        }
+      });
+    } else {
+      freqFieldset.querySelectorAll('input[name="frequency"]').forEach((input) => {
+        input.disabled = false;
+      });
+    }
+  }
+}
+
 function applySizeInputMode(form, mode, { clearInactive = false } = {}) {
   const metrics = form.querySelector("#quoteSizeMetrics");
   const bedsGroup = form.querySelector('[data-size-group="beds_baths"]');
@@ -434,6 +487,8 @@ function applySizeInputMode(form, mode, { clearInactive = false } = {}) {
       ? `Enter your square footage (at least ${minSqft}). We'll use that for your estimate.`
       : "Enter bedrooms and bathrooms—we'll estimate square footage for your quote.";
   }
+
+  syncQuoteServicePricingUi(form);
 }
 
 /** @deprecated Use hasValidSpaceMetrics */
@@ -484,13 +539,46 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   }
 
   const pricingConfig = getPricingConfig();
-  if (!serviceType || !pricingConfig.rates[serviceType] || sqft <= 0) {
+  const minimumJob = pricingConfig.minimumJob ?? 125;
+  let basePrice = 0;
+  let pricingMethod = "sqft";
+  let airbnbTierLabel = "";
+  let airbnbRangeLabel = "";
+
+  if (isAirbnbTurnoverService(serviceType)) {
+    if (typeof window.computeAirbnbBasePrice === "function") {
+      const airbnb = window.computeAirbnbBasePrice({
+        serviceType,
+        sizeMode,
+        bedrooms: beds,
+        bathrooms: baths,
+        sqft
+      });
+      basePrice = airbnb.basePrice;
+      pricingMethod = airbnb.pricingMethod;
+      airbnbTierLabel = airbnb.tierLabel || "";
+      airbnbRangeLabel = airbnb.rangeLabel || "";
+      if (pricingMethod === "none") {
+        return {
+          total: 0,
+          sqft,
+          serviceType,
+          freq,
+          addons,
+          pricingMethod
+        };
+      }
+    }
+  } else if (!serviceType || !pricingConfig.rates[serviceType] || sqft <= 0) {
     return { total: 0, sqft, serviceType, freq, addons };
+  } else {
+    basePrice = sqft * pricingConfig.rates[serviceType];
+    if (basePrice > 0 && basePrice < minimumJob) basePrice = minimumJob;
   }
 
-  let basePrice = sqft * pricingConfig.rates[serviceType];
-  const minimumJob = pricingConfig.minimumJob ?? 125;
-  if (basePrice > 0 && basePrice < minimumJob) basePrice = minimumJob;
+  if (isAirbnbTurnoverService(serviceType) && basePrice > 0 && basePrice < minimumJob) {
+    basePrice = minimumJob;
+  }
 
   let addonsPrice = 0;
   addons.forEach((addon) => {
@@ -499,7 +587,10 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   });
 
   let subtotal = basePrice + addonsPrice;
-  const discount = pricingConfig.frequencyDiscounts[freq] || 0;
+  const skipFreqDiscount =
+    isAirbnbTurnoverService(serviceType) &&
+    (window.getAirbnbTurnoverConfig?.()?.skipFrequencyDiscount !== false);
+  const discount = skipFreqDiscount ? 0 : pricingConfig.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
   const bookingAddress = table === "bookings"
@@ -524,7 +615,10 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
     addonsPrice,
     discount,
     travelFee,
-    areaName
+    areaName,
+    pricingMethod,
+    airbnbTierLabel,
+    airbnbRangeLabel
   };
 }
 
@@ -1772,7 +1866,13 @@ function initQuoteAssistant(formContainer = document) {
     const addons = data.getAll("add_ons[]");
 
     let spaceText = "Pending...";
-    if (pType && mode === "sqft" && pricing.sqft > 0) {
+    const isAirbnb = isAirbnbTurnoverService(sType);
+    if (isAirbnb && pricing.pricingMethod === "flat" && hasCompleteBedBathMetrics(form)) {
+      const range = pricing.airbnbRangeLabel ? ` (${pricing.airbnbRangeLabel})` : "";
+      spaceText = `${beds} bed, ${baths} bath • flat turnover${range}`;
+    } else if (isAirbnb && pricing.pricingMethod === "sqft" && pricing.sqft > 0) {
+      spaceText = `${pricing.sqft} sq ft • $0.18/sq ft turnover`;
+    } else if (pType && mode === "sqft" && pricing.sqft > 0) {
       spaceText = `${pType} • ${pricing.sqft} sq ft`;
     } else if (pType && hasCompleteBedBathMetrics(form)) {
       spaceText = `${pType} • ${beds} bed, ${baths} bath • ~${pricing.sqft} sq ft (est.)`;
@@ -1857,10 +1957,22 @@ function initQuoteAssistant(formContainer = document) {
     if (reviewFrequency) reviewFrequency.textContent = data.get("frequency") || session?.frequency || "-";
 
     if (reviewSize) {
-      reviewSize.textContent =
-        sizeMode === "sqft"
-          ? sqftLabel
-          : `${beds} bed / ${baths} bath / ${sqftLabel}`;
+      if (isAirbnbTurnoverService(data.get("service_type") || session?.service_type)) {
+        if (pricing.pricingMethod === "flat") {
+          const tier = pricing.airbnbTierLabel ? ` · ${pricing.airbnbTierLabel}` : "";
+          const range = pricing.airbnbRangeLabel ? ` (${pricing.airbnbRangeLabel})` : "";
+          reviewSize.textContent = `${beds} bed / ${baths} bath · flat turnover${tier}${range}`;
+        } else if (pricing.pricingMethod === "sqft") {
+          reviewSize.textContent = `${sqftRaw || pricing.sqft} sq ft · $0.18/sq ft`;
+        } else {
+          reviewSize.textContent = `${beds} bed / ${baths} bath`;
+        }
+      } else {
+        reviewSize.textContent =
+          sizeMode === "sqft"
+            ? sqftLabel
+            : `${beds} bed / ${baths} bath / ${sqftLabel}`;
+      }
     }
 
     if (reviewAddons) reviewAddons.textContent = addonText || "None";
@@ -2221,6 +2333,7 @@ function initQuoteAssistant(formContainer = document) {
       if (currentStepIndex === steps.length - 1) populateReview(canShowQuoteEstimateTotal());
     }
   });
+  syncQuoteServicePricingUi(form);
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
     playAssistantMessage(currentStepIndex);
     initPhoneFormatting(form);
@@ -2281,6 +2394,9 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   form.addEventListener("change", (event) => {
+    if (event?.target?.matches?.('input[name="service_type"]')) {
+      syncQuoteServicePricingUi(form);
+    }
     updateLiveSummary();
     updateNavState();
     if (currentStepIndex === steps.length - 1) {

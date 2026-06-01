@@ -34,16 +34,37 @@
     const pricing = getPricing();
     const serviceType = String(data.service_type || "").trim();
     const rate = pricing.rates?.[serviceType];
-    const beds = parseInt(data.bedrooms, 10) || 2;
-    const baths = parseInt(data.bathrooms, 10) || 1;
+    const beds = parseInt(data.bedrooms, 10);
+    const baths = parseInt(data.bathrooms, 10);
     const parsedSqft = parseInt(String(data.square_feet || "").replace(/,/g, ""), 10);
-    const sqft = parsedSqft > 0 ? parsedSqft : Math.round(beds * 450 + baths * 150 + 350);
+    const estimatedSqft =
+      Number.isInteger(beds) && beds >= 0 && Number.isInteger(baths) && baths >= 1
+        ? Math.round(beds * 450 + baths * 150 + 350)
+        : 0;
+    const sqft = parsedSqft > 0 ? parsedSqft : estimatedSqft;
     const freq = String(data.frequency || "One-time").trim() || "One-time";
-
-    if (!rate || sqft <= 0) return 0;
-
-    let base = sqft * rate;
     const minimum = Number(pricing.minimumJob) || 125;
+
+    let base = 0;
+    const isAirbnb =
+      typeof window.isAirbnbTurnoverService === "function" &&
+      window.isAirbnbTurnoverService(serviceType);
+
+    if (isAirbnb && typeof window.computeAirbnbBasePrice === "function") {
+      const useSqftOverride = parsedSqft > 0 && estimatedSqft > 0 && parsedSqft > estimatedSqft * 1.08;
+      const airbnb = window.computeAirbnbBasePrice({
+        serviceType,
+        sizeMode: useSqftOverride ? "sqft" : "beds_baths",
+        bedrooms: beds,
+        bathrooms: baths,
+        sqft: parsedSqft > 0 ? parsedSqft : estimatedSqft
+      });
+      base = airbnb.basePrice;
+    } else {
+      if (!rate || sqft <= 0) return 0;
+      base = sqft * rate;
+    }
+
     if (base > 0 && base < minimum) base = minimum;
 
     let addons = 0;
@@ -52,7 +73,7 @@
     });
 
     let subtotal = base + addons;
-    const discount = pricing.frequencyDiscounts?.[freq] || 0;
+    const discount = isAirbnb ? 0 : pricing.frequencyDiscounts?.[freq] || 0;
     subtotal -= subtotal * discount;
     subtotal += Math.max(0, Number(data.travel_fee) || 0);
     const rounded = Math.round(subtotal * 100) / 100;

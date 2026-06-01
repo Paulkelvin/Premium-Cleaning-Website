@@ -56,6 +56,23 @@ If `basePrice > 0` and `basePrice < minimumJob` ($125), then `basePrice = 125`.
 | Deep cleaning | 0.28 |
 | Move-in/Move-out | 0.32 |
 | Office cleaning | 0.20 |
+| Short-term rental & Airbnb turnover | 0.18 (sq ft override only) |
+
+### Airbnb / short-term rental (hybrid)
+
+Default (**Beds & baths** in quote): flat turnover fee by bedroom count (midpoint of client ranges):
+
+| Bedrooms | Quote amount | Typical range |
+|----------|--------------|---------------|
+| 0–1 | $150 | $125–$175 |
+| 2 | $213 | $175–$250 |
+| 3 | $288 | $225–$350 |
+| 4+ | $400 | $300–$500+ |
+
+Override (**Square footage** in quote): `basePrice = sqft × 0.18`, then $125 minimum rules.
+
+- No frequency discount on turnovers (always one-time between guests).
+- Config: `assets/js/config.js` → `airbnbTurnover`; logic: `assets/js/airbnb-pricing.js`.
 
 ---
 

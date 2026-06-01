@@ -49,6 +49,16 @@ window.CLEANCO_CONFIG = {
       "One-time": 0.0
     }
   },
+  airbnbTurnover: {
+    sqftRate: 0.18,
+    skipFrequencyDiscount: true,
+    tiers: [
+      { minBeds: 0, maxBeds: 1, amount: 150, rangeLabel: "$125–$175", label: "1 bed / 1 bath" },
+      { minBeds: 2, maxBeds: 2, amount: 213, rangeLabel: "$175–$250", label: "2 bed / 2 bath" },
+      { minBeds: 3, maxBeds: 3, amount: 288, rangeLabel: "$225–$350", label: "3 bed / 2 bath" },
+      { minBeds: 4, maxBeds: 99, amount: 400, rangeLabel: "$300–$500+", label: "4+ bed vacation rental" }
+    ]
+  },
   // Enable automated Square checkout for variable quote totals (requires Supabase Edge Functions).
   squareCheckoutEnabled: true,
   // Public site URL — must match SITE_URL secret in Supabase (no trailing slash).
