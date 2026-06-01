@@ -180,11 +180,35 @@ function ensureFooterAddonsColumn(grid, servicesColumn) {
   return addonsColumn;
 }
 
+function normalizeFooterGridLayout(grid) {
+  if (!grid || grid.querySelector(".footer-nav-columns")) return;
+
+  const first = grid.firstElementChild;
+  if (!first) return;
+
+  first.classList.add("footer-brand-col");
+
+  const nav = document.createElement("div");
+  nav.className = "footer-nav-columns";
+
+  const toMove = [...grid.children].filter((child) => child !== first);
+  toMove.forEach((child) => nav.appendChild(child));
+  grid.appendChild(nav);
+
+  nav.querySelectorAll(":scope > div").forEach((col) => {
+    const label = col.querySelector("h3")?.textContent.trim().toLowerCase();
+    if (label === "contact") col.classList.add("footer-col--contact");
+    if (label === "areas") col.classList.add("footer-col--areas");
+  });
+}
+
 function initFooterCatalog() {
   const services = getFooterServiceLinks();
   const addons = getFooterAddonLinks();
 
   document.querySelectorAll(".footer-grid").forEach((grid) => {
+    normalizeFooterGridLayout(grid);
+
     const servicesHeading = [...grid.querySelectorAll("h3")].find(
       (node) => node.textContent.trim().toLowerCase() === "services"
     );
@@ -275,6 +299,7 @@ function bootSiteUi() {
     initFooterLegalLinks();
     initFooterQuickPolicyLinks();
     initFooterCatalog();
+    document.querySelectorAll(".footer-grid").forEach(normalizeFooterGridLayout);
 
     if (typeof lucide !== "undefined") {
       lucide.createIcons();

@@ -42,63 +42,145 @@
 
   const SKIP_IDS = new Set(["4b"]);
 
-  /** Per photo (set + letter). IDs match filenames: Before/After 1b.jpeg → "1b". */
+  /** Per photo (id = set + letter in filenames). Titles are descriptive — no View A/B labels. */
   const ITEM_OVERRIDES = {
-    "1b": {
+    "1a": {
+      title: "Return air vent detail",
+      description: "Dust and lint removed from HVAC grille slats",
       category: "kitchens",
       badge: "Add-on",
-      title: "Oven cleaning add-on · View B",
+    },
+    "1b": {
+      title: "Oven cleaning add-on",
       description: "Inside-oven degrease & detail (add-on service)",
+      category: "kitchens",
+      badge: "Add-on",
     },
     "1c": {
+      title: "Tub & tile refresh",
+      description: "Bathtub, tile & fixtures restored",
       category: "bathrooms",
       badge: "Deep Reset",
-      title: "Bathroom detail · View C",
-      description: "Tub, tile & fixtures refreshed",
     },
-    "2c": {
-      category: "living",
-      badge: "Standard Clean",
-      title: "Living space refresh · View C",
-      description: "Floors refreshed · Standard care",
+    "1d": {
+      title: "Gas range surface detail",
+      description: "Burnt-on spills & crumbs cleared from stovetop",
+      category: "kitchens",
+      badge: "Deep Reset",
+    },
+    "1e": {
+      title: "Microwave interior detail",
+      description: "Splatter and buildup removed inside microwave",
+      category: "kitchens",
+      badge: "Add-on",
     },
     "2a": {
-      description:
-        "Glass, fixtures, corners & hard water stain removal",
-    },
-    "2e": {
-      description:
-        "Glass, fixtures, corners & hard water stain removal",
-    },
-    "3a": {
-      category: "moveout",
-      badge: "Move-out Turn",
-      title: "Move-out restoration · View A",
-      description: "Baseboards & kick plates restored for turnover",
-    },
-    "3c": {
-      category: "living",
-      badge: "Add-on",
-      title: "Window track detail · View C",
-      description: "Interior window track cleaning (add-on)",
-    },
-    "4a": {
+      title: "Shower hard water restoration",
+      description: "Glass, fixtures, corners & hard water stain removal",
       category: "bathrooms",
       badge: "Deep Reset",
-      title: "Bathroom detail · View A",
+    },
+    "2b": {
+      title: "Shower track & baseboard detail",
+      description: "Door track grime and baseboard corners deep cleaned",
+      category: "bathrooms",
+      badge: "Deep Reset",
+    },
+    "2c": {
+      title: "Bathroom floor refresh",
+      description: "Tile floors swept, mopped & detail-cleaned",
+      category: "living",
+      badge: "Standard Clean",
+    },
+    "2d": {
+      title: "Stair carpet deep clean",
+      description: "Ground-in traffic stains lifted from carpeted stairs",
+      category: "living",
+      badge: "Deep Reset",
+    },
+    "2e": {
+      title: "Shower mineral & rust removal",
+      description: "Heavy rust and hard water buildup cleared from shower",
+      category: "bathrooms",
+      badge: "Deep Reset",
+    },
+    "3a": {
+      title: "Move-out baseboard detail",
+      description: "Baseboards & kick plates restored for turnover",
+      category: "moveout",
+      badge: "Move-out Turn",
+    },
+    "3b": {
+      title: "Tub & tile restoration",
+      description: "Grout, fixtures & tub surfaces refreshed",
+      category: "bathrooms",
+      badge: "Deep Reset",
+    },
+    "3c": {
+      title: "Window track detail",
+      description: "Interior window track cleaning (add-on)",
+      category: "living",
+      badge: "Add-on",
+    },
+    "3d": {
+      title: "Window blind & mold detail",
+      description: "Mildew spotting treated on blind slats & trim",
+      category: "living",
+      badge: "Deep Reset",
+    },
+    "3e": {
+      title: "Bathtub rust & mineral removal",
+      description: "Rust and hard water stains cleared from tub & drain",
+      category: "bathrooms",
+      badge: "Deep Reset",
+    },
+    "4a": {
+      title: "Toilet & fixture deep clean",
       description: "Toilet, fixtures & hidden areas deep cleaned",
+      category: "bathrooms",
+      badge: "Deep Reset",
+    },
+    "4c": {
+      title: "Behind-appliance floor detail",
+      description: "Grime and buildup cleared behind kitchen appliances",
+      category: "moveout",
+      badge: "Move-out Turn",
     },
     "4d": {
-      category: "living",
-      badge: "Regular Care",
-      title: "Living space refresh · View D",
-      description: "Living area reset for a calmer feel",
+      title: "Shower stall reset",
+      description: "Soap scum and hard water staining removed from shower",
+      category: "bathrooms",
+      badge: "Deep Reset",
     },
     "4e": {
+      title: "Sliding door track detail",
+      description: "Built-up debris cleared from door tracks & threshold",
       category: "moveout",
       badge: "Full Reset",
-      title: "Full property reset · View E",
-      description: "Whole-home refresh from top to bottom",
+    },
+    "5a": {
+      title: "Sliding door track restoration",
+      description: "Door track grime removed for smooth operation",
+      category: "living",
+      badge: "Add-on",
+    },
+    "5b": {
+      title: "Wall mark removal",
+      description: "Crayon and scuff marks cleaned from painted walls",
+      category: "living",
+      badge: "Deep Reset",
+    },
+    "5c": {
+      title: "Bedroom carpet refresh",
+      description: "Spot treatment & deep vacuum — stains lifted from carpet",
+      category: "living",
+      badge: "Deep Reset",
+    },
+    "5d": {
+      title: "Walk-in shower glass detail",
+      description: "Glass, frame & tile — soap scum and buildup removed",
+      category: "bathrooms",
+      badge: "Deep Reset",
     },
   };
 
@@ -113,7 +195,9 @@
       const key = galleryItemKey(item);
       const patch = ITEM_OVERRIDES[key];
       if (!patch) return item;
-      return { ...item, ...patch };
+      const next = { ...item, ...patch };
+      if (patch.badge) next.badge = patch.badge;
+      return next;
     });
   }
 
@@ -130,7 +214,7 @@
   const items = [];
 
   for (let set = 1; set <= 5; set += 1) {
-    const letters = set === 5 ? ["a", "b"] : ["a", "b", "c", "d", "e"];
+    const letters = set === 5 ? ["a", "b", "c", "d"] : ["a", "b", "c", "d", "e"];
     const meta = SET_META[set];
 
     letters.forEach((letter) => {
@@ -143,7 +227,7 @@
         letter,
         category: meta.category,
         badge: meta.badge,
-        title: `${meta.project} · View ${letter.toUpperCase()}`,
+        title: ITEM_OVERRIDES[id]?.title || meta.project,
         description: meta.description,
         beforeImageUrl: image(beforeFile(set, letter)),
         afterImageUrl: image(afterFile(set, letter)),

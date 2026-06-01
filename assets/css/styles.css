@@ -2356,6 +2356,10 @@ textarea {
   padding: 60px 0 28px;
 }
 
+.site-footer > .section-inner {
+  width: min(1280px, calc(100% - 40px));
+}
+
 .site-footer p,
 .site-footer a {
   color: rgba(255, 255, 255, 0.7);
@@ -2367,9 +2371,32 @@ textarea {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: minmax(160px, 1.2fr) repeat(5, minmax(0, 1fr));
-  gap: 20px 18px;
+  grid-template-columns: minmax(220px, 1.15fr) minmax(0, 1fr);
+  column-gap: clamp(32px, 5vw, 72px);
+  row-gap: 28px;
   align-items: start;
+  width: 100%;
+}
+
+.footer-brand-col {
+  max-width: 320px;
+}
+
+.footer-brand-col > p {
+  max-width: 28ch;
+}
+
+.footer-nav-columns {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: clamp(18px, 2.4vw, 44px);
+  row-gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.footer-nav-columns > div {
+  min-width: 0;
 }
 
 .footer-grid h3 {
@@ -2382,14 +2409,14 @@ textarea {
 .footer-col--addons ul,
 .footer-grid [data-footer-addons] {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 
 .footer-col--addons ul a,
 .footer-grid [data-footer-addons] a {
-  font-size: 0.86rem;
-  line-height: 1.3;
+  font-size: 0.88rem;
+  line-height: 1.35;
 }
 
 .footer-grid [data-footer-services] {
@@ -2399,7 +2426,15 @@ textarea {
 .footer-grid ul {
   list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-grid .footer-col--contact ul li:nth-child(2) {
+  font-size: 0.88rem;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .footer-grid ul a {
@@ -4171,12 +4206,17 @@ html:not(.js) .fade-in-right {
 
   .hero-strip,
   .grid.four,
-  .footer-grid {
+  .footer-nav-columns {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .footer-grid > div:first-child {
-    grid-column: 1 / -1;
+  .footer-grid {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  .footer-brand-col {
+    max-width: none;
   }
 
   .grid,
@@ -4303,7 +4343,7 @@ html:not(.js) .fade-in-right {
 
   .hero-strip,
   .grid.four,
-  .footer-grid,
+  .footer-nav-columns,
   .form-grid,
   .values-grid {
     grid-template-columns: 1fr;
@@ -4311,6 +4351,10 @@ html:not(.js) .fade-in-right {
 
   .footer-grid {
     gap: 28px;
+  }
+
+  .footer-nav-columns {
+    row-gap: 24px;
   }
 
   .contact-info-card {
