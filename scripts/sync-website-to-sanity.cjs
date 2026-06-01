@@ -24,6 +24,71 @@ const SET_META = {
 const AFTER_FILE_OVERRIDES = {'4a': 'After 4a .jpeg', '4c': 'After 4c .jpeg'}
 const SKIP_GALLERY_IDS = new Set(['4b'])
 
+const ITEM_OVERRIDES = {
+  '1b': {
+    category: 'kitchens',
+    badge: 'Add-on',
+    title: 'Oven cleaning add-on · View B',
+    description: 'Inside-oven degrease & detail (add-on service)',
+  },
+  '1c': {
+    category: 'bathrooms',
+    badge: 'Deep Reset',
+    title: 'Bathroom detail · View C',
+    description: 'Tub, tile & fixtures refreshed',
+  },
+  '2c': {
+    category: 'living',
+    badge: 'Standard Clean',
+    title: 'Living space refresh · View C',
+    description: 'Floors refreshed · Standard care',
+  },
+  '2a': {
+    description: 'Glass, fixtures, corners & hard water stain removal',
+  },
+  '2e': {
+    description: 'Glass, fixtures, corners & hard water stain removal',
+  },
+  '3a': {
+    category: 'moveout',
+    badge: 'Move-out Turn',
+    title: 'Move-out restoration · View A',
+    description: 'Baseboards & kick plates restored for turnover',
+  },
+  '3c': {
+    category: 'living',
+    badge: 'Add-on',
+    title: 'Window track detail · View C',
+    description: 'Interior window track cleaning (add-on)',
+  },
+  '4a': {
+    category: 'bathrooms',
+    badge: 'Deep Reset',
+    title: 'Bathroom detail · View A',
+    description: 'Toilet, fixtures & hidden areas deep cleaned',
+  },
+  '4d': {
+    category: 'living',
+    badge: 'Regular Care',
+    title: 'Living space refresh · View D',
+    description: 'Living area reset for a calmer feel',
+  },
+  '4e': {
+    category: 'moveout',
+    badge: 'Full Reset',
+    title: 'Full property reset · View E',
+    description: 'Whole-home refresh from top to bottom',
+  },
+}
+
+function applyGalleryItemOverrides(doc, id) {
+  const patch = ITEM_OVERRIDES[id]
+  if (!patch) return doc
+  const next = {...doc, ...patch}
+  if (patch.badge) next.serviceType = patch.badge
+  return next
+}
+
 const SERVICE_ORDER = {
   'standard-cleaning': 1,
   'deep-cleaning': 2,
@@ -319,7 +384,7 @@ function buildGalleryItems() {
       if (SKIP_GALLERY_IDS.has(id)) return
 
       const afterName = AFTER_FILE_OVERRIDES[id] || `After ${id}.jpeg`
-      items.push({
+      const base = {
         _id: `gallery-${id}`,
         _type: 'galleryItem',
         title: `${meta.project} · View ${letter.toUpperCase()}`,
@@ -331,7 +396,8 @@ function buildGalleryItems() {
         afterImageUrl: `assets/images/${afterName}`,
         description: meta.description,
         displayOrder: order++,
-      })
+      }
+      items.push(applyGalleryItemOverrides(base, id))
     })
   }
 

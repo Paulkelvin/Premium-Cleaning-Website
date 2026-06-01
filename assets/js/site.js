@@ -82,26 +82,102 @@ function getFooterServiceLinks() {
     { label: "Move-in/out cleaning", href: `${prefix}services/move-in-out-cleaning.html` },
     { label: "Office cleaning", href: `${prefix}services/office-cleaning.html` },
     {
-      label: "Short-term rental & Airbnb turnovers",
+      label: "Airbnb turnovers",
       href: `${prefix}services/airbnb-turnover.html`
     },
-    { label: "Wash & fold", href: `${prefix}services/wash-fold.html` },
-    { label: "Junk removal", href: `${prefix}services/junk-removal.html` },
-    { label: "Carpet cleaning", href: `${prefix}services/carpet-cleaning.html` },
-    {
-      label: "Organization & decluttering",
-      href: `${prefix}services/organization-decluttering.html`
-    }
+    { label: "All services", href: `${prefix}services/index.html` }
   ];
 }
 
+function formatFooterAddonLabel(name) {
+  return String(name || "")
+    .replace(/\s*\(1-10\)/gi, "")
+    .replace(/\s*\(11-20\)/gi, "")
+    .trim();
+}
+
+function getFooterAddonsHref() {
+  const path = String(window.location.pathname || "").replace(/\\/g, "/");
+  const onServicesIndex =
+    /\/services\/index\.html$/i.test(path) || /\/services\/?$/i.test(path);
+  if (onServicesIndex) return "#addons";
+  return `${getSitePathPrefix()}services/index.html#addons`;
+}
+
 function getFooterAddonLinks() {
-  const prefix = getSitePathPrefix();
   const addOns = window.CLEANCO_CONFIG?.pricing?.addOns || {};
-  return Object.keys(addOns).map((name) => ({
-    label: name,
-    href: `${prefix}quote.html?addon=${encodeURIComponent(name)}`
-  }));
+  const addonsHref = getFooterAddonsHref();
+  const seen = new Set();
+
+  return Object.keys(addOns).reduce((links, name) => {
+    const label = formatFooterAddonLabel(name);
+    const key = label.toLowerCase();
+    if (seen.has(key)) return links;
+    seen.add(key);
+    links.push({ label, href: addonsHref });
+    return links;
+  }, []);
+}
+
+function detachLegacyFooterAddons(servicesColumn, grid) {
+  const legacyHeading = [...servicesColumn.querySelectorAll("h3")].find(
+    (node) => node.textContent.trim().toLowerCase() === "add-ons"
+  );
+  if (!legacyHeading) return null;
+
+  let addonsColumn = grid.querySelector("[data-footer-addons-col]");
+  if (!addonsColumn) {
+    addonsColumn = document.createElement("div");
+    addonsColumn.className = "footer-col footer-col--addons";
+    addonsColumn.setAttribute("data-footer-addons-col", "");
+    servicesColumn.insertAdjacentElement("afterend", addonsColumn);
+  }
+
+  if (!addonsColumn.querySelector("[data-footer-addons-heading]")) {
+    legacyHeading.setAttribute("data-footer-addons-heading", "");
+    addonsColumn.appendChild(legacyHeading);
+  } else {
+    legacyHeading.remove();
+  }
+
+  const legacyList = servicesColumn.querySelector("[data-footer-addons]");
+  if (legacyList && !addonsColumn.querySelector("[data-footer-addons]")) {
+    addonsColumn.appendChild(legacyList);
+  }
+
+  return addonsColumn;
+}
+
+function ensureFooterAddonsColumn(grid, servicesColumn) {
+  let addonsColumn = grid.querySelector("[data-footer-addons-col]");
+  if (!addonsColumn) {
+    addonsColumn = document.createElement("div");
+    addonsColumn.className = "footer-col footer-col--addons";
+    addonsColumn.setAttribute("data-footer-addons-col", "");
+    const contactColumn = [...grid.children].find((child) =>
+      child.querySelector("h3")?.textContent.trim().toLowerCase() === "contact"
+    );
+    if (contactColumn) {
+      grid.insertBefore(addonsColumn, contactColumn);
+    } else {
+      servicesColumn.insertAdjacentElement("afterend", addonsColumn);
+    }
+  }
+
+  if (!addonsColumn.querySelector("[data-footer-addons-heading]")) {
+    const heading = document.createElement("h3");
+    heading.setAttribute("data-footer-addons-heading", "");
+    heading.textContent = "Add-ons";
+    addonsColumn.appendChild(heading);
+  }
+
+  if (!addonsColumn.querySelector("[data-footer-addons]")) {
+    const list = document.createElement("ul");
+    list.setAttribute("data-footer-addons", "");
+    addonsColumn.appendChild(list);
+  }
+
+  return addonsColumn;
 }
 
 function initFooterCatalog() {
@@ -114,12 +190,14 @@ function initFooterCatalog() {
     );
     if (!servicesHeading) return;
 
-    const column = servicesHeading.parentElement;
-    if (!column) return;
+    const servicesColumn = servicesHeading.parentElement;
+    if (!servicesColumn) return;
 
-    let servicesList = column.querySelector("[data-footer-services]");
+    detachLegacyFooterAddons(servicesColumn, grid);
+
+    let servicesList = servicesColumn.querySelector("[data-footer-services]");
     if (!servicesList) {
-      servicesList = column.querySelector("ul");
+      servicesList = servicesColumn.querySelector("ul");
       if (servicesList) servicesList.setAttribute("data-footer-services", "");
     }
     if (servicesList) {
@@ -128,25 +206,13 @@ function initFooterCatalog() {
         .join("");
     }
 
-    let addonsHeading = column.querySelector("[data-footer-addons-heading]");
-    if (!addonsHeading) {
-      addonsHeading = document.createElement("h3");
-      addonsHeading.className = "footer-subheading";
-      addonsHeading.setAttribute("data-footer-addons-heading", "");
-      addonsHeading.textContent = "Add-ons";
-      column.appendChild(addonsHeading);
+    const addonsColumn = ensureFooterAddonsColumn(grid, servicesColumn);
+    const addonsList = addonsColumn.querySelector("[data-footer-addons]");
+    if (addonsList) {
+      addonsList.innerHTML = addons
+        .map((item) => `<li><a href="${item.href}">${item.label}</a></li>`)
+        .join("");
     }
-
-    let addonsList = column.querySelector("[data-footer-addons]");
-    if (!addonsList) {
-      addonsList = document.createElement("ul");
-      addonsList.setAttribute("data-footer-addons", "");
-      column.appendChild(addonsList);
-    }
-
-    addonsList.innerHTML = addons
-      .map((item) => `<li><a href="${item.href}">${item.label}</a></li>`)
-      .join("");
   });
 }
 
@@ -422,7 +488,7 @@ function initHomeReviewsCarousel() {
 window.initHomeReviewsCarousel = initHomeReviewsCarousel;
 
 // Accordions logic
-function initAccordions() {
+window.initAccordions = function initAccordions() {
   document.querySelectorAll(".faq-item").forEach((item) => {
     const trigger = item.querySelector(".faq-trigger");
     const panel = item.querySelector(".faq-panel");

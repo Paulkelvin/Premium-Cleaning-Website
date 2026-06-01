@@ -33,6 +33,11 @@ function initServiceDetailFaqs() {
   const list = document.querySelector("[data-home-faq-list]");
   if (!list) return;
   renderHomeFaqs(list);
+  if (typeof window.refreshInteractiveFeatures === "function") {
+    window.refreshInteractiveFeatures();
+  } else if (typeof window.initAccordions === "function") {
+    window.initAccordions();
+  }
   if (typeof lucide !== "undefined") lucide.createIcons();
 }
 

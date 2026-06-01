@@ -561,7 +561,11 @@ function applyTestimonials(testimonials) {
 
 function applyGallery(items) {
   if (!items.length) return;
-  window.GALLERY_ITEMS = items.map(mapSanityGalleryItem);
+  const mapped = items.map(mapSanityGalleryItem);
+  window.GALLERY_ITEMS =
+    typeof window.applyGalleryItemOverrides === "function"
+      ? window.applyGalleryItemOverrides(mapped)
+      : mapped;
   if (typeof window.renderGallery !== "function") return;
   const isHome = document.body.dataset.sanityPage === "home";
   window.renderGallery({
