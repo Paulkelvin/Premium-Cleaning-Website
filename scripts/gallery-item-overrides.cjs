@@ -10,8 +10,8 @@ module.exports.ITEM_OVERRIDES = {
     badge: 'Add-on',
   },
   '1b': {
-    title: 'Oven deep clean add-on',
-    description: 'Inside-oven deep clean, degrease & detail (add-on service)',
+    title: 'Oven cleaning add-on',
+    description: 'Inside-oven degrease & detail (add-on service)',
     category: 'kitchens',
     badge: 'Add-on',
   },
@@ -46,8 +46,8 @@ module.exports.ITEM_OVERRIDES = {
     badge: 'Deep Reset',
   },
   '2c': {
-    title: 'Floor refresh',
-    description: 'Tile floors swept, mopped & detail-cleaned · Standard care',
+    title: 'Bathroom floor refresh',
+    description: 'Tile floors swept, mopped & detail-cleaned',
     category: 'living',
     badge: 'Standard Clean',
   },
@@ -106,16 +106,16 @@ module.exports.ITEM_OVERRIDES = {
     badge: 'Move-out Turn',
   },
   '4d': {
-    title: 'Shower stall care',
-    description: 'Soap scum and buildup refreshed · Regular care',
+    title: 'Shower stall reset',
+    description: 'Soap scum and hard water staining removed from shower',
     category: 'bathrooms',
-    badge: 'Regular Care',
+    badge: 'Deep Reset',
   },
   '4e': {
     title: 'Sliding door track detail',
-    description: 'Built-up debris cleared from tracks · Deep reset',
+    description: 'Built-up debris cleared from door tracks & threshold',
     category: 'moveout',
-    badge: 'Deep Reset',
+    badge: 'Full Reset',
   },
   '5a': {
     title: 'Sliding door track restoration',

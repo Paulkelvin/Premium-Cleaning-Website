@@ -1699,25 +1699,54 @@ function initQuoteAssistant(formContainer = document) {
   function updateNavState() {
     if (!btnNext || currentStepIndex === steps.length - 1) return;
 
-    btnNext.classList.remove("is-hidden");
-    btnNext.style.display = "inline-flex";
+    btnNext.classList.remove("is-ready");
 
-    let valid = true;
     if (currentStepIndex === 2) {
-      valid = true;
-    } else if (!isBooking && currentStepIndex === 0) {
-      valid = validateSpaceStep(true);
-    } else if (!isBooking && currentStepIndex === 1) {
-      valid = validateServiceStep(true);
-    } else if (currentStepIndex === 3) {
-      valid = validateStep(steps[currentStepIndex], true);
-    } else if (isBooking && currentStepIndex === 0) {
-      valid = validateStep(steps[0], true);
+      btnNext.classList.remove("is-hidden");
+      btnNext.disabled = false;
+      btnNext.removeAttribute("aria-disabled");
+      return;
     }
 
-    btnNext.classList.toggle("is-ready", valid);
-    btnNext.disabled = !valid;
-    btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+    if (!isBooking && currentStepIndex === 0) {
+      const valid = validateSpaceStep(true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
+
+    if (!isBooking && currentStepIndex === 1) {
+      const valid = validateServiceStep(true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
+
+    if (currentStepIndex === 3) {
+      const valid = validateStep(steps[currentStepIndex], true);
+      btnNext.classList.toggle("is-hidden", !valid);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = !valid;
+      btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+      return;
+    }
+
+    if (isBooking && currentStepIndex === 0) {
+      const valid = validateStep(steps[0], true);
+      btnNext.classList.toggle("is-ready", valid);
+      btnNext.disabled = false;
+      btnNext.removeAttribute("aria-disabled");
+      btnNext.classList.remove("is-hidden");
+      return;
+    }
+
+    btnNext.classList.remove("is-hidden");
+    btnNext.disabled = false;
+    btnNext.setAttribute("aria-disabled", "false");
   }
 
   function showSuccessPanel(successState) {

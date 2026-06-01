@@ -18,6 +18,3 @@ verify_jwt = false
 
 [functions.send-payment-invoice]
 verify_jwt = false
-
-[functions.create-open-payment]
-verify_jwt = false

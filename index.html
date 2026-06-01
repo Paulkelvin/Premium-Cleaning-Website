@@ -28,7 +28,10 @@
   <main style="position: relative; overflow: hidden;">
     <div class="bg-blob bg-blob-blue"></div>
     <div class="bg-blob bg-blob-gold"></div>
-    <section class="hero hero--backdrop hero--no-photo">
+    <section class="hero hero--backdrop">
+      <div class="hero-bg" aria-hidden="true">
+        <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1800&q=85" alt="">
+      </div>
       <div class="hero-scrim" aria-hidden="true"></div>
       <div class="section-inner hero-content-wrap">
         <div class="hero-content">
@@ -53,7 +56,7 @@
           <div class="image-glow-accent"></div>
           <div class="corner-bracket top-left"></div>
           <div class="corner-bracket bottom-right"></div>
-          <img class="why-choose-us-img why-choose-us-img--logo" src="assets/images/rscleaningcollective_logo.png" alt="RS Cleaning Collective logo" width="280" height="80" decoding="async">
+          <img class="why-choose-us-img" src="https://images.unsplash.com/photo-1603712725038-e9334ae8f39f?auto=format&fit=crop&w=1200&q=85" alt="Professional cleaning supplies arranged neatly">
           <div class="floating-badge badge-top-right">
             <span class="badge-icon"><i data-lucide="shield-check"></i></span>
             <div class="badge-text">
@@ -453,41 +456,6 @@
       <div class="geo-pill home-deco-float" aria-hidden="true" style="top: 14%; right: 8%;"></div>
     </section>
 
-    <section class="band pay-now-section geo-accent-band" id="pay-now">
-      <div class="section-inner pay-now-split">
-        <div class="pay-now-copy fade-in-left">
-          <p class="eyebrow"><i data-lucide="credit-card"></i> Pay now</p>
-          <h2>Already have your total? Pay online.</h2>
-          <p>Enter the amount you were given, your name, and email — then continue to secure Square checkout. Minimum $1.00.</p>
-          <p class="pay-now-aside">Need a quote first? <a href="quote.html">Get an estimate</a> or <a href="tel:+12022626379">call 202-262-6379</a>.</p>
-        </div>
-        <form class="pay-form card fade-in-right" data-open-payment-form novalidate>
-          <label class="field">
-            <span>Your name</span>
-            <input type="text" name="full_name" required autocomplete="name" placeholder="Jane Doe">
-          </label>
-          <label class="field">
-            <span>Email</span>
-            <input type="email" name="email" required autocomplete="email" placeholder="jane@example.com">
-          </label>
-          <label class="field">
-            <span>Amount (USD)</span>
-            <div class="pay-amount-wrap">
-              <span class="pay-amount-prefix" aria-hidden="true">$</span>
-              <input type="number" name="amount" required min="1" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Payment amount in US dollars, minimum one dollar">
-            </div>
-          </label>
-          <label class="field">
-            <span>Note <em class="pay-optional">(optional)</em></span>
-            <textarea name="note" rows="2" placeholder="e.g. service date or address"></textarea>
-          </label>
-          <div class="form-state" data-pay-form-state role="status"></div>
-          <button type="submit" class="button pay-submit" data-pay-submit>Pay now <i data-lucide="lock"></i></button>
-          <p class="pay-form-trust">Secure payment powered by Square.</p>
-        </form>
-      </div>
-    </section>
-
     <section class="band geo-accent-band">
       <div class="geo-slab home-deco-float" aria-hidden="true" style="top: 20%; right: 10%; transform: rotate(14deg);"></div>
       <div class="geo-wedge home-deco-float home-deco-float--slow" aria-hidden="true" style="bottom: 18%; left: 5%; transform: rotate(-28deg);"></div>
@@ -511,12 +479,11 @@
 
   <footer class="site-footer">
     <div class="section-inner footer-grid">
-      <div class="footer-brand-col">
+      <div>
         <a class="brand" href="index.html"><img class="brand-logo" src="assets/images/rscleaningcollective_logo.png" alt="RS Cleaning Collective" width="280" height="80" decoding="async"></a>
         <p style="margin-top:14px; margin-bottom: 20px; font-size:0.95rem;">Premium local cleaning for homes, rentals, and workplaces.</p>
         <a class="button secondary small" href="quote.html">Request quote</a>
       </div>
-      <div class="footer-nav-columns">
       <div>
         <h3>Quick links</h3>
         <ul>
@@ -557,7 +524,6 @@
           <li>Prince George's County</li>
         </ul>
       </div>
-      </div>
     </div>
     <div class="section-inner footer-bottom">
       <span>© <span data-year></span> RS Cleaning Collective. All rights reserved.</span>
@@ -570,7 +536,5 @@
   <script src="assets/js/gallery.js"></script>
   <script src="assets/js/sanity-content.js"></script>
   <script src="assets/js/forms.js"></script>
-  <script src="assets/js/payments.js"></script>
-  <script src="assets/js/pay-open.js"></script>
 </body>
 </html>
