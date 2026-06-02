@@ -240,7 +240,7 @@
               ${hasLink ? `<button type="button" class="admin-btn admin-btn--ghost admin-btn--small" data-invoice-copy="${row.id}">Copy link</button>` : ""}
               ${!paid ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-checkout="${row.id}" title="Generate a new Square payment URL (use after price changes)">${hasLink ? "New pay link" : "Pay link"}</button>` : ""}
               ${!paid && hasLink ? `<button type="button" class="admin-btn admin-btn--primary admin-btn--small" data-invoice-send="${row.id}">Send email</button>` : ""}
-              <button type="button" class="admin-btn admin-btn--danger admin-btn--small" data-invoice-delete="${row.id}" data-invoice-title="${escapeHtml(title)}"><i data-lucide="trash-2"></i> Delete</button>
+              ${typeof isSuperuser === "function" && isSuperuser() ? `<button type="button" class="admin-btn admin-btn--danger admin-btn--small" data-invoice-delete="${row.id}" data-invoice-title="${escapeHtml(title)}"><i data-lucide="trash-2"></i> Delete</button>` : ""}
             </div>
           </div>
         </article>`;

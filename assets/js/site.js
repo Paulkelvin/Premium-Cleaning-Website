@@ -1,6 +1,7 @@
 // site.js - Premium Interactive Interactions and UI Polish
 
 const BRAND_LOGO_FILE = "rscleaningcollective_logo.png";
+const BRAND_LOGO_ALT_FILE = "rscleaningcollective-logo.PNG";
 
 function isUnderServicesSection(path) {
   return /\/services(?:\/|$)/i.test(path);
@@ -31,20 +32,27 @@ function createBrandLogoImg({ admin = false } = {}) {
   return img;
 }
 
+function isAltLogoContext(el) {
+  return !!el.closest(".site-footer, .admin-sidebar");
+}
+
 function initBrandLogos() {
-  document.querySelectorAll(".brand").forEach((brand) => {
+  document.querySelectorAll(".brand, .admin-brand").forEach((brand) => {
     const existing = brand.querySelector(".brand-logo");
     const mark = brand.querySelector(".brand-mark");
     const nameSpan = brand.querySelector("span:not(.brand-mark):not(.brand-logo)");
+    const file = isAltLogoContext(brand) ? BRAND_LOGO_ALT_FILE : BRAND_LOGO_FILE;
 
     if (existing) {
-      existing.src = siteAssetPath(BRAND_LOGO_FILE);
+      existing.src = siteAssetPath(file);
       if (mark) mark.remove();
       if (nameSpan) nameSpan.remove();
       return;
     }
 
-    const img = createBrandLogoImg();
+    const isAdmin = brand.classList.contains("admin-brand");
+    const img = createBrandLogoImg({ admin: isAdmin });
+    img.src = siteAssetPath(file);
     if (mark) mark.replaceWith(img);
     else brand.prepend(img);
     if (nameSpan) nameSpan.remove();
