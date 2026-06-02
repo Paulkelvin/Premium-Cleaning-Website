@@ -8291,14 +8291,14 @@ html:not(.js) .fade-in-right {
   background: linear-gradient(155deg, #14306b 0%, #0f4fcf 55%, #0a6f8f 100%);
   box-shadow: 0 24px 48px rgba(11, 19, 36, 0.28);
   padding: 0;
-  border-radius: 0;
   overflow: hidden;
   width: 100%;
   max-width: 520px;
   margin-left: auto;
-  aspect-ratio: 16 / 11;
+  aspect-ratio: 16 / 12;
   align-self: center;
-  clip-path: polygon(7% 0, 100% 0, 100% 88%, 93% 100%, 0 100%, 0 12%);
+  clip-path: none;
+  border-radius: 48% 52% 46% 54% / 56% 54% 46% 44%;
 }
 
 .about-page-hero-visual--team .about-page-hero-image {
@@ -8307,7 +8307,8 @@ html:not(.js) .fade-in-right {
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
-  object-position: center 12%;
+  object-position: 42% 16%;
+  transform: scale(1.08);
   clip-path: none;
   filter: none;
 }
