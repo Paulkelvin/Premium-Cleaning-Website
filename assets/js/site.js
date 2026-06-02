@@ -341,6 +341,43 @@ function initHeaderPayLink() {
   });
 }
 
+function getFacebookUrl() {
+  const cfg = window.CLEANCO_CONFIG || {};
+  return typeof cfg.facebookUrl === "string" ? cfg.facebookUrl.trim() : "";
+}
+
+function initFooterSocialLinks() {
+  const url = getFacebookUrl();
+  if (!url) return;
+
+  document.querySelectorAll(".footer-grid").forEach((grid) => {
+    const brandCol = grid.querySelector("div");
+    if (!brandCol || brandCol.querySelector("[data-footer-social]")) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "footer-social";
+    wrap.setAttribute("data-footer-social", "");
+
+    const link = document.createElement("a");
+    link.className = "footer-social-link";
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.setAttribute("aria-label", "Follow RS Cleaning Collective on Facebook");
+
+    const icon = document.createElement("i");
+    icon.setAttribute("data-lucide", "facebook");
+    link.appendChild(icon);
+
+    const label = document.createElement("span");
+    label.textContent = "Follow us on Facebook";
+    link.appendChild(label);
+
+    wrap.appendChild(link);
+    brandCol.appendChild(wrap);
+  });
+}
+
 function bootSiteUi() {
   document.documentElement.classList.add("js");
 
@@ -357,6 +394,7 @@ function bootSiteUi() {
     initFooterPayNowLink();
     initFooterQuickPolicyLinks();
     initFooterCatalog();
+    initFooterSocialLinks();
     document.querySelectorAll(".footer-grid").forEach(normalizeFooterGridLayout);
 
     if (typeof lucide !== "undefined") {

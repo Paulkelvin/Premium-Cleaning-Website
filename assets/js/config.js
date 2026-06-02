@@ -3,6 +3,7 @@ window.CLEANCO_CONFIG = {
   // Update phone in Sanity siteSettings when the client provides their real number.
   phone: "202-262-6379",
   email: "ryann@rslegalcollective.com",
+  facebookUrl: "https://web.facebook.com/profile.php?id=61569210390047",
   address: "Mechanicsville, MD",
   locationLabel: "Southern Maryland",
   serviceArea: "Charles County, St. Mary's County, Calvert County, and Prince George's County",
