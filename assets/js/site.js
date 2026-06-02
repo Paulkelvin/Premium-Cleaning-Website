@@ -384,8 +384,17 @@ function bootSiteUi() {
 
       const navigateFromNavLink = (link, e) => {
         const href = link.getAttribute("href");
-        if (!href || href.startsWith("#")) return;
+        if (!href) return;
         if (e && (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey)) return;
+        if (href.startsWith("#")) {
+          const target = href.length > 1 ? document.getElementById(href.slice(1)) : null;
+          closeMobileNav();
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            try { history.replaceState(null, "", href); } catch (_) {}
+          }
+          return;
+        }
         const targetUrl = new URL(href, window.location.href).href;
         closeMobileNav();
         window.location.href = targetUrl;
