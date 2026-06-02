@@ -481,6 +481,10 @@ function applySizeInputMode(form, mode, { clearInactive = false } = {}) {
   if (bathsInput) bathsInput.disabled = isSqft;
   if (sqftInput) sqftInput.disabled = !isSqft;
 
+  // #region agent log
+  fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d1571d'},body:JSON.stringify({sessionId:'d1571d',runId:'run1',hypothesisId:'H3,H4',location:'quote-assistant.js:applySizeInputMode',message:'size mode applied',data:{mode,isSqft,bedsHidden:!!bedsGroup?.hidden,sqftHidden:!!sqftGroup?.hidden,bedsDisabled:!!bedsInput?.disabled,bathsDisabled:!!bathsInput?.disabled,sqftDisabled:!!sqftInput?.disabled},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+
   if (hint) {
     const minSqft = minSqftForQuote();
     hint.textContent = isSqft
@@ -1055,6 +1059,10 @@ function initQuoteSizeMode(form, { onUpdate } = {}) {
     const wouldDiscard =
       targetMode === "sqft" ? hasBedBathEntries(form) : hasSqftEntries(form);
 
+    // #region agent log
+    fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d1571d'},body:JSON.stringify({sessionId:'d1571d',runId:'run1',hypothesisId:'H2,H3',location:'quote-assistant.js:requestModeSwitch',message:'size switch requested',data:{targetMode,committedMode,wouldDiscard,hasBedBath:hasBedBathEntries(form),hasSqft:hasSqftEntries(form)},timestamp:Date.now()})}).catch(()=>{});
+    // #endregion
+
     if (!wouldDiscard) {
       setMode(targetMode, { clearInactive: true });
       return;
@@ -1626,6 +1634,9 @@ function initQuoteAssistant(formContainer = document) {
   function validateSizeChunk(silent = false) {
     const mode = getSizeInputMode(form);
     const { beds, baths, sqft } = readSpaceMetrics(form);
+  // #region agent log
+  fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H1,H2,H5',location:'quote-assistant.js:validateSizeChunk:entry',message:'size validation entry',data:{mode,beds,baths,sqft,silent},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
     if (mode === "sqft") {
       const minSqft = minSqftForQuote();
@@ -1726,6 +1737,23 @@ function initQuoteAssistant(formContainer = document) {
     btnNext.classList.toggle("is-ready", valid);
     btnNext.disabled = !valid;
     btnNext.setAttribute("aria-disabled", valid ? "false" : "true");
+    // #region agent log
+    if (!isBooking && currentStepIndex === 0) {
+      const _m2 = readSpaceMetrics(form);
+      const _mode2 = getSizeInputMode(form);
+      const _pt2 = form.querySelector('input[name="property_type"]:checked')?.value || null;
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H1,H2,H3,H5',location:'quote-assistant.js:updateNavState:step0',message:'step0 nav state updated',data:{valid,disabled:btnNext.disabled,currentStepIndex,mode:_mode2,propertyType:_pt2,beds:_m2.beds,baths:_m2.baths,sqft:_m2.sqft,bedsRaw:_m2.bedsRaw,bathsRaw:_m2.bathsRaw,sqftRaw:_m2.sqftRaw},timestamp:Date.now()})}).catch(()=>{});
+    }
+    // #endregion
+
+    // #region agent log
+    if (!isBooking && currentStepIndex === 0) {
+      const _m = readSpaceMetrics(form);
+      const _mode = getSizeInputMode(form);
+      const _pt = form.querySelector('input[name="property_type"]:checked')?.value || null;
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d1571d'},body:JSON.stringify({sessionId:'d1571d',runId:'run1',hypothesisId:'H1,H5',location:'quote-assistant.js:updateNavState',message:'step0 nav evaluation',data:{valid,mode:_mode,propertyType:_pt,beds:_m.beds,baths:_m.baths,sqft:_m.sqft,bedsRaw:_m.bedsRaw,bathsRaw:_m.bathsRaw,disabled:btnNext.disabled},timestamp:Date.now()})}).catch(()=>{});
+    }
+    // #endregion
   }
 
   function showSuccessPanel(successState) {
@@ -2178,7 +2206,12 @@ function initQuoteAssistant(formContainer = document) {
   }
 
   function transitionToStep(nextIndex, direction = 1) {
-    if (nextIndex < 0 || nextIndex >= steps.length || isStepTransitioning) return;
+    if (nextIndex < 0 || nextIndex >= steps.length || isStepTransitioning) {
+      // #region agent log
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H4',location:'quote-assistant.js:transitionToStep:blocked',message:'transition blocked',data:{nextIndex,direction,currentStepIndex,isStepTransitioning,stepsLength:steps.length},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
+      return;
+    }
 
     if (!isQuoteStudio) {
       currentStepIndex = nextIndex;
@@ -2200,6 +2233,9 @@ function initQuoteAssistant(formContainer = document) {
       nextStepEl.classList.add("active", direction > 0 ? "is-entering-forward" : "is-entering-back");
       updateUI();
       playAssistantMessage(currentStepIndex);
+      // #region agent log
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H4',location:'quote-assistant.js:transitionToStep:committed',message:'transition committed',data:{nextIndex,direction,currentStepIndexAfter:currentStepIndex},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       scrollQuoteStepIntoView({ behavior: "smooth" });
       setTimeout(() => {
         nextStepEl.classList.remove("is-entering-forward", "is-entering-back");
@@ -2322,10 +2358,18 @@ function initQuoteAssistant(formContainer = document) {
 
   if (btnNext) {
     btnNext.addEventListener("click", () => {
+      // #region agent log
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H1,H2,H3,H4',location:'quote-assistant.js:btnNext:click',message:'continue clicked',data:{isBooking,currentStepIndex,disabled:!!btnNext.disabled,isStepTransitioning},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       if (isStepTransitioning) return;
 
       if (!isBooking && currentStepIndex === 0) {
-        if (!validateSpaceStep()) return;
+        if (!validateSpaceStep()) {
+          // #region agent log
+          fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'35abd8'},body:JSON.stringify({sessionId:'35abd8',runId:'run1',hypothesisId:'H1,H2,H5',location:'quote-assistant.js:btnNext:blockedSpace',message:'space step validation failed on continue',data:{currentStepIndex},timestamp:Date.now()})}).catch(()=>{});
+          // #endregion
+          return;
+        }
       } else if (!isBooking && currentStepIndex === 1) {
         if (!validateServiceStep()) return;
       } else if (!validateStep(steps[currentStepIndex])) {
@@ -2388,6 +2432,11 @@ function initQuoteAssistant(formContainer = document) {
     }
     updateLiveSummary();
     updateNavState();
+    // #region agent log
+    if (event?.target?.matches?.('input[name="property_type"], input[name="size_input_mode"], #quoteBedrooms, #quoteBathrooms, #quoteSqft')) {
+      fetch('http://127.0.0.1:7394/ingest/aa88cdec-5152-40d3-ae85-3d0638ac0c55',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'d1571d'},body:JSON.stringify({sessionId:'d1571d',runId:'run1',hypothesisId:'H2,H5',location:'quote-assistant.js:formChange',message:'step0-relevant change event',data:{name:event.target?.name||event.target?.id||'unknown',value:event.target?.value||null,checked:!!event.target?.checked,currentStepIndex},timestamp:Date.now()})}).catch(()=>{});
+    }
+    // #endregion
     if (currentStepIndex === steps.length - 1) {
       populateReview(canShowQuoteEstimateTotal());
       setGetEstimateEnabled(isFinalReadyForEstimate());
