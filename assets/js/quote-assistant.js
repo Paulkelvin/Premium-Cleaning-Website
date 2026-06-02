@@ -396,9 +396,12 @@ function inferSizeInputModeFromSession(session) {
 }
 
 function isAirbnbTurnoverService(serviceType) {
-  return typeof window.isAirbnbTurnoverService === "function"
-    ? window.isAirbnbTurnoverService(normalizeServiceType(serviceType))
-    : normalizeServiceType(serviceType) === "Short-term rental & Airbnb turnover";
+  const normalized = normalizeServiceType(serviceType);
+  const externalHelper = window.isAirbnbTurnoverService;
+  if (typeof externalHelper === "function" && externalHelper !== isAirbnbTurnoverService) {
+    return externalHelper(normalized);
+  }
+  return normalized === "Short-term rental & Airbnb turnover";
 }
 
 function syncQuoteServicePricingUi(form) {
