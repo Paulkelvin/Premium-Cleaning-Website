@@ -91,8 +91,7 @@ function getFooterServiceLinks() {
 
 function formatFooterAddonLabel(name) {
   return String(name || "")
-    .replace(/\s*\(1-10\)/gi, "")
-    .replace(/\s*\(11-20\)/gi, "")
+    .replace(/\s*\([^)]*\)/g, "")
     .trim();
 }
 
@@ -324,6 +323,24 @@ function initFooterLegalLinks() {
   });
 }
 
+function initHeaderPayLink() {
+  const href = getPayNowHref();
+  document.querySelectorAll(".site-nav").forEach((nav) => {
+    if (nav.querySelector("[data-nav-pay]")) return;
+
+    const link = document.createElement("a");
+    link.href = href;
+    link.setAttribute("data-nav-pay", "");
+    link.textContent = "Pay";
+
+    const quoteButton = [...nav.querySelectorAll("a.button")].find((a) =>
+      /quote/i.test(a.getAttribute("href") || "") || /quote/i.test(a.textContent)
+    );
+    if (quoteButton) nav.insertBefore(link, quoteButton);
+    else nav.appendChild(link);
+  });
+}
+
 function bootSiteUi() {
   document.documentElement.classList.add("js");
 
@@ -335,6 +352,7 @@ function bootSiteUi() {
       node.textContent = new Date().getFullYear();
     });
 
+    initHeaderPayLink();
     initFooterLegalLinks();
     initFooterPayNowLink();
     initFooterQuickPolicyLinks();
