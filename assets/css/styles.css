@@ -13520,10 +13520,9 @@ html {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: flex-start;
-  flex: 0 0 auto;
-  margin-left: auto;
+  flex: 1 1 100%;
 }
 
 .status.invoice-draft {
