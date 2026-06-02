@@ -2952,7 +2952,7 @@ body.admin-login-page {
   background: transparent;
   padding: 8px 0;
   font: inherit;
-  font-size: 0.86rem;
+  font-size: 16px;
 }
 
 .admin-toolbar-search input:focus {
@@ -2965,7 +2965,7 @@ body.admin-login-page {
   border: 1px solid var(--line);
   background: var(--white);
   font: inherit;
-  font-size: 0.84rem;
+  font-size: 16px;
   font-weight: 600;
   color: var(--ink);
 }
@@ -3791,7 +3791,7 @@ body.admin-login-page {
   border-radius: 10px;
   border: 1px solid var(--line);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 16px;
 }
 
 .admin-login-field input:focus {
@@ -13330,7 +13330,7 @@ html {
   border-radius: 8px;
   border: 1px solid var(--line);
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 16px;
   font-weight: 400;
   color: var(--ink);
   background: var(--white);
@@ -13632,7 +13632,7 @@ html {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 13px 14px;
-  font-size: 0.95rem;
+  font-size: 16px;
   background: var(--white);
 }
 
