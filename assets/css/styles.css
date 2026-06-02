@@ -8299,6 +8299,15 @@ html:not(.js) .fade-in-right {
   align-self: center;
   clip-path: none;
   border-radius: 48% 52% 46% 54% / 56% 54% 46% 44%;
+  animation: blobMorph 12s ease-in-out infinite;
+}
+
+@keyframes blobMorph {
+  0%   { border-radius: 48% 52% 46% 54% / 56% 54% 46% 44%; }
+  25%  { border-radius: 54% 46% 50% 50% / 48% 58% 42% 52%; }
+  50%  { border-radius: 44% 56% 52% 48% / 52% 46% 54% 48%; }
+  75%  { border-radius: 50% 50% 44% 56% / 54% 50% 50% 46%; }
+  100% { border-radius: 48% 52% 46% 54% / 56% 54% 46% 44%; }
 }
 
 .about-page-hero-visual--team .about-page-hero-image {
@@ -8307,8 +8316,8 @@ html:not(.js) .fade-in-right {
   max-height: none;
   aspect-ratio: auto;
   object-fit: cover;
-  object-position: 42% 16%;
-  transform: scale(1.08);
+  object-position: 54% 16%;
+  transform: scale(1.12);
   clip-path: none;
   filter: none;
 }
