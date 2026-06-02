@@ -8249,8 +8249,10 @@ html:not(.js) .fade-in-right {
 }
 
 .about-page-hero-copy h1 {
-  max-width: none;
+  max-width: 18ch;
   margin-bottom: 0.75rem;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1.08;
 }
 
 .about-page-hero-copy > p:not(.eyebrow) {
@@ -8286,21 +8288,28 @@ html:not(.js) .fade-in-right {
 }
 
 .about-page-hero-visual--team {
-  background: transparent;
-  box-shadow: none;
+  background: linear-gradient(155deg, #14306b 0%, #0f4fcf 55%, #0a6f8f 100%);
+  box-shadow: 0 24px 48px rgba(11, 19, 36, 0.28);
   padding: 0;
   border-radius: 0;
-  overflow: visible;
+  overflow: hidden;
+  width: 100%;
+  max-width: 520px;
+  margin-left: auto;
+  aspect-ratio: 16 / 11;
+  align-self: center;
+  clip-path: polygon(7% 0, 100% 0, 100% 88%, 93% 100%, 0 100%, 0 12%);
 }
 
 .about-page-hero-visual--team .about-page-hero-image {
   width: 100%;
+  height: 100%;
   max-height: none;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: auto;
   object-fit: cover;
-  object-position: center top;
-  clip-path: polygon(0 46%, 9% 0, 91% 0, 100% 46%, 91% 100%, 9% 100%);
-  filter: drop-shadow(0 18px 38px rgba(11, 17, 15, 0.28));
+  object-position: center 12%;
+  clip-path: none;
+  filter: none;
 }
 
 @media (max-width: 900px) {
@@ -8329,6 +8338,8 @@ html:not(.js) .fade-in-right {
 
   .about-page-hero-visual--team {
     padding: 0;
+    margin: 0 auto;
+    max-width: 460px;
   }
 
   .about-page-hero-image {
