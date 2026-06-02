@@ -137,16 +137,25 @@ function getFooterAddonsHref() {
 function getFooterAddonLinks() {
   const addOns = window.CLEANCO_CONFIG?.pricing?.addOns || {};
   const addonsHref = getFooterAddonsHref();
+  const prefix = getSitePathPrefix();
   const seen = new Set();
+  const links = [];
 
-  return Object.keys(addOns).reduce((links, name) => {
-    const label = formatFooterAddonLabel(name);
-    const key = label.toLowerCase();
-    if (seen.has(key)) return links;
+  const pushLink = (label, href) => {
+    const key = String(label || "").trim().toLowerCase();
+    if (!key || seen.has(key)) return;
     seen.add(key);
-    links.push({ label, href: addonsHref });
-    return links;
-  }, []);
+    links.push({ label, href });
+  };
+
+  Object.keys(addOns).forEach((name) => {
+    pushLink(formatFooterAddonLabel(name), addonsHref);
+  });
+
+  pushLink("Carpet cleaning", `${prefix}services/carpet-cleaning.html`);
+  pushLink("Junk removal", `${prefix}services/junk-removal.html`);
+
+  return links;
 }
 
 function detachLegacyFooterAddons(servicesColumn, grid) {
