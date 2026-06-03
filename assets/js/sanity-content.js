@@ -83,6 +83,7 @@ function mapSanityGalleryItem(item, index) {
       },
       whyChooseUsTitle,
       whyChooseUsItems,
+      "aboutSectionImageUrl": coalesce(aboutSectionImage.asset->url, aboutSectionImageUrl),
       finalCtaTitle,
       finalCtaCopy
     },
@@ -459,6 +460,12 @@ function applyHome(home) {
   text(document.querySelector(".quote-panel h2"), home.finalCtaTitle);
   const quotePanelCopy = document.querySelector(".quote-panel > p");
   if (quotePanelCopy) text(quotePanelCopy, home.finalCtaCopy);
+
+  const aboutImage = document.querySelector("[data-home-about-image]");
+  if (aboutImage && home.aboutSectionImageUrl) {
+    attr(aboutImage, "src", home.aboutSectionImageUrl);
+    attr(aboutImage, "alt", "RS Cleaning Collective logo");
+  }
 }
 
 function applyService(services) {

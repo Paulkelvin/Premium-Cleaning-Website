@@ -141,4 +141,34 @@ module.exports.ITEM_OVERRIDES = {
     category: 'bathrooms',
     badge: 'Deep Reset',
   },
+  '6a': {
+    title: 'Toilet bowl deep clean',
+    description: 'Murky water and grime ring cleared from toilet bowl',
+    category: 'bathrooms',
+    badge: 'Deep Reset',
+  },
+  '6b': {
+    title: 'Microwave interior degrease',
+    description: 'Baked-on grease and food buildup removed from microwave floor',
+    category: 'kitchens',
+    badge: 'Add-on',
+  },
+  '6c': {
+    title: 'Glass cooktop restoration',
+    description: 'Grease splatters and dried spills cleared from gas cooktop',
+    category: 'kitchens',
+    badge: 'Deep Reset',
+  },
+  '6d': {
+    title: 'Shower handle limescale removal',
+    description: 'Heavy mineral buildup cleared from Moen escutcheon and handle',
+    category: 'bathrooms',
+    badge: 'Deep Reset',
+  },
+  '6e': {
+    title: 'Fiberglass shower stall reset',
+    description: 'Grime and buildup removed from seats, walls, and shower floor',
+    category: 'bathrooms',
+    badge: 'Deep Reset',
+  },
 }

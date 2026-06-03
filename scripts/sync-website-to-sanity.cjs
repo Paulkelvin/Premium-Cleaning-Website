@@ -20,6 +20,7 @@ const SET_META = {
   3: {category: 'living', badge: 'Regular Care', project: 'Living space refresh', description: 'Living area reset for a calmer feel'},
   4: {category: 'moveout', badge: 'Move-out Turn', project: 'Move-out restoration', description: 'Cabinets, floors, and baseboards restored'},
   5: {category: 'moveout', badge: 'Full Reset', project: 'Full property reset', description: 'Whole-home refresh from top to bottom'},
+  6: {category: 'bathrooms', badge: 'Deep Reset', project: 'Fixture restoration', description: 'Fixtures and surfaces restored'},
 }
 const AFTER_FILE_OVERRIDES = {'4a': 'After 4a .jpeg', '4c': 'After 4c .jpeg'}
 const SKIP_GALLERY_IDS = new Set(['4b'])
@@ -44,6 +45,7 @@ const SERVICE_ORDER = {
 
 const IMAGE_FIELD_PAIRS = [
   ['heroImage', 'heroImageUrl'],
+  ['aboutSectionImage', 'aboutSectionImageUrl'],
   ['beforeImage', 'beforeImageUrl'],
   ['afterImage', 'afterImageUrl'],
   ['avatar', 'avatarUrl'],
@@ -195,6 +197,7 @@ function extractHomePage() {
     howItWorksSteps,
     whyChooseUsTitle: first(html, /<div class="heading-tag-split">[\s\S]*?<h2>([^<]+)<\/h2>/i),
     whyChooseUsItems,
+    aboutSectionImageUrl: 'assets/images/rscleaningcollective_logo.png',
     finalCtaTitle: first(quotePanel, /<h2[^>]*>([^<]+)<\/h2>/i),
     finalCtaCopy: first(quotePanel, /<h2[^>]*>[\s\S]*?<p[^>]*>([^<]+)<\/p>/i),
   }
@@ -320,7 +323,7 @@ function buildGalleryItems() {
   const items = []
   let order = 1
 
-  for (let set = 1; set <= 5; set += 1) {
+  for (let set = 1; set <= 6; set += 1) {
     const letters = set === 5 ? ['a', 'b', 'c', 'd'] : ['a', 'b', 'c', 'd', 'e']
     const meta = SET_META[set]
 

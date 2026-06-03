@@ -41,6 +41,13 @@ export const homePage = defineType({
     defineField({name: 'howItWorksSteps', title: 'How It Works Steps', type: 'array', of: [{type: 'object', fields: cardFields}]}),
     defineField({name: 'whyChooseUsTitle', title: 'Why Choose Us Title', type: 'text'}),
     defineField({name: 'whyChooseUsItems', title: 'Why Choose Us Items', type: 'array', of: [{type: 'string'}]}),
+    defineField({
+      name: 'aboutSectionImage',
+      title: 'About Section Image',
+      type: 'image',
+      description: 'Logo or photo beside the About Us block on the homepage.',
+      options: {hotspot: true},
+    }),
     defineField({name: 'finalCtaTitle', title: 'Final CTA Title', type: 'text'}),
     defineField({name: 'finalCtaCopy', title: 'Final CTA Copy', type: 'text'}),
   ],

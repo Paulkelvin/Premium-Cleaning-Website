@@ -157,6 +157,14 @@ async function migrateHomePage() {
     changed = true
   }
 
+  if (!doc.aboutSectionImage && doc.aboutSectionImageUrl) {
+    console.log('Home about section')
+    const asset = await uploadFromUrl(doc.aboutSectionImageUrl)
+    patch.set({aboutSectionImage: imageRef(asset._id)})
+    patch.unset(['aboutSectionImageUrl'])
+    changed = true
+  }
+
   if (doc.serviceCards?.length) {
     const {cards, changed: cardsChanged} = await migrateCards(doc.serviceCards)
     if (cardsChanged) {

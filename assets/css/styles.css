@@ -1085,6 +1085,17 @@ body[data-sanity-page="gallery"] [data-gallery-list] {
   animation: none;
 }
 
+.about-split .about-section-logo {
+  display: block;
+  width: min(100%, 320px);
+  max-height: 220px;
+  margin: 0 auto;
+  object-fit: contain;
+  background: transparent;
+  padding: 12px;
+  animation: none;
+}
+
 .legal-policy h2 {
   font-size: 1.05rem;
   margin: 1.35rem 0 0.45rem;
