@@ -10,8 +10,11 @@ Automatic emails for new contact inquiries, quote requests, bookings, and paid S
 | Quote request | Yes — estimate summary | Yes — confirmation |
 | Website booking | Yes — schedule + payment info | Yes — confirmation |
 | Square payment marked paid | Yes — payment alert | Yes — payment receipt |
+| Pay now (open amount on contact/home) | Yes — after Square marks paid | Yes — payment receipt |
 
 Admin-created offline invoices are unchanged (manual **Send email** in the dashboard).
+
+Open-amount payments save a `bookings` row with `source = open_payment` (no “new booking” lead email). Payment emails are sent when Square reports paid (webhook or `confirm-square-payment` on the thank-you page).
 
 While the admin dashboard is open, it also polls every 45 seconds and shows a toast when new records arrive.
 
@@ -28,7 +31,25 @@ Complete Gmail setup first (same secrets as offline invoices):
 
 See `OFFLINE_INVOICES_SETUP.md` Steps 3–5 if you have not done this yet.
 
-Admin recipients come from the `admin_users` table (`rs.cleaning@collective.com`, `paulopackager@gmail.com`, etc.).
+### Important: SQL table vs Edge Function secrets
+
+Running this in **SQL Editor** only checks the **database** copy:
+
+```sql
+select client_id, client_secret, refresh_token, from_email
+from public.internal_gmail_config where id = 1;
+```
+
+That is **not** enough by itself. The live `notify-lead` function must either:
+
+1. **Deploy current repo code** (`.\scripts\deploy-notify-functions.ps1`) so it reads `internal_gmail_config`, **or**
+2. Add the **same four values** as **Edge Function secrets** in the dashboard:
+
+   **Project → Edge Functions → Secrets** (names must match exactly: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GMAIL_FROM_EMAIL`).
+
+If emails are skipped, check `net._http_response` — a body of `"reason":"gmail_not_configured"` means the function still cannot see Gmail credentials.
+
+Admin recipients come from the `admin_users` table (`ryann@rslegalcollective.com`, `paulopackager@gmail.com`, etc.). Remove invalid addresses from that table — bad recipients cause Gmail bounce messages in the sender inbox.
 
 ---
 
@@ -41,41 +62,42 @@ This creates DB triggers that call the `notify-lead` Edge Function after each in
 
 ---
 
-## Step 2 — Set the webhook secret
+## Step 2 — Webhook secret (auto-configured)
 
-Generate a long random string (32+ characters). Use the **same value** in both places below.
+The webhook secret is **not something you invent manually** — it is a long random password that links your database triggers to the `notify-lead` Edge Function.
 
-**A. Supabase SQL Editor**
+If setup was done via Supabase MCP/SQL, this is already stored in `internal_webhook_config` and you can skip this step.
+
+To verify:
 
 ```sql
-update public.internal_webhook_config
-set secret = 'paste-your-long-random-secret-here',
-    updated_at = now()
+select case when secret is not null then 'ready' else 'missing' end as webhook_status
+from public.internal_webhook_config
 where id = 1;
 ```
 
-**B. Supabase Edge Function secret (optional but recommended)**
+Optional: also set the same value as a Supabase secret (only if you prefer env-based config):
 
 ```powershell
-supabase secrets set NOTIFY_WEBHOOK_SECRET="paste-your-long-random-secret-here" --project-ref hbacogyhftngwoxenttv
+supabase secrets set NOTIFY_WEBHOOK_SECRET="your-secret-here" --project-ref hbacogyhftngwoxenttv
 ```
 
-If `NOTIFY_WEBHOOK_SECRET` is set, it overrides the database value for the Edge Function.
+You do **not** need to remember or copy the secret unless you are debugging auth errors.
 
 ---
 
 ## Step 3 — Deploy Edge Functions
 
+Ask Cursor (with Supabase MCP enabled) to deploy:
+
+- `notify-lead`
+- `square-webhook`
+- `confirm-square-payment`
+
+Or after `npx supabase login`:
+
 ```powershell
 .\scripts\deploy-notify-functions.ps1
-```
-
-Or deploy manually:
-
-```powershell
-npx supabase@latest functions deploy notify-lead --project-ref hbacogyhftngwoxenttv
-npx supabase@latest functions deploy square-webhook --project-ref hbacogyhftngwoxenttv
-npx supabase@latest functions deploy confirm-square-payment --project-ref hbacogyhftngwoxenttv
 ```
 
 ---
@@ -94,6 +116,8 @@ Triggers are fire-and-forget: if Gmail is not configured, form submissions still
 
 | Symptom | Fix |
 |---------|-----|
+| SQL shows Gmail values, still no email | DB table alone is not used by old deployed code — run `deploy-notify-functions.ps1` **or** copy values into **Edge Function secrets** |
+| `notify-lead` logs only show booted/shutdown | Normal for cold starts; confirm real calls via SQL: `select content::text from net._http_response order by created desc limit 1` |
 | Forms work, no emails | Finish Gmail secrets; verify `internal_webhook_config.secret` is set |
 | `401 Unauthorized` in notify-lead logs | Secret mismatch between SQL update and `NOTIFY_WEBHOOK_SECRET` |
 | Admin gets email, customer does not | Check customer email on the submission; Gmail may land in spam |

@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
   try {
     await requireAdmin(req);
 
-    if (!isGmailConfigured()) {
+    if (!(await isGmailConfigured())) {
       throw new Error(
         "Gmail is not configured yet. Complete Google setup in OFFLINE_INVOICES_SETUP.md, then add secrets to Supabase."
       );
@@ -120,6 +120,6 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not send invoice email";
-    return json({ error: message, gmail_configured: isGmailConfigured() }, 400);
+    return json({ error: message, gmail_configured: await isGmailConfigured() }, 400);
   }
 });

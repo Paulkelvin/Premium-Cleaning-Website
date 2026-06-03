@@ -234,7 +234,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, full_name, email, phone, service_type, preferred_date, address, estimated_total, payment_method, payment_status, square_order_id, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+        "id, source, full_name, email, phone, service_type, preferred_date, address, estimated_total, payment_method, payment_status, square_order_id, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
       )
       .eq("id", bookingId)
       .single();
@@ -252,19 +252,30 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!String(booking.service_area_name || "").trim()) {
+    const isOpenPayment = String(booking.source || "") === "open_payment";
+
+    if (!isOpenPayment && !String(booking.service_area_name || "").trim()) {
       throw new Error("Service area must be confirmed before payment confirmation");
     }
 
-    const storedTotal = Number(booking.estimated_total);
-    const computedTotal = computeBookingTotal(booking).total;
-    let total = computedTotal;
-    if (Number.isFinite(storedTotal) && storedTotal > total) {
-      total = Math.round(storedTotal * 100) / 100;
-    }
-    const expectedAmountCents = Math.round(total * 100);
-    if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 12500) {
-      throw new Error("Could not determine a valid booking total");
+    let expectedAmountCents: number;
+    if (isOpenPayment) {
+      const openTotal = Number(booking.estimated_total);
+      if (!Number.isFinite(openTotal) || openTotal < 1) {
+        throw new Error("Could not determine payment amount");
+      }
+      expectedAmountCents = Math.round(openTotal * 100);
+    } else {
+      const storedTotal = Number(booking.estimated_total);
+      const computedTotal = computeBookingTotal(booking).total;
+      let total = computedTotal;
+      if (Number.isFinite(storedTotal) && storedTotal > total) {
+        total = Math.round(storedTotal * 100) / 100;
+      }
+      expectedAmountCents = Math.round(total * 100);
+      if (!Number.isFinite(expectedAmountCents) || expectedAmountCents < 12500) {
+        throw new Error("Could not determine a valid booking total");
+      }
     }
 
     const verification = await verifySquarePaymentForBooking(

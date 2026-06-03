@@ -37,8 +37,10 @@ begin
     return new;
   end if;
 
-  if tg_table_name = 'bookings' and coalesce(new.source, 'website') = 'admin' then
-    return new;
+  if tg_table_name = 'bookings' then
+    if coalesce(new.source, 'website') in ('admin', 'open_payment') then
+      return new;
+    end if;
   end if;
 
   select net.http_post(

@@ -7,3 +7,7 @@ node_modules/
 dist/
 .DS_Store
 .cursor/
+scripts/.deploy-*.json
+scripts/.deploy-chunk-*.txt
+scripts/.deploy-result-*.txt
+scripts/.mcp-*.json

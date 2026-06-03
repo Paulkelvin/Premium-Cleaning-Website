@@ -1,3 +1,14 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+type GmailConfig = {
+  clientId: string;
+  clientSecret: string;
+  refreshToken: string;
+  fromEmail: string;
+};
+
+let cachedConfig: GmailConfig | null | undefined;
+
 function base64UrlEncode(value: string) {
   const bytes = new TextEncoder().encode(value);
   let binary = "";
@@ -7,23 +18,85 @@ function base64UrlEncode(value: string) {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 }
 
-export function isGmailConfigured() {
-  return Boolean(
-    Deno.env.get("GOOGLE_CLIENT_ID") &&
-      Deno.env.get("GOOGLE_CLIENT_SECRET") &&
-      Deno.env.get("GOOGLE_REFRESH_TOKEN") &&
-      Deno.env.get("GMAIL_FROM_EMAIL")
-  );
+/** RFC 2047 — prevents mojibake (e.g. Ã¢Â€Â) for em dashes and other UTF-8 in Subject headers. */
+function encodeMimeHeaderValue(value: string) {
+  if (!/[^\x00-\x7F]/.test(value)) return value;
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return `=?UTF-8?B?${btoa(binary)}?=`;
+}
+
+function readEnvConfig(): GmailConfig | null {
+  const clientId = Deno.env.get("GOOGLE_CLIENT_ID")?.trim() || "";
+  const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET")?.trim() || "";
+  const refreshToken = Deno.env.get("GOOGLE_REFRESH_TOKEN")?.trim() || "";
+  const fromEmail = Deno.env.get("GMAIL_FROM_EMAIL")?.trim() || "";
+  if (!clientId || !clientSecret || !refreshToken || !fromEmail) return null;
+  return { clientId, clientSecret, refreshToken, fromEmail };
+}
+
+function serviceRoleClient() {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !serviceRoleKey) return null;
+  return createClient(supabaseUrl, serviceRoleKey);
+}
+
+async function loadGmailConfig(): Promise<GmailConfig | null> {
+  if (cachedConfig !== undefined) return cachedConfig;
+
+  const envConfig = readEnvConfig();
+  if (envConfig) {
+    cachedConfig = envConfig;
+    return envConfig;
+  }
+
+  const client = serviceRoleClient();
+  if (!client) {
+    cachedConfig = null;
+    return null;
+  }
+
+  const { data, error } = await client
+    .from("internal_gmail_config")
+    .select("client_id, client_secret, refresh_token, from_email")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("gmail: could not read internal_gmail_config", error.message);
+    cachedConfig = null;
+    return null;
+  }
+
+  const config: GmailConfig = {
+    clientId: String(data?.client_id || "").trim(),
+    clientSecret: String(data?.client_secret || "").trim(),
+    refreshToken: String(data?.refresh_token || "").trim(),
+    fromEmail: String(data?.from_email || "").trim(),
+  };
+
+  if (!config.clientId || !config.clientSecret || !config.refreshToken || !config.fromEmail) {
+    cachedConfig = null;
+    return null;
+  }
+
+  cachedConfig = config;
+  return config;
+}
+
+export async function isGmailConfigured() {
+  return (await loadGmailConfig()) !== null;
 }
 
 export async function getGoogleAccessToken() {
-  const clientId = Deno.env.get("GOOGLE_CLIENT_ID");
-  const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET");
-  const refreshToken = Deno.env.get("GOOGLE_REFRESH_TOKEN");
-
-  if (!clientId || !clientSecret || !refreshToken) {
+  const config = await loadGmailConfig();
+  if (!config) {
     throw new Error(
-      "Gmail is not configured yet. Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN, and GMAIL_FROM_EMAIL to Supabase secrets (see OFFLINE_INVOICES_SETUP.md)."
+      "Gmail is not configured yet. Add GOOGLE_* secrets in Supabase or configure internal_gmail_config (see OFFLINE_INVOICES_SETUP.md)."
     );
   }
 
@@ -31,9 +104,9 @@ export async function getGoogleAccessToken() {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
+      refresh_token: config.refreshToken,
       grant_type: "refresh_token",
     }),
   });
@@ -52,8 +125,8 @@ export async function sendGmailEmail(options: {
   html: string;
   text?: string;
 }) {
-  const from = Deno.env.get("GMAIL_FROM_EMAIL")?.trim();
-  if (!from) {
+  const config = await loadGmailConfig();
+  if (!config) {
     throw new Error("GMAIL_FROM_EMAIL is not configured");
   }
 
@@ -64,9 +137,9 @@ export async function sendGmailEmail(options: {
 
   const text = options.text || options.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   const raw = [
-    `From: RS Cleaning Collective <${from}>`,
+    `From: RS Cleaning Collective <${config.fromEmail}>`,
     `To: ${to}`,
-    `Subject: ${options.subject}`,
+    `Subject: ${encodeMimeHeaderValue(options.subject)}`,
     "MIME-Version: 1.0",
     'Content-Type: text/html; charset="UTF-8"',
     "",

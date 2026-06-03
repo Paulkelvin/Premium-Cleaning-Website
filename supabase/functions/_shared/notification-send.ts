@@ -34,6 +34,13 @@ export async function getWebhookSecret(client: ReturnType<typeof createClient>) 
   return String(data?.secret || "").trim();
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidRecipient(email: string) {
+  const normalized = String(email || "").trim().toLowerCase();
+  return Boolean(normalized && EMAIL_RE.test(normalized));
+}
+
 export async function fetchAdminEmails(client: ReturnType<typeof createClient>) {
   const { data, error } = await client.from("admin_users").select("email");
   if (error) {
@@ -42,21 +49,36 @@ export async function fetchAdminEmails(client: ReturnType<typeof createClient>) 
   }
   return (data || [])
     .map((row) => String(row.email || "").trim().toLowerCase())
-    .filter(Boolean);
+    .filter(isValidRecipient);
 }
 
 async function sendMany(recipients: string[], subject: string, html: string) {
-  const unique = [...new Set(recipients.map((entry) => entry.trim().toLowerCase()).filter(Boolean))];
+  const unique = [
+    ...new Set(recipients.map((entry) => entry.trim().toLowerCase()).filter(isValidRecipient)),
+  ];
   const results: string[] = [];
+  const failures: { to: string; error: string }[] = [];
+
   for (const to of unique) {
-    await sendGmailEmail({ to, subject, html });
-    results.push(to);
+    try {
+      await sendGmailEmail({ to, subject, html });
+      results.push(to);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.warn("notify: failed to send to", to, message);
+      failures.push({ to, error: message });
+    }
   }
+
+  if (results.length === 0 && unique.length > 0) {
+    throw new Error(failures[0]?.error || "All notification emails failed");
+  }
+
   return results;
 }
 
 export async function sendLeadNotifications(table: string, record: LeadRecord) {
-  if (!isGmailConfigured()) {
+  if (!(await isGmailConfigured())) {
     return { ok: true, skipped: true, reason: "gmail_not_configured" };
   }
 
@@ -70,20 +92,28 @@ export async function sendLeadNotifications(table: string, record: LeadRecord) {
   if (adminEmails.length) {
     sentTo.push(...await sendMany(adminEmails, adminEmail.subject, adminEmail.html));
   }
-  if (customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-    await sendGmailEmail({
-      to: customerEmail,
-      subject: customerEmailContent.subject,
-      html: customerEmailContent.html,
-    });
-    sentTo.push(customerEmail);
+  if (customerEmail && isValidRecipient(customerEmail)) {
+    try {
+      await sendGmailEmail({
+        to: customerEmail,
+        subject: customerEmailContent.subject,
+        html: customerEmailContent.html,
+      });
+      sentTo.push(customerEmail);
+    } catch (err) {
+      console.warn(
+        "notify: customer email failed",
+        customerEmail,
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   return { ok: true, sent_to: sentTo };
 }
 
 export async function sendPaymentNotifications(record: LeadRecord) {
-  if (!isGmailConfigured()) {
+  if (!(await isGmailConfigured())) {
     return { ok: true, skipped: true, reason: "gmail_not_configured" };
   }
 
@@ -97,13 +127,21 @@ export async function sendPaymentNotifications(record: LeadRecord) {
   if (adminEmails.length) {
     sentTo.push(...await sendMany(adminEmails, adminEmail.subject, adminEmail.html));
   }
-  if (customerEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
-    await sendGmailEmail({
-      to: customerEmail,
-      subject: customerEmailContent.subject,
-      html: customerEmailContent.html,
-    });
-    sentTo.push(customerEmail);
+  if (customerEmail && isValidRecipient(customerEmail)) {
+    try {
+      await sendGmailEmail({
+        to: customerEmail,
+        subject: customerEmailContent.subject,
+        html: customerEmailContent.html,
+      });
+      sentTo.push(customerEmail);
+    } catch (err) {
+      console.warn(
+        "notify: customer payment email failed",
+        customerEmail,
+        err instanceof Error ? err.message : err
+      );
+    }
   }
 
   return { ok: true, sent_to: sentTo };

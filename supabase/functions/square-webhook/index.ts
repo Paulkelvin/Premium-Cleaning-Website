@@ -22,9 +22,10 @@ async function hmacSha256Base64(key: string, message: string) {
 
 function parseBookingId(note?: string | null) {
   if (!note) return null;
-  const tagged = String(note).match(/booking:([0-9a-f-]{36})/i);
+  const text = String(note);
+  const tagged = text.match(/(?:booking|open):([0-9a-f-]{36})/i);
   if (tagged?.[1]) return tagged[1];
-  const bare = String(note).match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
+  const bare = text.match(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i);
   return bare?.[1] ?? null;
 }
 

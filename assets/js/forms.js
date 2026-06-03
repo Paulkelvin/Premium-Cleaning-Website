@@ -124,8 +124,22 @@ function formPayload(form) {
 function showState(form, type, message) {
   const state = form.querySelector("[data-form-state]");
   if (!state) return;
-  state.className = `form-state ${type}`;
-  state.textContent = message;
+  const baseClass = state.classList.contains("contact-form-feedback")
+    ? "form-state contact-form-feedback"
+    : "form-state";
+  state.className = type ? `${baseClass} ${type}` : baseClass;
+  state.textContent = message || "";
+  if (message) {
+    state.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+}
+
+function showContactFeedback(form, type, message) {
+  showState(form, type, message);
+  if (form.getAttribute("data-table") !== "contact_submissions") return;
+  if (typeof window.showAppToast === "function" && (type === "success" || type === "error")) {
+    window.showAppToast(message, type);
+  }
 }
 
 const QUOTE_SESSION_KEY = "rs_cleaning_quote_session";
@@ -171,7 +185,7 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
     const submit = form.querySelector("button[type='submit']");
     const honeypot = form.querySelector("[name='company_website']");
     if (honeypot?.value) {
-      showState(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
+      showContactFeedback(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
       return;
     }
 
@@ -187,7 +201,7 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
       if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(field);
       if (typeof window.showAppToast === "function") window.showAppToast(text, "error");
       if (typeof window.scrollFieldIntoView === "function") window.scrollFieldIntoView(field);
-      showState(form, "error", text);
+      showContactFeedback(form, "error", text);
       field?.focus?.({ preventScroll: true });
       return false;
     };
@@ -204,17 +218,21 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
     if (!consent?.checked) return fail(consent, "Please agree to the privacy policy before sending.");
 
     submit.disabled = true;
-    showState(form, "loading", "Sending...");
+    showContactFeedback(form, "loading", "Sending your message…");
 
     try {
       const payload = formPayload(form);
       payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
       await supabaseInsert(table, payload);
       form.reset();
-      showState(form, "success", "Thanks. Your request was received and our team will follow up shortly.");
+      showContactFeedback(
+        form,
+        "success",
+        "Message sent! We'll follow up by email or phone, usually within one business day."
+      );
     } catch (error) {
       console.error(error);
-      showState(form, "error", mapSubmissionError(error));
+      showContactFeedback(form, "error", mapSubmissionError(error));
     } finally {
       submit.disabled = false;
     }

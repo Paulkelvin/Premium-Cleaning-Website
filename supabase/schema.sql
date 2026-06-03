@@ -85,7 +85,7 @@ create table if not exists admin_users (
 );
 
 insert into admin_users (email, role) values
-  ('rs.cleaning@collective.com', 'superuser'),
+  ('ryann@rslegalcollective.com', 'superuser'),
   ('paulopackager@gmail.com', 'superuser')
 on conflict (email) do update set role = excluded.role;
 

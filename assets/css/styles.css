@@ -11704,6 +11704,39 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   gap: 10px;
 }
 
+.contact-form-feedback {
+  margin: 12px 0 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  min-height: 0;
+}
+
+.contact-form-feedback:empty {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contact-form-feedback.success {
+  color: #0f5132;
+  background: rgba(52, 211, 153, 0.14);
+  border: 1px solid rgba(52, 211, 153, 0.45);
+}
+
+.contact-form-feedback.error {
+  color: #9d174d;
+  background: rgba(244, 114, 182, 0.12);
+  border: 1px solid rgba(244, 114, 182, 0.35);
+}
+
+.contact-form-feedback.loading {
+  color: var(--blue);
+  background: rgba(15, 79, 207, 0.06);
+  border: 1px solid rgba(15, 79, 207, 0.12);
+}
+
 .contact-form-actions {
   display: flex;
   flex-direction: column;

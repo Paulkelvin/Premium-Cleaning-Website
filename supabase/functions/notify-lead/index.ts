@@ -44,8 +44,14 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid payload" }, 400);
     }
 
-    if (table === "bookings" && String(record.source || "website") === "admin") {
-      return json({ ok: true, skipped: true, reason: "admin_invoice" });
+    if (table === "bookings") {
+      const source = String(record.source || "website");
+      if (source === "admin") {
+        return json({ ok: true, skipped: true, reason: "admin_invoice" });
+      }
+      if (source === "open_payment") {
+        return json({ ok: true, skipped: true, reason: "open_payment" });
+      }
     }
 
     const result = await sendLeadNotifications(table, record as Record<string, unknown>);

@@ -13,7 +13,8 @@ if (-not $env:SUPABASE_ACCESS_TOKEN) {
 $functions = @(
   "notify-lead",
   "square-webhook",
-  "confirm-square-payment"
+  "confirm-square-payment",
+  "create-open-payment"
 )
 
 foreach ($name in $functions) {

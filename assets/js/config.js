@@ -18,7 +18,7 @@ window.CLEANCO_CONFIG = {
   // Legacy anon JWT for PostgREST + Edge Functions when JWT verification is enabled.
   supabaseFunctionKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhiYWNvZ3loZnRuZ3dveGVudHR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MzU2OTgsImV4cCI6MjA5NTExMTY5OH0.K6SfTHVK01gsf0cgqqST3t2ThJP8T8PBXxW1NjQgyOk",
   // Must match Supabase Auth users + supabase/schema.sql RLS policies (exact emails).
-  adminEmails: ["rs.cleaning@collective.com", "paulopackager@gmail.com"],
+  adminEmails: ["ryann@rslegalcollective.com", "paulopackager@gmail.com"],
   // phone: fallback before Sanity loads — also edit Site Settings → Phone in Sanity Studio for live updates site-wide
   sanityProjectId: "hjrx2q9w",
   sanityDataset: "production",
