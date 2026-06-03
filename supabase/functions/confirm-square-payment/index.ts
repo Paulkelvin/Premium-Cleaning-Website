@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { sendPaymentNotifications } from "../_shared/notification-send.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -233,7 +234,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await supabase
       .from("bookings")
       .select(
-        "id, estimated_total, payment_method, payment_status, square_order_id, service_type, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
+        "id, full_name, email, phone, service_type, preferred_date, address, estimated_total, payment_method, payment_status, square_order_id, bedrooms, bathrooms, square_feet, add_ons, frequency, service_area_name, travel_fee"
       )
       .eq("id", bookingId)
       .single();
@@ -285,6 +286,15 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       throw new Error(updateError.message);
+    }
+
+    try {
+      await sendPaymentNotifications(booking);
+    } catch (notifyError) {
+      console.error(
+        "confirm-square-payment: payment notification failed",
+        notifyError instanceof Error ? notifyError.message : notifyError
+      );
     }
 
     return new Response(

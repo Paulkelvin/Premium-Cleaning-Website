@@ -30,7 +30,9 @@ let dashboardCache = {
 let currentAdminProfile = { email: "", role: "admin" };
 let dashboardRefreshInFlight = null;
 let dashboardLoadingCount = 0;
+let adminLeadPollTimer = null;
 const DASHBOARD_FETCH_TIMEOUT_MS = 25000;
+const ADMIN_LEAD_POLL_MS = 45000;
 
 function getAdminHeaders() {
   return {
@@ -1399,6 +1401,50 @@ function initExportDateDefaults() {
   toInput.value = toIso(today);
 }
 
+function snapshotDashboardIds() {
+  const snap = {};
+  TABLES.forEach((table) => {
+    snap[table] = new Set((dashboardCache[table] || []).map((row) => row.id));
+  });
+  return snap;
+}
+
+function announceNewDashboardRecords(beforeSnap) {
+  if (!beforeSnap) return;
+
+  TABLES.forEach((table) => {
+    const previous = beforeSnap[table] || new Set();
+    (dashboardCache[table] || []).forEach((row) => {
+      if (previous.has(row.id)) return;
+      const label = TABLE_LABELS[table] || "Record";
+      const name = row.full_name || row.email || "Customer";
+      showAdminToast(`New ${label.toLowerCase()}: ${name}`, "success");
+    });
+  });
+}
+
+function stopAdminLeadPolling() {
+  if (adminLeadPollTimer) {
+    window.clearInterval(adminLeadPollTimer);
+    adminLeadPollTimer = null;
+  }
+}
+
+function startAdminLeadPolling() {
+  if (!document.querySelector("[data-dashboard]") || !adminHasSupabase) return;
+  stopAdminLeadPolling();
+  adminLeadPollTimer = window.setInterval(async () => {
+    if (document.hidden || dashboardRefreshInFlight) return;
+    const beforeSnap = snapshotDashboardIds();
+    try {
+      await initDashboard();
+      announceNewDashboardRecords(beforeSnap);
+    } catch (error) {
+      console.warn("Admin lead poll failed.", error);
+    }
+  }, ADMIN_LEAD_POLL_MS);
+}
+
 async function initDashboard() {
   if (!document.querySelector("[data-dashboard]")) return;
   if (dashboardRefreshInFlight) return dashboardRefreshInFlight;
@@ -1709,7 +1755,9 @@ window.showAdminToast = showAdminToast;
 window.initDashboard = initDashboard;
 window.deleteAdminRecord = deleteRecord;
 
-initDashboard();
+initDashboard().finally(() => {
+  startAdminLeadPolling();
+});
 document.addEventListener("DOMContentLoaded", () => {
   initAdminNavigation();
   initKpiNavigation();

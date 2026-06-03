@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.create-open-payment]
 verify_jwt = false
+
+[functions.notify-lead]
+verify_jwt = false

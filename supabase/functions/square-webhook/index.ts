@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { sendPaymentNotifications } from "../_shared/notification-send.ts";
 
 const encoder = new TextEncoder();
 
@@ -139,6 +140,14 @@ Deno.serve(async (req) => {
     });
   }
 
+  const { data: existingBooking } = await supabase
+    .from("bookings")
+    .select(
+      "id, full_name, email, phone, service_type, preferred_date, address, estimated_total, payment_status"
+    )
+    .eq("id", bookingId)
+    .maybeSingle();
+
   const paymentStatus = mapPaymentStatus(String(payment.status || ""));
   const paymentId = payment.id ? String(payment.id) : null;
 
@@ -161,6 +170,21 @@ Deno.serve(async (req) => {
   }
 
   console.log("square-webhook: updated booking", bookingId, paymentStatus);
+
+  if (
+    paymentStatus === "paid" &&
+    existingBooking &&
+    existingBooking.payment_status !== "paid"
+  ) {
+    try {
+      await sendPaymentNotifications(existingBooking);
+    } catch (notifyError) {
+      console.error(
+        "square-webhook: payment notification failed",
+        notifyError instanceof Error ? notifyError.message : notifyError
+      );
+    }
+  }
 
   return new Response(JSON.stringify({ ok: true, booking_id: bookingId, payment_status: paymentStatus }), {
     headers: { "Content-Type": "application/json" },
