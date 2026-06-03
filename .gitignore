@@ -11,3 +11,6 @@ scripts/.deploy-*.json
 scripts/.deploy-chunk-*.txt
 scripts/.deploy-result-*.txt
 scripts/.mcp-*.json
+scripts/.secrets*
+*.local.ps1
+.env.local
