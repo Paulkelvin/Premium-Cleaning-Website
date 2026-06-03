@@ -1087,8 +1087,10 @@ body[data-sanity-page="gallery"] [data-gallery-list] {
 
 .about-split .about-section-logo {
   display: block;
-  width: min(100%, 480px);
-  max-height: 320px;
+  width: auto;
+  height: clamp(300px, 42vw, 440px);
+  max-width: min(100%, 440px);
+  aspect-ratio: 1 / 1;
   margin: 0 auto;
   object-fit: contain;
   background: transparent;
