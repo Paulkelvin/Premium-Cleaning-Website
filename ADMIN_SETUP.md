@@ -1,5 +1,13 @@
 # Admin & handoff — plain steps for Paulo
 
+## If a password was ever committed to GitHub
+
+1. **Rotate immediately** in [Supabase → Authentication → Users](https://supabase.com/dashboard/project/hbacogyhftngwoxenttv/auth/users) (edit user → set a new password).
+2. Never store passwords in the repo. Use `scripts/set-ryann-admin-auth.ps1` with env vars only (`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ADMIN_PASSWORD`, `SUPABASE_ADMIN_USER_ID`).
+3. Mark the GitGuardian alert as resolved after rotation.
+
+---
+
 ## Admin email (done in code)
 
 Admin access is managed in the **`admin_users`** table in Supabase (see migration `supabase/migrations/20250530_admin_users_delete.sql`).
@@ -169,10 +177,10 @@ Re-run after you change website copy or add new before/after photos.
 
 | Give them | Notes |
 |-----------|--------|
-| Website URL | e.g. `https://REDACTED.com` |
+| Website URL | e.g. `https://rscleaningcollective.com` |
 | Sanity Studio | Invite their email in sanity.io → project members (Editor) |
 | Admin dashboard | `https://yoursite.com/admin-login.html` — only if you create a Supabase user for them |
-| Contact email | Already `hello@REDACTED.com` in Site Settings |
+| Contact email | Already `hello@rscleaningcollective.com` in Site Settings |
 
 You keep **`paulopackager@gmail.com`** as admin until you switch the client to their own Supabase user + update `adminEmail` in config and RLS SQL.
 

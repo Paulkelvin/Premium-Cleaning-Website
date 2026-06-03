@@ -12,7 +12,7 @@ const { ITEM_OVERRIDES } = require("./gallery-item-overrides.cjs");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
-const SITE_BASE = process.env.SITE_BASE_URL || "https://REDACTED.com";
+const SITE_BASE = process.env.SITE_BASE_URL || "https://rscleaningcollective.com";
 
 const SET_META = {
   1: { category: "kitchens", badge: "Standard Clean", project: "Kitchen reset", description: "Surfaces refreshed · Details restored" },

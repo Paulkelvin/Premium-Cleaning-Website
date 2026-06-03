@@ -6,7 +6,7 @@ const {getCliClient} = require('@sanity/cli')
 const path = require('path')
 const fs = require('fs')
 
-const SITE_BASE = process.env.SITE_BASE_URL || 'https://REDACTED.com'
+const SITE_BASE = process.env.SITE_BASE_URL || 'https://rscleaningcollective.com'
 const IMAGES_DIR = path.join(__dirname, '..', 'assets', 'images')
 const client = getCliClient({apiVersion: '2025-05-23'})
 

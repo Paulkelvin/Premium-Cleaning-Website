@@ -18,7 +18,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ID = 'hjrx2q9w'
 const DATASET = 'production'
 const API_VERSION = '2025-05-23'
-const SITE_BASE = process.env.SITE_BASE_URL || 'https://REDACTED.com'
+const SITE_BASE = process.env.SITE_BASE_URL || 'https://rscleaningcollective.com'
 const IMAGES_DIR = path.join(__dirname, '..', 'assets', 'images')
 
 const token = process.env.SANITY_API_TOKEN || process.env.SANITY_AUTH_TOKEN

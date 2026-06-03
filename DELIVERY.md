@@ -55,7 +55,7 @@ Confirm in Cloudflare: build command = `npm run build`, output directory = `dist
 
 | Field | Status | Recommendation |
 |--------|--------|----------------|
-| **hello@REDACTED.com** | Live ✓ | Keep as primary contact + form replies |
+| **hello@rscleaningcollective.com** | Live ✓ | Keep as primary contact + form replies |
 | **Phone `(555) 014-7820`** | Placeholder | Replace with client’s **real local number** in Sanity **Site Settings → Phone** (updates all `tel:` links site-wide). Until then, remove or hide “Call us” if they have no phone yet. |
 
 **Best practice:** one real phone, one real inbox, both edited in **Sanity Site Settings** (not hard-coded in HTML).
