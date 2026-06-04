@@ -46,6 +46,9 @@
     "4c": "After 4c .jpeg",
   };
 
+  /** Before/after files uploaded with labels reversed (swap URLs only). */
+  const SWAP_BEFORE_AFTER_IDS = new Set(["5c"]);
+
   const SKIP_IDS = new Set(["4b"]);
 
   /** Per photo (id = set + letter in filenames). Titles are descriptive — no View A/B labels. */
@@ -230,9 +233,13 @@
     return items.map((item) => {
       const key = galleryItemKey(item);
       const patch = ITEM_OVERRIDES[key];
-      if (!patch) return item;
-      const next = { ...item, ...patch };
-      if (patch.badge) next.badge = patch.badge;
+      const next = patch ? { ...item, ...patch } : { ...item };
+      if (patch?.badge) next.badge = patch.badge;
+      if (SWAP_BEFORE_AFTER_IDS.has(key)) {
+        const before = next.beforeImageUrl;
+        next.beforeImageUrl = next.afterImageUrl;
+        next.afterImageUrl = before;
+      }
       return next;
     });
   }
