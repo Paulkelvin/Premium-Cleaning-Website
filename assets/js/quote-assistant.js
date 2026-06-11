@@ -527,6 +527,7 @@ function hasPartialSpaceMetrics(form) {
 }
 
 function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
+  const table = form.getAttribute("data-table") || "quote_requests";
   const data = new FormData(form);
   const table = form.getAttribute("data-table");
   const session = table === "bookings" && typeof window.loadQuoteSession === "function"
@@ -619,10 +620,13 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   const bookingAddress = table === "bookings"
     ? String(data.get("address") || "").trim()
     : "";
-  const { areaName, travelFee } = resolveBookingServiceArea(session, {
-    areaName: getServiceAreaMeta()?.name || "",
-    travelFee: getServiceAreaMeta()?.travelFee
-  }, bookingAddress);
+  let travelFee = 0;
+  let areaName = "";
+  if (table === "bookings" && bookingAddress) {
+    const resolved = resolveBookingServiceArea(session, {}, bookingAddress);
+    areaName = resolved.areaName;
+    travelFee = resolved.travelFee;
+  }
   subtotal += travelFee;
 
   const preFloorTotal = Math.round(subtotal * 100) / 100;
@@ -892,7 +896,6 @@ function initQuotePrefill() {
   const area = resolveBookingServiceArea(session);
   if (area.areaName && !String(session.service_area_name || "").trim()) {
     session.service_area_name = area.areaName;
-    session.travel_fee = area.travelFee;
     if (typeof window.saveQuoteSession === "function") {
       window.saveQuoteSession(session);
     }
@@ -1224,6 +1227,30 @@ function initQuoteAssistant(formContainer = document) {
   let isStepTransitioning = false;
   let currentStepIndex = 0;
   let quoteDraft = null;
+  let persistedQuoteId = null;
+
+  if (!isBooking && typeof window.loadQuoteSession === "function") {
+    const bootSession = window.loadQuoteSession();
+    if (bootSession?.quote_id) persistedQuoteId = bootSession.quote_id;
+  }
+
+  async function persistQuoteRequest() {
+    if (typeof window.supabaseInsert !== "function") {
+      throw new Error("Form service unavailable. Please refresh and try again.");
+    }
+    const { payload, pricing } = buildSubmissionPayload(form, table);
+    payload.estimated_total = pricing.total;
+    payload.travel_fee = 0;
+
+    if (persistedQuoteId && typeof window.supabaseUpdate === "function") {
+      await window.supabaseUpdate(table, persistedQuoteId, payload);
+      return { id: persistedQuoteId, pricing, payload };
+    }
+
+    const result = await window.supabaseInsert(table, payload);
+    persistedQuoteId = result.id;
+    return { id: result.id, pricing, payload };
+  }
 
   const quoteContext = !isBooking ? getQuoteContext() : null;
   const quoteMessages = [
@@ -1341,6 +1368,10 @@ function initQuoteAssistant(formContainer = document) {
     if (checkoutLoading) {
       checkoutLoading.hidden = false;
       if (typeof lucide !== "undefined") lucide.createIcons({ root: checkoutLoading });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: "auto" });
+        checkoutLoading.scrollIntoView({ behavior: "auto", block: "center" });
+      });
     }
   }
 
@@ -1460,9 +1491,21 @@ function initQuoteAssistant(formContainer = document) {
       if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
     }
     try {
-      const { pricing } = buildSubmissionPayload(form, table);
-      // Estimate stays local until final submit. Database insert happens only after consent + submit.
-      quoteDraft = { captured: true, pricing };
+      const persisted = await persistQuoteRequest();
+      quoteDraft = {
+        captured: true,
+        pricing: persisted.pricing,
+        quote_id: persisted.id
+      };
+      if (typeof window.saveQuoteSession === "function") {
+        window.saveQuoteSession({
+          ...persisted.payload,
+          quote_id: persisted.id,
+          estimated_total: persisted.pricing.total,
+          travel_fee: 0,
+          size_input_mode: getSizeInputMode(form)
+        });
+      }
     } catch (err) {
       console.error("Estimate capture failed:", err);
       showStudioToast(root, mapSubmissionError(err), "error");
@@ -2031,6 +2074,9 @@ function initQuoteAssistant(formContainer = document) {
       if (shouldShowTotal && pricing.travelFee > 0) {
         travelNote.hidden = false;
         travelNote.textContent = `Includes $${pricing.travelFee.toFixed(0)} travel fee${pricing.areaName ? ` for ${pricing.areaName}` : ""}.`;
+      } else if (shouldShowTotal && table === "quote_requests") {
+        travelNote.hidden = false;
+        travelNote.textContent = "Excludes travel fee — confirmed at booking when you enter your address.";
       } else {
         travelNote.hidden = true;
         travelNote.textContent = "";
@@ -2534,10 +2580,17 @@ function initQuoteAssistant(formContainer = document) {
         if (session?.quote_id) payload.quote_id = session.quote_id;
         result = await window.supabaseInsert(table, payload);
       } else if (table === "quote_requests") {
-        if (typeof window.supabaseInsert !== "function") {
+        if (persistedQuoteId && typeof window.supabaseUpdate === "function") {
+          payload.travel_fee = 0;
+          payload.estimated_total = pricing.total;
+          await window.supabaseUpdate(table, persistedQuoteId, payload);
+          result = { id: persistedQuoteId };
+        } else if (typeof window.supabaseInsert === "function") {
+          result = await window.supabaseInsert(table, payload);
+          persistedQuoteId = result.id;
+        } else {
           throw new Error("Form service unavailable. Please refresh and try again.");
         }
-        result = await window.supabaseInsert(table, payload);
       } else {
         if (typeof window.supabaseInsert !== "function") {
           throw new Error("Form service unavailable. Please refresh and try again.");
@@ -2550,8 +2603,8 @@ function initQuoteAssistant(formContainer = document) {
           ...payload,
           quote_id: result.id,
           estimated_total: pricing.total,
-          service_area_name: resolveBookingServiceArea(null, pricing).areaName,
-          travel_fee: resolveBookingServiceArea(null, pricing).travelFee,
+          service_area_name: "",
+          travel_fee: 0,
           size_input_mode: getSizeInputMode(form)
         };
         if (typeof window.saveQuoteSession === "function") {

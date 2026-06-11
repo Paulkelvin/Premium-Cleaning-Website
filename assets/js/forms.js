@@ -108,6 +108,39 @@ async function supabaseInsert(table, payload) {
   return { ok: true, id: rowId };
 }
 
+async function supabaseUpdate(table, rowId, payload) {
+  const body = sanitizePayload(table, payload);
+  delete body.id;
+
+  if (table === "bookings") {
+    finalizeBookingPayload(body);
+    if (body.consent != null) body.consent = Boolean(body.consent);
+  }
+
+  if (!hasSupabase) {
+    const key = `cleanco_${table}`;
+    const items = JSON.parse(localStorage.getItem(key) || "[]");
+    const idx = items.findIndex((row) => row.id === rowId);
+    if (idx >= 0) {
+      items[idx] = { ...items[idx], ...body };
+      localStorage.setItem(key, JSON.stringify(items));
+    }
+    return { ok: true, demo: true, id: rowId };
+  }
+
+  const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}?id=eq.${encodeURIComponent(rowId)}`, {
+    method: "PATCH",
+    headers: getSupabaseRestHeaders(),
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Update failed");
+  }
+  return { ok: true, id: rowId };
+}
+
 function formPayload(form) {
   const data = new FormData(form);
   const payload = Object.fromEntries(data.entries());
@@ -172,6 +205,7 @@ function clearQuoteSession() {
 
 window.mapSubmissionError = mapSubmissionError;
 window.supabaseInsert = supabaseInsert;
+window.supabaseUpdate = supabaseUpdate;
 window.buildFormPayload = formPayload;
 window.sanitizePayloadForTable = sanitizePayload;
 window.saveQuoteSession = saveQuoteSession;

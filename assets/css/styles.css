@@ -726,27 +726,38 @@ h3 {
   margin-top: 12px;
 }
 
-.hero-promo {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin-top: 16px;
-  padding: 12px 16px;
-  background: rgba(212, 175, 55, 0.12);
-  border: 1px solid rgba(212, 175, 55, 0.35);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  max-width: 520px;
+.hero-promo,
+.site-promo {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 79, 207, 0.08);
+  border: 1px solid rgba(15, 79, 207, 0.18);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  max-width: 100%;
   color: var(--ink);
 }
 
-.hero-promo i {
-  flex-shrink: 0;
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  color: var(--gold);
+.site-promo-badge {
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.site-promo--quote {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 0.82rem;
 }
 
 .hero-strip {
@@ -9451,11 +9462,17 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   max-width: 34rem;
 }
 
+.hero.hero--backdrop:not(.hero--overlay) .site-promo--hero,
 .hero.hero--backdrop:not(.hero--overlay) .hero-promo {
   color: rgba(255, 255, 255, 0.96);
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(212, 175, 55, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+.hero.hero--backdrop:not(.hero--overlay) .site-promo-badge {
+  color: var(--blue);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .hero--backdrop .hero-actions {
