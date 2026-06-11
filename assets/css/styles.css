@@ -2564,12 +2564,15 @@ textarea {
 body.admin-shell {
   padding-top: 0;
   background: #eef2f8;
-  overflow-x: hidden;
+  overflow: hidden;
   max-width: 100%;
+  height: 100vh;
+  height: 100dvh;
 }
 
 html:has(body.admin-shell) {
-  overflow-x: hidden;
+  overflow: hidden;
+  height: 100%;
 }
 
 body.admin-login-page {
@@ -2580,10 +2583,13 @@ body.admin-login-page {
 
 .admin-layout {
   display: flex;
+  width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .admin-sidebar {
@@ -2593,11 +2599,12 @@ body.admin-login-page {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  position: sticky;
+  position: relative;
   top: 0;
   height: 100vh;
   height: 100dvh;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
 }
 
 .admin-sidebar-header {
@@ -2651,6 +2658,9 @@ body.admin-login-page {
   gap: 4px;
   padding: 14px 10px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .admin-nav-item {
@@ -2746,11 +2756,14 @@ body.admin-login-page {
   flex: 1;
   min-width: 0;
   max-width: 100%;
+  height: 100vh;
+  height: 100dvh;
   padding: 20px 24px 28px;
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
 
 [data-admin-table] {
@@ -3889,8 +3902,20 @@ body.admin-login-page {
 }
 
 @media (max-width: 900px) {
+  body.admin-shell,
+  html:has(body.admin-shell) {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   .admin-layout {
     flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .admin-sidebar {
@@ -3970,6 +3995,8 @@ body.admin-login-page {
   }
 
   .admin-main {
+    height: auto;
+    overflow: visible;
     padding: 14px 12px 20px;
   }
 
