@@ -3,11 +3,18 @@ function getPricingConfig() {
   if (cfg?.rates && cfg?.addOns) return cfg;
   return {
     minimumJob: 125,
+    minimumByService: {
+      "Standard cleaning": 150,
+      "Deep cleaning": 225,
+      "Move-in/Move-out": 275,
+      "Office cleaning": 125,
+      "Short-term rental & Airbnb turnover": 125
+    },
     minSqft: 500,
     rates: {
-      "Standard cleaning": 0.17,
-      "Deep cleaning": 0.28,
-      "Move-in/Move-out": 0.32,
+      "Standard cleaning": 0.14,
+      "Deep cleaning": 0.22,
+      "Move-in/Move-out": 0.25,
       "Office cleaning": 0.20,
       "Short-term rental & Airbnb turnover": 0.18
     },
@@ -33,6 +40,15 @@ function getPricingConfig() {
 function minSqftForQuote() {
   const min = Number(getPricingConfig().minSqft);
   return Number.isFinite(min) && min > 0 ? min : 500;
+}
+
+function resolveMinimumForService(serviceType, pricingConfig) {
+  const cfg = pricingConfig || getPricingConfig();
+  const key = String(serviceType || "").trim();
+  if (key && cfg.minimumByService?.[key] != null) {
+    return Number(cfg.minimumByService[key]);
+  }
+  return Number(cfg.minimumJob) || 125;
 }
 
 function enforceMinimumJobTotal(amount, minimumJob) {
@@ -546,7 +562,7 @@ function calculateQuoteTotal(form, { allowEstimate = false } = {}) {
   }
 
   const pricingConfig = getPricingConfig();
-  const minimumJob = pricingConfig.minimumJob ?? 125;
+  const minimumJob = resolveMinimumForService(serviceType, pricingConfig);
   let basePrice = 0;
   let pricingMethod = "sqft";
   let airbnbTierLabel = "";

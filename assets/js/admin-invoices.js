@@ -30,6 +30,14 @@
       .filter(Boolean);
   }
 
+  function resolveMinimumForService(serviceType, pricing) {
+    const key = String(serviceType || "").trim();
+    if (key && pricing.minimumByService?.[key] != null) {
+      return Number(pricing.minimumByService[key]);
+    }
+    return Number(pricing.minimumJob) || 125;
+  }
+
   function calculateSuggestedTotal(data) {
     const pricing = getPricing();
     const serviceType = String(data.service_type || "").trim();
@@ -43,7 +51,7 @@
         : 0;
     const sqft = parsedSqft > 0 ? parsedSqft : estimatedSqft;
     const freq = String(data.frequency || "One-time").trim() || "One-time";
-    const minimum = Number(pricing.minimumJob) || 125;
+    const minimum = resolveMinimumForService(serviceType, pricing);
 
     let base = 0;
     const isAirbnb =

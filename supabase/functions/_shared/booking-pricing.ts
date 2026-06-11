@@ -7,10 +7,13 @@ export type BookingPricingInput = {
   square_feet?: string | null;
   add_ons?: string | null;
   frequency?: string | null;
+  service_area_name?: string | null;
+  travel_fee?: string | null;
 };
 
 type PricingConfig = {
   minimumJob: number;
+  minimumByService?: Record<string, number>;
   rates: Record<string, number>;
   addOns: Record<string, number>;
   frequencyDiscounts: Record<string, number>;
@@ -29,6 +32,18 @@ const AIRBNB_TIERS = [
   { minBeds: 3, maxBeds: 3, amount: 288 },
   { minBeds: 4, maxBeds: 99, amount: 400 },
 ];
+
+const AREA_FEE_RULES: Record<string, number> = {
+  "charles county": 0,
+  "st. mary's county": 0,
+  "st mary's county": 0,
+  "calvert county": 0,
+  "prince george's county": 0,
+  "prince georges county": 0,
+  "southern anne arundel county": 20,
+  "washington, dc": 20,
+  "washington dc": 20,
+};
 
 function isAirbnbService(serviceType: string) {
   return serviceType === AIRBNB_SERVICE;
@@ -69,7 +84,7 @@ const ADDON_ALIASES: Record<string, string> = {
   "bedding refresh (strip and remake beds)": "Bedding refresh (strip and remake beds)",
 };
 
-function getPricingConfig(): PricingConfig {
+export function getPricingConfig(): PricingConfig {
   const raw = Deno.env.get("BOOKING_PRICING_JSON");
   if (raw) {
     try {
@@ -82,10 +97,17 @@ function getPricingConfig(): PricingConfig {
 
   return {
     minimumJob: 125,
+    minimumByService: {
+      "Standard cleaning": 150,
+      "Deep cleaning": 225,
+      "Move-in/Move-out": 275,
+      "Office cleaning": 125,
+      [AIRBNB_SERVICE]: 125,
+    },
     rates: {
-      "Standard cleaning": 0.17,
-      "Deep cleaning": 0.28,
-      "Move-in/Move-out": 0.32,
+      "Standard cleaning": 0.14,
+      "Deep cleaning": 0.22,
+      "Move-in/Move-out": 0.25,
       "Office cleaning": 0.20,
       [AIRBNB_SERVICE]: 0.18,
     },
@@ -106,6 +128,17 @@ function getPricingConfig(): PricingConfig {
       "One-time": 0.0,
     },
   };
+}
+
+export function resolveMinimumForService(
+  serviceType: string,
+  pricing: PricingConfig = getPricingConfig()
+): number {
+  const key = String(serviceType || "").trim();
+  if (key && pricing.minimumByService?.[key] != null) {
+    return Number(pricing.minimumByService[key]);
+  }
+  return Number(pricing.minimumJob) || 125;
 }
 
 function normalizeServiceType(value?: string | null) {
@@ -130,6 +163,20 @@ function parseSqft(raw?: string | null, bedrooms?: string | null, bathrooms?: st
   return Math.round(beds * 450 + baths * 150 + 350);
 }
 
+export function resolveTravelFee(areaName?: string | null, rawTravelFee?: string | null) {
+  const normalizedArea = String(areaName || "").trim().toLowerCase();
+  if (normalizedArea && AREA_FEE_RULES[normalizedArea] != null) {
+    return AREA_FEE_RULES[normalizedArea];
+  }
+  if (rawTravelFee != null && String(rawTravelFee).trim() !== "") {
+    return Math.max(0, Number(rawTravelFee) || 0);
+  }
+  if (normalizedArea) {
+    return 0;
+  }
+  return 35;
+}
+
 export function computeBookingTotal(booking: BookingPricingInput) {
   const pricing = getPricingConfig();
   const serviceType = normalizeServiceType(booking.service_type);
@@ -137,6 +184,7 @@ export function computeBookingTotal(booking: BookingPricingInput) {
   const freq = String(booking.frequency || "One-time").trim() || "One-time";
   const beds = parseInt(String(booking.bedrooms ?? ""), 10);
   const baths = parseInt(String(booking.bathrooms ?? ""), 10);
+  const minimumJob = resolveMinimumForService(serviceType, pricing);
 
   if (!serviceType) {
     return { total: 0, sqft, serviceType, freq };
@@ -162,8 +210,8 @@ export function computeBookingTotal(booking: BookingPricingInput) {
     basePrice = sqft * pricing.rates[serviceType];
   }
 
-  if (basePrice > 0 && basePrice < pricing.minimumJob) {
-    basePrice = pricing.minimumJob;
+  if (basePrice > 0 && basePrice < minimumJob) {
+    basePrice = minimumJob;
   }
 
   let addonsPrice = 0;
@@ -181,9 +229,11 @@ export function computeBookingTotal(booking: BookingPricingInput) {
     : pricing.frequencyDiscounts[freq] || 0;
   subtotal -= subtotal * discount;
 
+  const travelFee = resolveTravelFee(booking.service_area_name, booking.travel_fee);
+  subtotal += travelFee;
+
   const rounded = Math.round(subtotal * 100) / 100;
-  const total =
-    rounded > 0 && rounded < pricing.minimumJob ? pricing.minimumJob : rounded;
+  const total = rounded > 0 && rounded < minimumJob ? minimumJob : rounded;
 
   return {
     total,

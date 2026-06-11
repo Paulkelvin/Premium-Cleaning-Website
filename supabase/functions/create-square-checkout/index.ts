@@ -1,105 +1,16 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import {
+  computeBookingTotal,
+  getPricingConfig,
+  resolveMinimumForService,
+  resolveTravelFee,
+} from "../_shared/booking-pricing.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-/** Keep pricing in sync with assets/js/config.js */
-function computeBookingTotal(booking: Record<string, string | null | undefined>) {
-  const pricing = {
-    minimumJob: 125,
-    rates: {
-      "Standard cleaning": 0.17,
-      "Deep cleaning": 0.28,
-      "Move-in/Move-out": 0.32,
-      "Office cleaning": 0.20,
-    },
-    addOns: {
-      "Wash and fold": 45,
-      "Fold laundry only": 25,
-      "Inside oven": 40,
-      "Inside fridge": 40,
-      "Cabinet interiors": 50,
-      "Interior Windows Accessible (1-10)": 50,
-      "Interior Windows Accessible (11-20)": 100,
-      "Bedding refresh (strip and remake beds)": 15,
-    },
-    frequencyDiscounts: {
-      Weekly: 0.20,
-      "Bi-weekly": 0.15,
-      Monthly: 0.10,
-      "One-time": 0.0,
-    },
-  };
-
-  const serviceType = String(booking.service_type || "").trim();
-  const parsedSqft = parseInt(String(booking.square_feet || "").replace(/,/g, ""), 10);
-  const beds = parseInt(String(booking.bedrooms || ""), 10) || 2;
-  const baths = parseInt(String(booking.bathrooms || ""), 10) || 1;
-  const sqft = parsedSqft > 0 ? parsedSqft : Math.round(beds * 450 + baths * 150 + 350);
-  const freq = String(booking.frequency || "One-time").trim() || "One-time";
-
-  if (!serviceType || !pricing.rates[serviceType as keyof typeof pricing.rates] || sqft <= 0) {
-    return { total: 0 };
-  }
-
-  let basePrice = sqft * pricing.rates[serviceType as keyof typeof pricing.rates];
-  if (basePrice > 0 && basePrice < pricing.minimumJob) basePrice = pricing.minimumJob;
-
-  let addonsPrice = 0;
-  String(booking.add_ons || "")
-    .split(",")
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .forEach((addon) => {
-      if (pricing.addOns[addon as keyof typeof pricing.addOns]) {
-        addonsPrice += pricing.addOns[addon as keyof typeof pricing.addOns];
-      }
-    });
-
-  let subtotal = basePrice + addonsPrice;
-  const discount = pricing.frequencyDiscounts[freq as keyof typeof pricing.frequencyDiscounts] || 0;
-  subtotal -= subtotal * discount;
-
-  const travelFee = resolveTravelFee(booking.service_area_name, booking.travel_fee);
-  subtotal += travelFee;
-
-  const rounded = Math.round(subtotal * 100) / 100;
-  const total =
-    rounded > 0 && rounded < pricing.minimumJob ? pricing.minimumJob : rounded;
-  return { total };
-}
-
-const AREA_FEE_RULES: Record<string, number> = {
-  "charles county": 0,
-  "st. mary's county": 0,
-  "st mary's county": 0,
-  "calvert county": 0,
-  "prince george's county": 0,
-  "prince georges county": 0,
-  "southern anne arundel county": 20,
-  "washington, dc": 20,
-  "washington dc": 20,
-};
-
-function resolveTravelFee(areaName?: string | null, rawTravelFee?: string | null) {
-  const normalizedArea = String(areaName || "").trim().toLowerCase();
-  if (normalizedArea && AREA_FEE_RULES[normalizedArea] != null) {
-    return AREA_FEE_RULES[normalizedArea];
-  }
-
-  if (rawTravelFee != null && String(rawTravelFee).trim() !== "") {
-    return Math.max(0, Number(rawTravelFee) || 0);
-  }
-
-  if (normalizedArea) {
-    return 0;
-  }
-
-  return 35;
-}
 
 function squareBaseUrl(environment: string) {
   return environment === "production"
@@ -226,7 +137,8 @@ Deno.serve(async (req) => {
       total = Math.round(storedTotal * 100) / 100;
     }
     const amountCents = Math.round(total * 100);
-    const minCents = 12500;
+    const serviceType = String(booking.service_type || "").trim();
+    const minCents = Math.round(resolveMinimumForService(serviceType, getPricingConfig()) * 100);
     if (!Number.isFinite(amountCents) || amountCents < minCents) {
       throw new Error("Could not calculate a valid checkout total for this booking");
     }

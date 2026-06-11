@@ -25,11 +25,18 @@ window.CLEANCO_CONFIG = {
   sanityApiVersion: "2025-05-23",
   pricing: {
     minimumJob: 125,
+    minimumByService: {
+      "Standard cleaning": 150,
+      "Deep cleaning": 225,
+      "Move-in/Move-out": 275,
+      "Office cleaning": 125,
+      "Short-term rental & Airbnb turnover": 125
+    },
     minSqft: 500,
     rates: {
-      "Standard cleaning": 0.17,
-      "Deep cleaning": 0.28,
-      "Move-in/Move-out": 0.32,
+      "Standard cleaning": 0.14,
+      "Deep cleaning": 0.22,
+      "Move-in/Move-out": 0.25,
       "Office cleaning": 0.20,
       "Short-term rental & Airbnb turnover": 0.18
     },
