@@ -5704,6 +5704,10 @@ html:not(.js) .fade-in-right {
   .wipe-reveal::after {
     display: none;
   }
+
+  .bg-blob {
+    animation: none !important;
+  }
 }
 
 /* Floating background blobs */
@@ -5714,6 +5718,7 @@ html:not(.js) .fade-in-right {
   pointer-events: none;
   opacity: 0.45;
   z-index: 0;
+  will-change: transform;
 }
 
 .bg-blob-blue {
@@ -5738,6 +5743,14 @@ html:not(.js) .fade-in-right {
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(40px, -60px) scale(1.08); }
   100% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+/* Animating a blurred filter is expensive to repaint every frame and
+   fights scroll compositing on weaker/mobile GPUs — freeze it there. */
+@media (max-width: 768px) {
+  .bg-blob {
+    animation: none;
+  }
 }
 
 /* Pulsing handle animation */
