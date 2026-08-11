@@ -1,7 +1,7 @@
 window.CLEANCO_CONFIG = {
   businessName: "RS Cleaning Collective",
   // Update phone in Sanity siteSettings when the client provides their real number.
-  phone: "202-262-6379",
+  phone: "240-823-4466",
   email: "ryann@rslegalcollective.com",
   facebookUrl: "https://web.facebook.com/profile.php?id=61569210390047",
   address: "Mechanicsville, MD",

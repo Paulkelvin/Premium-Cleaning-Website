@@ -45,7 +45,7 @@ function buildInvoiceEmail(booking: Record<string, unknown>, checkoutUrl: string
     <p style="margin:0 0 24px;color:#64748b;font-size:14px;">Secure payment powered by Square.</p>
     <a href="${escapeHtml(checkoutUrl)}" style="display:inline-block;background:#0f4fcf;color:#fff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:600;">Pay now</a>
     <p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">If the button does not work, copy this link:<br><a href="${escapeHtml(checkoutUrl)}">${escapeHtml(checkoutUrl)}</a></p>
-    <p style="margin:24px 0 0;font-size:13px;color:#64748b;">Questions? Reply to this email or call us at 202-262-6379.</p>
+    <p style="margin:24px 0 0;font-size:13px;color:#64748b;">Questions? Reply to this email or call us at 240-823-4466.</p>
   </div>
 </body>
 </html>`;

@@ -51,7 +51,7 @@ export function buildEmailShell(options: {
 
   const footer =
     options.footerHtml ||
-    `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Questions? Reply to this email or call us at 202-262-6379.</p>`;
+    `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Questions? Reply to this email or call us at 240-823-4466.</p>`;
 
   return `<!DOCTYPE html>
 <html>
