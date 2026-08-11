@@ -8,6 +8,7 @@ export default defineConfig({
   title: 'Premium Cleaning Website',
   projectId: 'hjrx2q9w',
   dataset: 'production',
+  basePath: '/studio',
   plugins: [structureTool(), visionTool()],
   schema: {
     types: schemaTypes

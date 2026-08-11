@@ -5,7 +5,10 @@ export default defineCliConfig({
     projectId: 'hjrx2q9w',
     dataset: 'production'
   },
-  studioHost: 'cleaning-websitepaulkelvin-cleaning'
+  studioHost: 'cleaning-websitepaulkelvin-cleaning',
+  project: {
+    basePath: '/studio'
+  }
 })
 
 

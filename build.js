@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 function copyDir(src, dest) {
   fs.mkdirSync(dest, { recursive: true });
@@ -47,6 +48,24 @@ for (let dir of dirsToCopy) {
   const srcDir = path.join(__dirname, dir);
   if (fs.existsSync(srcDir)) {
     copyDir(srcDir, path.join(distPath, dir));
+  }
+}
+
+// 5. Build the Sanity Studio into dist/studio so it's served at /studio
+execSync('npx sanity build dist/studio -y', { stdio: 'inherit' });
+
+// 6. Studio's index.html links its favicon/manifest from root-level /static
+// regardless of basePath, so mirror those few icon files there too.
+const studioIconFiles = ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png', 'manifest.webmanifest'];
+const studioStaticDir = path.join(distPath, 'studio', 'static');
+const rootStaticDir = path.join(distPath, 'static');
+if (fs.existsSync(studioStaticDir)) {
+  fs.mkdirSync(rootStaticDir, { recursive: true });
+  for (const file of studioIconFiles) {
+    const src = path.join(studioStaticDir, file);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(rootStaticDir, file));
+    }
   }
 }
 
