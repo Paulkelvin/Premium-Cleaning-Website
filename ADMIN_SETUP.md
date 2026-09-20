@@ -177,7 +177,7 @@ Re-run after you change website copy or add new before/after photos.
 
 | Give them | Notes |
 |-----------|--------|
-| Website URL | e.g. `https://rscleaningcollective.com` |
+| Website URL | e.g. `https://www.rscleaningcollective.com` |
 | Sanity Studio | Invite their email in sanity.io → project members (Editor) |
 | Admin dashboard | `https://yoursite.com/admin-login.html` — only if you create a Supabase user for them |
 | Contact email | Already `hello@rscleaningcollective.com` in Site Settings |

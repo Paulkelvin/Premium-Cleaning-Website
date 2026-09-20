@@ -2660,7 +2660,7 @@ function initQuoteAssistant(formContainer = document) {
     btnRestart.addEventListener("click", () => {
       clearQuoteContextStorage();
       if (window.history.replaceState) {
-        window.history.replaceState({}, "", "quote.html");
+        window.history.replaceState({}, "", "/quote");
       }
       form.reset();
       coachInitialPaint = true;
@@ -2682,7 +2682,7 @@ function initQuoteAssistant(formContainer = document) {
   const btnBookNow = formContainer.querySelector("#btnContinueToBook");
   if (btnBookNow) {
     btnBookNow.addEventListener("click", () => {
-      window.location.href = "book.html?from=quote";
+      window.location.href = "/book?from=quote";
     });
   }
 }

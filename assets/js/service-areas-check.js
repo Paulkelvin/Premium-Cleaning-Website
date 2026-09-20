@@ -107,6 +107,6 @@
 
   continueBtn?.addEventListener("click", () => {
     if (!lastMatch) runCheck();
-    window.location.href = "quote.html";
+    window.location.href = "/quote";
   });
 })();

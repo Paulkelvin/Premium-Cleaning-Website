@@ -83,17 +83,16 @@ function getSitePathPrefix() {
 }
 
 function getFooterServiceLinks() {
-  const prefix = getSitePathPrefix();
   return [
-    { label: "Standard cleaning", href: `${prefix}services/standard-cleaning.html` },
-    { label: "Deep cleaning", href: `${prefix}services/deep-cleaning.html` },
-    { label: "Move-in/out cleaning", href: `${prefix}services/move-in-out-cleaning.html` },
-    { label: "Office cleaning", href: `${prefix}services/office-cleaning.html` },
+    { label: "Standard cleaning", href: "/services/standard-cleaning" },
+    { label: "Deep cleaning", href: "/services/deep-cleaning" },
+    { label: "Move-in/out cleaning", href: "/services/move-in-out-cleaning" },
+    { label: "Office cleaning", href: "/services/office-cleaning" },
     {
       label: "Airbnb turnovers",
-      href: `${prefix}services/airbnb-turnover.html`
+      href: "/services/airbnb-turnover"
     },
-    { label: "All services", href: `${prefix}services/index.html` }
+    { label: "All services", href: "/services/" }
   ];
 }
 
@@ -105,7 +104,7 @@ function formatFooterAddonLabel(name) {
 
 function getPayNowHref() {
   if (document.getElementById("pay-now")) return "#pay-now";
-  return `${getSitePathPrefix()}index.html#pay-now`;
+  return `/#pay-now`;
 }
 
 function initFooterPayNowLink() {
@@ -138,13 +137,12 @@ function getFooterAddonsHref() {
   const onServicesIndex =
     /\/services\/index\.html$/i.test(path) || /\/services\/?$/i.test(path);
   if (onServicesIndex) return "#addons";
-  return `${getSitePathPrefix()}services/index.html#addons`;
+  return `/services/#addons`;
 }
 
 function getFooterAddonLinks() {
   const addOns = window.CLEANCO_CONFIG?.pricing?.addOns || {};
   const addonsHref = getFooterAddonsHref();
-  const prefix = getSitePathPrefix();
   const seen = new Set();
   const links = [];
 
@@ -159,8 +157,8 @@ function getFooterAddonLinks() {
     pushLink(formatFooterAddonLabel(name), addonsHref);
   });
 
-  pushLink("Carpet cleaning", `${prefix}services/carpet-cleaning.html`);
-  pushLink("Junk removal", `${prefix}services/junk-removal.html`);
+  pushLink("Carpet cleaning", "/services/carpet-cleaning");
+  pushLink("Junk removal", "/services/junk-removal");
 
   return links;
 }
@@ -287,8 +285,7 @@ function initFooterCatalog() {
 }
 
 function initFooterQuickPolicyLinks() {
-  const prefix = getSitePathPrefix();
-  const href = `${prefix}cancellation-policy.html`;
+  const href = "/cancellation-policy";
 
   document.querySelectorAll(".footer-grid").forEach((grid) => {
     const quickHeading = [...grid.querySelectorAll("h3")].find(
@@ -309,10 +306,9 @@ function initFooterQuickPolicyLinks() {
 }
 
 function initFooterLegalLinks() {
-  const prefix = getSitePathPrefix();
-  const cancellationHref = `${prefix}cancellation-policy.html`;
-  const privacyHref = `${prefix}privacy.html`;
-  const termsHref = `${prefix}terms.html`;
+  const cancellationHref = "/cancellation-policy";
+  const privacyHref = "/privacy";
+  const termsHref = "/terms";
 
   document.querySelectorAll(".footer-bottom > span:last-child").forEach((row) => {
     if (row.querySelector(`a[href="${cancellationHref}"]`)) return;
@@ -1314,7 +1310,7 @@ function initAdminReturnLink() {
 
   if (document.querySelector("[data-admin-return-link]")) return;
   const link = document.createElement("a");
-  link.href = "admin-dashboard.html";
+  link.href = "/admin-dashboard";
   link.className = "admin-return-link";
   link.setAttribute("data-admin-return-link", "");
   link.innerHTML = '<i data-lucide="layout-dashboard"></i><span>Admin</span>';
