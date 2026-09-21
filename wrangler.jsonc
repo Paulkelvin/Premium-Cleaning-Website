@@ -3,6 +3,7 @@
   "name": "cleaningwebsite1",
   "compatibility_date": "2026-05-23",
   "main": "src/redirect-worker.js",
+  "workers_dev": false,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS"
