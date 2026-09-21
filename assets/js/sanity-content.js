@@ -431,7 +431,7 @@ function applyHome(home) {
   document.querySelectorAll(".why-choose-us-split .premium-features .feature-row").forEach((row, index) => {
     const item = home.whyChooseUsItems?.[index];
     if (!item) return;
-    text(row.querySelector("span"), item);
+    text(row.querySelector(".feature-text strong"), item);
   });
 
   text(document.querySelector(".services-editorial-section .heading-underline-gradient h2"), home.servicesOverviewTitle);
