@@ -951,17 +951,6 @@ function revealElement(el) {
   if (el.classList.contains("home-proof-bar-inner") || el.classList.contains("home-proof-compact")) {
     assignProofBarStagger(el);
   }
-
-  // Release the GPU compositing layer once the reveal transition finishes so
-  // Safari doesn't keep rendering a stale layer after a later layout change
-  // (e.g. a responsive column collapse) — otherwise it can leave a ghosted
-  // duplicate of the pre-animation content visible indefinitely.
-  const clearWillChange = (event) => {
-    if (event.target !== el) return;
-    el.style.willChange = "auto";
-    el.removeEventListener("transitionend", clearWillChange);
-  };
-  el.addEventListener("transitionend", clearWillChange);
 }
 
 function isElementInRevealViewport(el) {
