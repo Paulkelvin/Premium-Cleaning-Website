@@ -251,7 +251,7 @@ function goToDashboard(accessToken) {
     safeSet("cleanco_admin_email", parseJwtEmail(accessToken));
     safeSet("cleanco_admin_token", accessToken);
   }
-  window.location.href = "admin-dashboard.html";
+  window.location.href = "/admin-dashboard";
 }
 
 function clearAdminSession() {
@@ -1002,7 +1002,7 @@ if (loginForm) {
     if (!adminHasSupabase && email && password) {
       safeSet("cleanco_admin", "true");
       safeSet("cleanco_admin_email", String(email).toLowerCase());
-      window.location.href = "admin-dashboard.html";
+      window.location.href = "/admin-dashboard";
       return;
     }
 
@@ -1452,7 +1452,7 @@ async function initDashboard() {
   dashboardRefreshInFlight = (async () => {
     if (!(await assertAdminSession())) {
       clearAdminSession();
-      window.location.href = "admin-login.html";
+      window.location.href = "/admin-login";
       return;
     }
 
@@ -1613,7 +1613,7 @@ document.querySelector("[data-admin-refresh]")?.addEventListener("click", () => 
 
 document.querySelector("[data-admin-logout]")?.addEventListener("click", () => {
   clearAdminSession();
-  window.location.href = "admin-login.html";
+  window.location.href = "/admin-login";
 });
 
 function switchView(targetView) {

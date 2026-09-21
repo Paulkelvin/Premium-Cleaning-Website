@@ -68,8 +68,8 @@ export function buildEmailShell(options: {
 }
 
 export function buildAdminDashboardUrl() {
-  const siteUrl = String(Deno.env.get("SITE_URL") || "https://rs.cleaningcollective.workers.dev").replace(/\/$/, "");
-  return `${siteUrl}/admin-dashboard.html`;
+  const siteUrl = String(Deno.env.get("SITE_URL") || "https://www.rscleaningcollective.com").replace(/\/$/, "");
+  return `${siteUrl}/admin-dashboard`;
 }
 
 export type LeadRecord = Record<string, unknown>;

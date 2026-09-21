@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rscleaningcollective.com/sitemap.xml
+Sitemap: https://www.rscleaningcollective.com/sitemap.xml

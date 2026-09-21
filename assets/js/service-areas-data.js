@@ -117,7 +117,7 @@ window.SERVICE_AREA_TOWN_NOTICE = {
   lead: "Contact us!",
   body:
     "We proudly serve Southern Maryland and surrounding communities throughout St. Mary's, Charles, Calvert, and Prince George's counties.",
-  contactHref: "contact.html"
+  contactHref: "/contact"
 };
 
 window.OUTSIDE_AREA_DEFAULT = {

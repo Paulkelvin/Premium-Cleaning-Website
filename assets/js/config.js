@@ -70,7 +70,7 @@ window.CLEANCO_CONFIG = {
   // Enable automated Square checkout for variable quote totals (requires Supabase Edge Functions).
   squareCheckoutEnabled: true,
   // Public site URL — must match SITE_URL secret in Supabase (no trailing slash).
-  siteUrl: "https://rs.cleaningcollective.workers.dev",
+  siteUrl: "https://www.rscleaningcollective.com",
   // Deprecated: static Stripe link cannot handle variable quote prices.
   stripePaymentLink: ""
 };
