@@ -95,14 +95,37 @@ async function supabaseInsert(table, payload) {
     return { ok: true, demo: true, id: rowId };
   }
 
-  const response = await fetch(`${config.supabaseUrl}/rest/v1/${table}`, {
+  const doInsert = () => fetch(`${config.supabaseUrl}/rest/v1/${table}`, {
     method: "POST",
     headers: getSupabaseRestHeaders(),
     body: JSON.stringify(body)
   });
 
+  // A single retry for transient failures (dropped connection, momentary
+  // 5xx) — validation-type failures (4xx) are deterministic for this
+  // payload, so retrying those would just delay showing the real error.
+  let response;
+  try {
+    response = await doInsert();
+    if (!response.ok && response.status >= 500) throw new Error(`HTTP ${response.status}`);
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    try {
+      response = await doInsert();
+    } catch (retryErr) {
+      throw new Error(retryErr?.message || "Failed to fetch");
+    }
+  }
+
   if (!response.ok) {
     const message = await response.text();
+    // If the first attempt's request actually reached the database before
+    // its response was lost (the scenario this retry exists for), the
+    // retry's insert of the same row id fails as a duplicate key — that
+    // means the data was saved, so treat it as success rather than an error.
+    if (response.status === 409 || /duplicate key|already exists/i.test(message)) {
+      return { ok: true, id: rowId };
+    }
     throw new Error(message || "Submission failed");
   }
   return { ok: true, id: rowId };
