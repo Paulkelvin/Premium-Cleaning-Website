@@ -1494,10 +1494,33 @@ function initQuoteAssistant(formContainer = document) {
         });
       }
     } catch (err) {
-      console.error("Estimate capture failed:", err);
-      showStudioToast(root, mapSubmissionError(err), "error");
-      invalidateQuoteDraft();
-      return;
+      console.error("Estimate capture failed, falling back to a locally computed estimate:", err);
+      // The price itself is plain client-side math and doesn't need the network.
+      // Don't block showing it just because saving the lead in the background
+      // failed (network hiccup, ad blocker, temporary outage, etc.) — that was
+      // preventing the calculator from "populating" for some visitors even
+      // though nothing was actually wrong with their inputs. Booking still
+      // requires a successful save later, so nothing downstream is skipped.
+      const fallback = buildSubmissionPayload(form, table);
+      quoteDraft = {
+        captured: true,
+        pricing: fallback.pricing,
+        quote_id: null
+      };
+      if (typeof window.saveQuoteSession === "function") {
+        window.saveQuoteSession({
+          ...fallback.payload,
+          quote_id: null,
+          estimated_total: fallback.pricing.total,
+          travel_fee: 0,
+          size_input_mode: getSizeInputMode(form)
+        });
+      }
+      showStudioToast(
+        root,
+        "Here's your estimate. We couldn't reach our server to save your request in the background — please continue, or call/text us if this keeps happening.",
+        "error"
+      );
     } finally {
       if (btnGetEstimate) {
         btnGetEstimate.removeAttribute("aria-busy");
