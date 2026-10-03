@@ -7,6 +7,12 @@ export const page = defineType({
   type: 'document',
   fields: [
     defineField({name: 'title', title: 'Title', type: 'string'}),
+    defineField({
+      name: 'seoTitle',
+      title: 'Google title (meta title)',
+      description: 'Shown as the blue link in Google results and in the browser tab. Keep it under about 60 characters and mention the service area, e.g. "Deep Cleaning in Southern Maryland | RS Cleaning Collective". Leave empty to use the website default.',
+      type: 'string',
+    }),
     defineField({name: 'slug', title: 'Slug', type: 'slug', options: {source: 'title'}}),
     defineField({name: 'metaDescription', title: 'Meta Description', type: 'text'}),
     defineField({name: 'heroEyebrow', title: 'Hero Eyebrow', type: 'string'}),

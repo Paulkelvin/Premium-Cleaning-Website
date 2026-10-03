@@ -18,6 +18,11 @@ function text(node, value) {
   if (node && value) node.textContent = value;
 }
 
+function applySeoTitle(value) {
+  const title = String(value || "").trim();
+  if (title) document.title = title;
+}
+
 function attr(node, name, value) {
   if (node && value) node.setAttribute(name, value);
 }
@@ -61,6 +66,7 @@ function mapSanityGalleryItem(item, index) {
       primaryCtaHref
     },
     "home": *[_type == "homePage"][0]{
+      seoTitle,
       heroEyebrow,
       heroTitle,
       heroCopy,
@@ -89,6 +95,7 @@ function mapSanityGalleryItem(item, index) {
     },
     "pages": *[_type == "page"]{
       title,
+      seoTitle,
       "slug": slug.current,
       metaDescription,
       heroEyebrow,
@@ -110,6 +117,7 @@ function mapSanityGalleryItem(item, index) {
     },
     "services": *[_type == "service"] | order(displayOrder asc){
       title,
+      seoTitle,
       "slug": slug.current,
       shortDescription,
       "heroImageUrl": coalesce(heroImage.asset->url, heroImageUrl),
@@ -284,6 +292,7 @@ function applyPageHero(data) {
   if (!key || key === "home") return;
   const page = (data.pages || []).find((item) => item.slug === key);
   if (!page) return;
+  applySeoTitle(page.seoTitle);
   const heroRoot = document.querySelector(".page-hero, .hero--overlay");
   if (!heroRoot) return;
   text(heroRoot.querySelector(".eyebrow"), page.heroEyebrow);
@@ -395,6 +404,7 @@ function applyQuoteStudioHero(pages) {
   if (key !== "quote" && key !== "book") return;
   const page = pages.find((item) => item.slug === key);
   if (!page) return;
+  applySeoTitle(page.seoTitle);
   const titleEl = document.querySelector("[data-studio-title]");
   const copyEl = document.querySelector("[data-studio-copy]");
   text(titleEl, page.heroTitle);
@@ -407,6 +417,7 @@ function applyQuoteStudioHero(pages) {
 
 function applyHome(home) {
   if (!home || document.body.dataset.sanityPage !== "home") return;
+  applySeoTitle(home.seoTitle);
   text(document.querySelector(".hero h1"), home.heroTitle);
   text(document.querySelector(".hero .hero-lead"), home.heroCopy);
 
@@ -499,6 +510,7 @@ function applyService(services) {
   const image = document.querySelector(".service-detail-hero img, .service-detail-scope img");
   attr(image, "src", service.heroImageUrl);
   attr(image, "alt", service.title);
+  applySeoTitle(service.seoTitle);
 }
 
 function applyFaqs(faqs) {

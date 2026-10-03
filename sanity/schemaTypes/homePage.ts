@@ -18,6 +18,12 @@ export const homePage = defineType({
   title: 'Home Page',
   type: 'document',
   fields: [
+    defineField({
+      name: 'seoTitle',
+      title: 'Google title (meta title)',
+      description: 'Shown as the blue link in Google results and in the browser tab. Keep it under about 60 characters and mention the service area, e.g. "Deep Cleaning in Southern Maryland | RS Cleaning Collective". Leave empty to use the website default.',
+      type: 'string',
+    }),
     defineField({name: 'heroEyebrow', title: 'Hero Eyebrow', type: 'string'}),
     defineField({name: 'heroTitle', title: 'Hero Title', type: 'text'}),
     defineField({name: 'heroCopy', title: 'Hero Copy', type: 'text'}),
