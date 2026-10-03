@@ -298,7 +298,6 @@ function applyPageHero(data) {
     }
     meta.setAttribute("content", page.metaDescription);
   }
-  if (page.title) document.title = `${page.title} | RS Cleaning Collective`;
 
   const heroImg = heroRoot.querySelector("img");
   attr(heroImg, "src", page.heroImageUrl);
@@ -404,7 +403,6 @@ function applyQuoteStudioHero(pages) {
     let meta = document.querySelector("meta[name='description']");
     if (meta) meta.setAttribute("content", page.metaDescription);
   }
-  if (page.title) document.title = `${page.title} | RS Cleaning Collective`;
 }
 
 function applyHome(home) {
@@ -501,7 +499,6 @@ function applyService(services) {
   const image = document.querySelector(".service-detail-hero img, .service-detail-scope img");
   attr(image, "src", service.heroImageUrl);
   attr(image, "alt", service.title);
-  if (service.title) document.title = `${service.title} | RS Cleaning Collective`;
 }
 
 function applyFaqs(faqs) {
