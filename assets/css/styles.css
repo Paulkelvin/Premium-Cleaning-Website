@@ -2495,6 +2495,7 @@ textarea {
 .footer-social-link svg {
   width: 18px;
   height: 18px;
+  flex: 0 0 18px;
 }
 
 .footer-brand-col > p {
@@ -13842,5 +13843,42 @@ html {
 
   .pay-now-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ================================================================
+   PHONE SCROLL PERFORMANCE
+   Purely decorative looping animations (floating shapes, glows,
+   pulses) keep the phone repainting while scrolling, which makes
+   scrolling feel stiff on iPhones. Pause them on small screens;
+   larger screens keep them. The reviews marquee is content and stays.
+   ================================================================ */
+@media (max-width: 768px) {
+  .hero-image,
+  .geo-dots::after,
+  .geo-circle--bold::before,
+  .geo-bubble,
+  .geo-slab,
+  .geo-pill,
+  .geo-wedge,
+  .home-deco-float,
+  .geo-spark,
+  .geo-shield,
+  .floating-badge,
+  .floating-bubble,
+  .orb,
+  .sparkle-accent,
+  .gallery-slider .slider-button,
+  body[data-sanity-page="home"] .hero-strip div,
+  body[data-sanity-page="home"] .step-icon-wrap,
+  .hero--backdrop .hero-actions .button.secondary,
+  .about-page-hero-visual--team {
+    animation: none !important;
+  }
+
+  .gallery-slider .slider-label,
+  .gallery-slider .slider-expand-btn {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 }

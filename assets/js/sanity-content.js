@@ -48,6 +48,27 @@ function mapSanityGalleryItem(item, index) {
   };
 }
 
+// Photos are uploaded straight from phones (up to ~6000px, several MB each).
+// Ask Sanity's image CDN for a web-sized, modern-format copy instead so pages
+// load faster and phones don't stall decoding huge images while scrolling.
+const SANITY_IMAGE_PREFIX = "https://cdn.sanity.io/images/";
+const SANITY_IMAGE_PARAMS = "w=1600&fit=max&auto=format&q=80";
+
+function sizedSanityImageUrl(url) {
+  if (typeof url !== "string" || !url.startsWith(SANITY_IMAGE_PREFIX)) return url;
+  if (/[?&]w=/.test(url)) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}${SANITY_IMAGE_PARAMS}`;
+}
+
+function withSizedSanityImages(value) {
+  if (typeof value === "string") return sizedSanityImageUrl(value);
+  if (Array.isArray(value)) return value.map(withSizedSanityImages);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, withSizedSanityImages(item)]));
+  }
+  return value;
+}
+
 (async function hydrateFromSanity() {
   const config = window.CLEANCO_CONFIG || {};
   if (!config.sanityProjectId || !config.sanityDataset) return;
@@ -168,8 +189,9 @@ function mapSanityGalleryItem(item, index) {
     const endpoint = `https://${config.sanityProjectId}.api.sanity.io/v${config.sanityApiVersion || "2025-05-23"}/data/query/${config.sanityDataset}?query=${encodeURIComponent(query)}`;
     const response = await fetch(endpoint);
     if (!response.ok) throw new Error(await response.text());
-    const { result } = await response.json();
-    if (!result) return;
+    const { result: rawResult } = await response.json();
+    if (!rawResult) return;
+    const result = withSizedSanityImages(rawResult);
 
     applySettings(result.settings);
     applyPageHero(result);
