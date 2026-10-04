@@ -493,6 +493,7 @@ function bootSiteUi() {
     initScrollRevealSafetyNet();
     initReviewsSectionReveal();
     initHomepageBubbles();
+    initDecorAnimationsInView();
     initGalleryFilters();
     initTestimonialSlider();
     initHomeReviewsCarousel();
@@ -1097,7 +1098,55 @@ window.refreshInteractiveFeatures = () => {
   initReviewsSectionReveal();
   initScrollReveal({ revealVisibleNow: true });
   scheduleScrollRevealSafetyCheck();
+  initDecorAnimationsInView();
 };
+
+// Decorative looping animations (floating shapes, glows, pulses) only run
+// while they are on screen, on phones and computers alike. Off-screen ones
+// are paused so the browser isn't redrawing things nobody can see, which
+// keeps scrolling smooth. Without JS (or IntersectionObserver) they simply
+// keep running as before.
+const DECOR_ANIMATION_SELECTORS = [
+  ".hero-image",
+  ".geo-dots",
+  ".geo-circle--bold",
+  ".geo-bubble",
+  ".geo-slab",
+  ".geo-pill",
+  ".geo-wedge",
+  ".home-deco-float",
+  ".geo-spark",
+  ".geo-shield",
+  ".floating-badge",
+  ".floating-bubble",
+  ".orb",
+  ".sparkle-accent",
+  ".bg-blob",
+  ".gallery-slider .slider-button",
+  'body[data-sanity-page="home"] .hero-strip div',
+  'body[data-sanity-page="home"] .step-icon-wrap',
+  ".hero--backdrop .hero-actions .button.secondary",
+  ".about-page-hero-visual--team"
+].join(", ");
+
+let decorObserver;
+const observedDecor = new WeakSet();
+
+function initDecorAnimationsInView() {
+  if (!("IntersectionObserver" in window)) return;
+  if (!decorObserver) {
+    decorObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle("deco-offscreen", !entry.isIntersecting);
+      });
+    }, { rootMargin: "100px 0px" });
+  }
+  document.querySelectorAll(DECOR_ANIMATION_SELECTORS).forEach((el) => {
+    if (observedDecor.has(el)) return;
+    observedDecor.add(el);
+    decorObserver.observe(el);
+  });
+}
 
 // 7. Cleaning-themed Homepage Bubbles
 function initHomepageBubbles() {
