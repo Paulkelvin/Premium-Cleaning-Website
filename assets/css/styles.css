@@ -13847,35 +13847,20 @@ html {
 }
 
 /* ================================================================
-   PHONE SCROLL PERFORMANCE
-   Purely decorative looping animations (floating shapes, glows,
-   pulses) keep the phone repainting while scrolling, which makes
-   scrolling feel stiff on iPhones. Pause them on small screens;
-   larger screens keep them. The reviews marquee is content and stays.
+   DECORATIVE ANIMATIONS: ONLY WHILE ON SCREEN
+   site.js adds .deco-offscreen to decorative looping elements (floating
+   shapes, glows, pulses) while they are out of view, so the browser isn't
+   repainting things nobody can see. Same behaviour on phones and desktop.
    ================================================================ */
-@media (max-width: 768px) {
-  .hero-image,
-  .geo-dots::after,
-  .geo-circle--bold::before,
-  .geo-bubble,
-  .geo-slab,
-  .geo-pill,
-  .geo-wedge,
-  .home-deco-float,
-  .geo-spark,
-  .geo-shield,
-  .floating-badge,
-  .floating-bubble,
-  .orb,
-  .sparkle-accent,
-  .gallery-slider .slider-button,
-  body[data-sanity-page="home"] .hero-strip div,
-  body[data-sanity-page="home"] .step-icon-wrap,
-  .hero--backdrop .hero-actions .button.secondary,
-  .about-page-hero-visual--team {
-    animation: none !important;
-  }
+.deco-offscreen,
+.deco-offscreen::before,
+.deco-offscreen::after {
+  animation-play-state: paused !important;
+}
 
+/* Small blurred labels on before/after sliders: a plain translucent
+   background looks the same on phones and is much cheaper to scroll. */
+@media (max-width: 768px) {
   .gallery-slider .slider-label,
   .gallery-slider .slider-expand-btn {
     backdrop-filter: none;
