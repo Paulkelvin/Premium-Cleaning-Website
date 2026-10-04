@@ -345,14 +345,18 @@ function initHeaderPayLink() {
   });
 }
 
-function getFacebookUrl() {
+function getSocialLinks() {
   const cfg = window.CLEANCO_CONFIG || {};
-  return typeof cfg.facebookUrl === "string" ? cfg.facebookUrl.trim() : "";
+  const clean = (value) => (typeof value === "string" ? value.trim() : "");
+  return [
+    { url: clean(cfg.facebookUrl), network: "Facebook", icon: "facebook" },
+    { url: clean(cfg.instagramUrl), network: "Instagram", icon: "instagram" }
+  ].filter((item) => item.url);
 }
 
 function initFooterSocialLinks() {
-  const url = getFacebookUrl();
-  if (!url) return;
+  const links = getSocialLinks();
+  if (!links.length) return;
 
   document.querySelectorAll(".footer-grid").forEach((grid) => {
     const brandCol = grid.querySelector("div");
@@ -362,22 +366,24 @@ function initFooterSocialLinks() {
     wrap.className = "footer-social";
     wrap.setAttribute("data-footer-social", "");
 
-    const link = document.createElement("a");
-    link.className = "footer-social-link";
-    link.href = url;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.setAttribute("aria-label", "Follow RS Cleaning Collective on Facebook");
+    links.forEach(({ url, network, icon: iconName }) => {
+      const link = document.createElement("a");
+      link.className = "footer-social-link";
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.setAttribute("aria-label", `Follow RS Cleaning Collective on ${network}`);
 
-    const icon = document.createElement("i");
-    icon.setAttribute("data-lucide", "facebook");
-    link.appendChild(icon);
+      const icon = document.createElement("i");
+      icon.setAttribute("data-lucide", iconName);
+      link.appendChild(icon);
 
-    const label = document.createElement("span");
-    label.textContent = "Follow us on Facebook";
-    link.appendChild(label);
+      const label = document.createElement("span");
+      label.textContent = `Follow us on ${network}`;
+      link.appendChild(label);
 
-    wrap.appendChild(link);
+      wrap.appendChild(link);
+    });
     brandCol.appendChild(wrap);
   });
 }

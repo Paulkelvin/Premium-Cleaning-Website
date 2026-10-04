@@ -4,6 +4,7 @@ window.CLEANCO_CONFIG = {
   phone: "240-823-4466",
   email: "ryann@rslegalcollective.com",
   facebookUrl: "https://web.facebook.com/profile.php?id=61569210390047",
+  instagramUrl: "https://www.instagram.com/rscleaningcollective/",
   address: "Mechanicsville, MD",
   locationLabel: "Southern Maryland",
   serviceArea: "Charles County, St. Mary's County, Calvert County, and Prince George's County",
