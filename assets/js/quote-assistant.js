@@ -1225,6 +1225,9 @@ function initQuoteAssistant(formContainer = document) {
     if (bootSession?.quote_id) persistedQuoteId = bootSession.quote_id;
   }
 
+  // Hidden field people never see; bots that fill every input trip it.
+  const isSpamTrapFilled = () => Boolean(String(form.querySelector('input[name="rs_trap"]')?.value || "").trim());
+
   async function persistQuoteRequest() {
     if (typeof window.supabaseInsert !== "function") {
       throw new Error("Form service unavailable. Please refresh and try again.");
@@ -1232,6 +1235,7 @@ function initQuoteAssistant(formContainer = document) {
     const { payload, pricing } = buildSubmissionPayload(form, table);
     payload.estimated_total = pricing.total;
     payload.travel_fee = 0;
+    if (isSpamTrapFilled()) return { id: null, pricing, payload };
 
     const result = await window.supabaseInsert(table, payload);
     persistedQuoteId = result.id;
@@ -1522,6 +1526,9 @@ function initQuoteAssistant(formContainer = document) {
         "error"
       );
     } finally {
+      if (typeof window.rsTrack === "function" && quoteDraft?.captured) {
+        window.rsTrack("quote_estimate", { value: Number(quoteDraft.pricing?.total) || 0, currency: "USD" });
+      }
       if (btnGetEstimate) {
         btnGetEstimate.removeAttribute("aria-busy");
         btnGetEstimate.innerHTML = `Get my estimate <i data-lucide="sparkles"></i>`;
@@ -2541,6 +2548,15 @@ function initQuoteAssistant(formContainer = document) {
       stateEl.textContent = "Saving your request...";
     }
 
+    if (isSpamTrapFilled()) {
+      // Silently drop bot submissions without saving or emailing anything.
+      if (stateEl) {
+        stateEl.className = "form-state success";
+        stateEl.textContent = "Thanks. Your request was received.";
+      }
+      return;
+    }
+
     try {
       const { payload, pricing } = buildSubmissionPayload(form, table);
       let result = {};
@@ -2565,6 +2581,14 @@ function initQuoteAssistant(formContainer = document) {
           throw new Error("Form service unavailable. Please refresh and try again.");
         }
         result = await window.supabaseInsert(table, payload);
+      }
+
+      if (typeof window.rsTrack === "function") {
+        window.rsTrack(table === "bookings" ? "booking_submitted" : "quote_submitted", {
+          value: Number(pricing.total || payload.estimated_total) || 0,
+          currency: "USD",
+          service_type: payload.service_type || ""
+        });
       }
 
       if (table === "quote_requests") {

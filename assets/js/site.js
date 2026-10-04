@@ -582,6 +582,9 @@ function initHomeReviewsCarousel() {
       body.appendChild(hint);
     }
 
+    // Scrollable review text must be reachable by keyboard (WCAG 2.1.1).
+    text.tabIndex = 0;
+
     const body = card.querySelector(".review-body");
     const updateOverflow = () => {
       if (!body || !text) return;
