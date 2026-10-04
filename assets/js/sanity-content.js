@@ -535,9 +535,27 @@ function applyService(services) {
   applySeoTitle(service.seoTitle);
 }
 
+// Keep the FAQ page's FAQPage structured data in step with the FAQs shown.
+function applyFaqSchema(faqs) {
+  const script = document.getElementById("faq-schema");
+  if (!script) return;
+  const items = faqs.filter((item) => item.question && item.answer);
+  if (!items.length) return;
+  script.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: String(item.question).trim(),
+      acceptedAnswer: { "@type": "Answer", text: String(item.answer).trim() }
+    }))
+  });
+}
+
 function applyFaqs(faqs) {
   const list = document.querySelector("[data-faq-list]");
   if (!list || !faqs.length) return;
+  applyFaqSchema(faqs);
   const visibleFaqs = document.body.dataset.sanityPage === "home" ? faqs.slice(0, 3) : faqs;
   list.innerHTML = visibleFaqs.map((item, index) => `
     <div class="faq-item ${index === 0 ? "is-open" : ""}">
