@@ -467,7 +467,7 @@ function applyHome(home) {
   });
 
   text(document.querySelector(".quote-panel h2"), home.finalCtaTitle);
-  const quotePanelCopy = document.querySelector(".quote-panel > p");
+  const quotePanelCopy = document.querySelector(".quote-panel > p:not(.eyebrow)");
   if (quotePanelCopy) text(quotePanelCopy, home.finalCtaCopy);
 
   const aboutImage = document.querySelector("[data-home-about-image]");

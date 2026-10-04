@@ -111,9 +111,8 @@ h3 {
   width: 100%;
   z-index: 1000;
   overflow: visible;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  /* Solid so it matches the browser's own top bar on iPhone (no lighter strip). */
+  background: #ffffff;
   border-bottom: 1px solid rgba(226, 232, 240, 0.6);
   height: calc(var(--header-height) + env(safe-area-inset-top, 0));
   display: flex;
@@ -1252,6 +1251,20 @@ body[data-sanity-page="gallery"] [data-gallery-list] {
 
 .quote-panel p {
   color: rgba(255, 255, 255, 0.78);
+}
+
+/* "Most clients book within 24 hours" badge: keep it tidy on phones. */
+.quote-panel > .eyebrow {
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  border-radius: 16px !important;
+}
+
+@media (max-width: 480px) {
+  .quote-panel > .eyebrow {
+    font-size: 0.66rem !important;
+    letter-spacing: 0.03em;
+  }
 }
 
 /* ================================================================
