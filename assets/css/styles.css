@@ -18,6 +18,8 @@
   --gold: #C9A84C;
   --gold-light: #FDF8EE;
   --gold-dark: #B8922E;
+  /* Darker gold for small text on light backgrounds (WCAG AA contrast). */
+  --gold-text: #8A6A1A;
 
   --soft-bg: #EEF4FC;
   --coral: #e86d51;
@@ -695,7 +697,7 @@ h3 {
 }
 
 .eyebrow {
-  color: var(--gold-dark);
+  color: var(--gold-text);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.16em;

@@ -20,6 +20,8 @@ window.CLEANCO_CONFIG = {
   // Must match Supabase Auth users + supabase/schema.sql RLS policies (exact emails).
   adminEmails: ["ryann@rslegalcollective.com", "paulopackager@gmail.com"],
   // phone: fallback before Sanity loads — also edit Site Settings → Phone in Sanity Studio for live updates site-wide
+  // Google Analytics 4 measurement ID (e.g. "G-XXXXXXXXXX"). Leave empty to keep analytics off.
+  gaMeasurementId: "",
   sanityProjectId: "hjrx2q9w",
   sanityDataset: "production",
   sanityApiVersion: "2025-05-23",

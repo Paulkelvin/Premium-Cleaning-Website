@@ -247,6 +247,7 @@ document.querySelectorAll("[data-lead-form]").forEach((form) => {
       const payload = formPayload(form);
       payload.consent = Boolean(form.querySelector("[name='consent']")?.checked);
       await supabaseInsert(table, payload);
+      if (typeof window.rsTrack === "function") window.rsTrack("contact_submitted", { form: table });
       form.reset();
       showContactFeedback(
         form,
