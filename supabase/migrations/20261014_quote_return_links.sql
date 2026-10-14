@@ -1,11 +1,17 @@
 -- Return links + one-time quote reminder.
--- Run once in Supabase Dashboard → SQL Editor, AFTER deploying the
--- resume-quote and quote-reminders Edge Functions (see RETURN_LINKS_SETUP.md).
--- Safe to re-run.
+-- Applied to project hbacogyhftngwoxenttv on 2026-10-14 (as migrations
+-- quote_reminder_sent_at + quote_reminders_schedule). Safe to re-run.
 
 -- 1. Remember which quotes already got their reminder.
 alter table public.quote_requests
   add column if not exists reminder_sent_at timestamptz;
+
+-- Quotes created before reminders went live were consented under the old
+-- wording; never send them a reminder. (Run once at go-live: 2026-10-14.)
+update public.quote_requests
+set reminder_sent_at = now()
+where reminder_sent_at is null
+  and created_at < '2026-10-14 15:20:00+00';
 
 -- 2. Function the scheduler calls; reuses the notify-lead webhook secret.
 create extension if not exists pg_net with schema extensions;
