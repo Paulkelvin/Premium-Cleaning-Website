@@ -3,7 +3,14 @@
 // Public (verify_jwt = false): the quote id is a random UUID that only the
 // customer receives, links expire after QUOTE_LINK_DAYS, and quotes that have
 // already been booked are not returned.
-import { serviceRoleClient } from "../_shared/notification-send.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+
+function serviceRoleClient() {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (!supabaseUrl || !serviceRoleKey) throw new Error("Server configuration incomplete");
+  return createClient(supabaseUrl, serviceRoleKey);
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

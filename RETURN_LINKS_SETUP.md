@@ -9,33 +9,20 @@ Lets customers pick up where they left off:
 | **Continue to booking** button in the quote email → `/book?quote=…` reloads the quote on any device (30 days) | Email + website | Yes (step 2) |
 | One reminder email ~24 hours after a quote that wasn't booked | Email | Yes (steps 2–3) |
 
-Until steps 2–3 are done, the website works exactly as before; old emails simply don't have the buttons.
+**Status: fully live since 14 Oct 2026.** `resume-quote`, `quote-reminders` and `notify-lead` are deployed to project `hbacogyhftngwoxenttv`, and the hourly `quote-reminders` cron job is active. Quotes created before go-live were marked as already reminded, so only new quotes (under the new consent wording) get a reminder.
 
----
+## Phone number in emails
 
-## 1. Before you deploy — check two settings
+Customer emails use `CONTACT_PHONE` in `supabase/functions/_shared/notification-templates.ts` (currently **202-262-6379**, the number the emails already used). The website uses 240-823-4466. Once the correct number is confirmed, change that one line and redeploy `notify-lead` and `quote-reminders`.
 
-1. **Phone number in emails.** The deployed emails will say **240-823-4466** (the number used across the website). The emails currently being sent come from an older version that says 202-262-6379. If 202-262-6379 is correct, change it in `supabase/functions/_shared/notification-templates.ts` first.
-2. **SITE_URL secret.** Supabase Dashboard → **Edge Functions → Secrets** → `SITE_URL` must be `https://www.rscleaningcollective.com` (no trailing slash). The email buttons use it.
-
-## 2. Deploy the three Edge Functions
-
-On a computer with this project and Node installed:
+## Redeploying later (if templates change)
 
 ```powershell
 npx supabase@latest login
 .\scripts\deploy-return-links.ps1
 ```
 
-This deploys only `notify-lead` (emails with the new buttons), `resume-quote` (loads a saved quote from the email link) and `quote-reminders` (sends the one reminder). Other functions are not touched.
-
-## 3. Turn on the hourly reminder
-
-Supabase Dashboard → **SQL Editor** → paste and run the whole file:
-
-`supabase/migrations/20261014_quote_return_links.sql`
-
-It adds a `reminder_sent_at` column and schedules `quote-reminders` every hour (minute 17). Safe to run more than once.
+The SQL in `supabase/migrations/20261014_quote_return_links.sql` is already applied; re-running it is safe.
 
 ## How the reminder decides who to email
 

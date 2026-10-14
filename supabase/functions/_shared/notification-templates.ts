@@ -1,3 +1,11 @@
+// Phone number shown in customer emails. Kept as the number the live emails
+// already use until the owner confirms which number is correct.
+export const CONTACT_PHONE = "202-262-6379";
+
+// Customer-facing links always use the canonical site (not SITE_URL, which
+// may still point at the retired workers.dev address).
+export const PUBLIC_SITE_URL = "https://www.rscleaningcollective.com";
+
 export function escapeHtml(value: unknown) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -51,7 +59,7 @@ export function buildEmailShell(options: {
 
   const footer =
     options.footerHtml ||
-    `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Questions? Reply to this email or call us at 240-823-4466.</p>`;
+    `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Questions? Reply to this email or call us at ${CONTACT_PHONE}.</p>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -68,7 +76,7 @@ export function buildEmailShell(options: {
 }
 
 export function buildSiteUrl() {
-  return String(Deno.env.get("SITE_URL") || "https://www.rscleaningcollective.com").replace(/\/$/, "");
+  return PUBLIC_SITE_URL;
 }
 
 export function buildAdminDashboardUrl() {
@@ -202,7 +210,7 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
           ["Add-ons", record.add_ons],
         ],
         footerHtml: record.id
-          ? `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Your quote is saved. Use the button any time in the next ${QUOTE_LINK_DAYS} days to pick a date and book, on any device. Questions? Reply to this email or call us at 240-823-4466.</p>`
+          ? `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Your quote is saved. Use the button any time in the next ${QUOTE_LINK_DAYS} days to pick a date and book, on any device. Questions? Reply to this email or call us at ${CONTACT_PHONE}.</p>`
           : `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Ready to schedule? Continue to booking on our website or reply to this email.</p>`,
       }),
     };
@@ -231,7 +239,7 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
         ["Payment", payOnline ? "Pay online" : "Pay at service"],
       ],
       footerHtml: needsPayment
-        ? `${buttonHtml(buildPayBookingUrl(record.id), "Complete your payment")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Already paid? You can ignore the button. Questions? Reply to this email or call us at 240-823-4466.</p>`
+        ? `${buttonHtml(buildPayBookingUrl(record.id), "Complete your payment")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Already paid? You can ignore the button. Questions? Reply to this email or call us at ${CONTACT_PHONE}.</p>`
         : undefined,
     }),
   };
@@ -251,7 +259,7 @@ export function buildQuoteReminderEmail(record: LeadRecord) {
         ["Estimate", formatMoney(record.estimated_total)],
         ["Frequency", record.frequency],
       ],
-      footerHtml: `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">This is the only reminder we'll send about this quote. Questions? Reply to this email or call us at 240-823-4466.</p>`,
+      footerHtml: `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">This is the only reminder we'll send about this quote. Questions? Reply to this email or call us at ${CONTACT_PHONE}.</p>`,
     }),
   };
 }
