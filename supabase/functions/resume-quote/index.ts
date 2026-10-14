@@ -55,6 +55,18 @@ Deno.serve(async (req) => {
       .eq("quote_id", quoteId);
     if ((count || 0) > 0) return json({ status: "booked" }, 409);
 
+    // Re-estimating creates a new quote, so a customer may book from a newer
+    // quote. Treat an older link as booked once that email has booked since.
+    const email = String(record.email || "").trim();
+    if (email) {
+      const { count: bookedSince } = await client
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .ilike("email", email.replace(/[\\%_]/g, (ch) => `\\${ch}`))
+        .gte("created_at", String(record.created_at));
+      if ((bookedSince || 0) > 0) return json({ status: "booked" }, 409);
+    }
+
     return json({ status: "ok", quote: record });
   } catch (err) {
     console.error("resume-quote:", err instanceof Error ? err.message : err);

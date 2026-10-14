@@ -36,7 +36,10 @@
     if (pagePath() !== "/book") return;
     const params = new URLSearchParams(window.location.search);
     const quoteId = String(params.get("quote") || "").trim();
-    if (!quoteId) return;
+    if (!quoteId) {
+      checkSavedQuoteStillOpen();
+      return;
+    }
 
     const cleanUrl = "/book";
     const existing = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
@@ -115,6 +118,29 @@
         if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", ready);
         else ready();
       });
+  }
+
+  // A quote saved on this device may have been booked elsewhere (another device,
+  // or a newer quote). Older saved quotes are re-checked quietly; if the server
+  // says it's booked, reuse the email-link flow to show "already booked".
+  function checkSavedQuoteStillOpen() {
+    const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
+    const quoteId = String(session?.quote_id || "");
+    const savedAt = new Date(session?.savedAt || 0).getTime();
+    if (!UUID_RE.test(quoteId) || !config.supabaseUrl || Date.now() - savedAt < 60 * 60 * 1000) return;
+    fetch(`${config.supabaseUrl}/functions/v1/resume-quote`, {
+      method: "POST",
+      headers: functionHeaders(),
+      body: JSON.stringify({ quote_id: quoteId }),
+    })
+      .then((response) => response.json().catch(() => ({})))
+      .then((data) => {
+        if (data.status === "booked" || data.status === "expired") {
+          window.clearQuoteSession();
+          window.location.replace(`/book?quote=${encodeURIComponent(quoteId)}`);
+        }
+      })
+      .catch(() => {});
   }
 
   // ---------- /quote: welcome back ----------

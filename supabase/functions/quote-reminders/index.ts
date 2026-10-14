@@ -5,7 +5,9 @@
 // A quote gets a reminder when it:
 //   - was created 24-72 hours ago (so old quotes are never mass-emailed),
 //   - has consent, a valid email, and no reminder sent yet,
-//   - has no booking linked to it, and the same email has not booked since.
+//   - has no booking linked to it, and the same email has not booked since,
+//   - is the customer's latest quote (re-estimating creates a new quote row;
+//     only the newest one is reminded, and at most one email per address per run).
 import {
   getWebhookSecret,
   serviceRoleClient,
@@ -18,6 +20,11 @@ const HOUR = 60 * 60 * 1000;
 const MIN_AGE_HOURS = 24;
 const MAX_AGE_HOURS = 72;
 const BATCH_LIMIT = 25;
+
+// Escape LIKE wildcards so an address containing "_" or "%" matches only itself.
+function likeExact(value: string) {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+}
 
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -55,6 +62,7 @@ Deno.serve(async (req) => {
     if (error) throw new Error(error.message);
 
     const sent: string[] = [];
+    const emailedThisRun = new Set<string>();
     const skipped: Array<{ id: string; reason: string }> = [];
 
     for (const quote of quotes || []) {
@@ -68,6 +76,17 @@ Deno.serve(async (req) => {
         continue;
       }
 
+      const { count: newer } = await client
+        .from("quote_requests")
+        .select("id", { count: "exact", head: true })
+        .ilike("email", likeExact(email))
+        .gt("created_at", quote.created_at);
+      if ((newer || 0) > 0 || emailedThisRun.has(email)) {
+        await markDone();
+        skipped.push({ id: quote.id, reason: "superseded" });
+        continue;
+      }
+
       const { count: linked } = await client
         .from("bookings")
         .select("id", { count: "exact", head: true })
@@ -75,7 +94,7 @@ Deno.serve(async (req) => {
       const { count: sameEmail } = await client
         .from("bookings")
         .select("id", { count: "exact", head: true })
-        .ilike("email", email)
+        .ilike("email", likeExact(email))
         .gte("created_at", quote.created_at);
       if ((linked || 0) > 0 || (sameEmail || 0) > 0) {
         await markDone();
@@ -96,6 +115,7 @@ Deno.serve(async (req) => {
         const content = buildQuoteReminderEmail(quote);
         await sendGmailEmail({ to: email, subject: content.subject, html: content.html });
         sent.push(quote.id);
+        emailedThisRun.add(email);
       } catch (err) {
         console.warn("quote-reminders: send failed", quote.id, err instanceof Error ? err.message : err);
         skipped.push({ id: quote.id, reason: "send_failed" });
