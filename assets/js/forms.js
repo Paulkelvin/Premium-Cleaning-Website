@@ -166,28 +166,54 @@ function showContactFeedback(form, type, message) {
 }
 
 const QUOTE_SESSION_KEY = "rs_cleaning_quote_session";
+// Saved quotes survive closing the tab so visitors can come back and book
+// later on the same device. They expire after QUOTE_SESSION_DAYS.
+const QUOTE_SESSION_DAYS = 14;
 
 function saveQuoteSession(data) {
+  const value = JSON.stringify({
+    ...data,
+    savedAt: new Date().toISOString()
+  });
   try {
-    sessionStorage.setItem(QUOTE_SESSION_KEY, JSON.stringify({
-      ...data,
-      savedAt: new Date().toISOString()
-    }));
+    localStorage.setItem(QUOTE_SESSION_KEY, value);
   } catch (err) {
-    console.warn("Could not save quote session", err);
+    try {
+      sessionStorage.setItem(QUOTE_SESSION_KEY, value);
+    } catch {
+      console.warn("Could not save quote session", err);
+    }
+  }
+}
+
+function readStoredQuote(storage) {
+  try {
+    const raw = storage.getItem(QUOTE_SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    const savedAt = new Date(data?.savedAt || 0).getTime();
+    if (!savedAt || Date.now() - savedAt > QUOTE_SESSION_DAYS * 24 * 60 * 60 * 1000) {
+      storage.removeItem(QUOTE_SESSION_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
   }
 }
 
 function loadQuoteSession() {
   try {
-    const raw = sessionStorage.getItem(QUOTE_SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    return readStoredQuote(localStorage) || readStoredQuote(sessionStorage);
   } catch {
     return null;
   }
 }
 
 function clearQuoteSession() {
+  try {
+    localStorage.removeItem(QUOTE_SESSION_KEY);
+  } catch {}
   try {
     sessionStorage.removeItem(QUOTE_SESSION_KEY);
   } catch {}

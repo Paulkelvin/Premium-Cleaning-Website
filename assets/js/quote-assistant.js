@@ -1506,6 +1506,8 @@ function initQuoteAssistant(formContainer = document) {
       // though nothing was actually wrong with their inputs. Booking still
       // requires a successful save later, so nothing downstream is skipped.
       const fallback = buildSubmissionPayload(form, table);
+      // Never fall back to an older saved quote's id: this estimate is new.
+      persistedQuoteId = null;
       quoteDraft = {
         captured: true,
         pricing: fallback.pricing,
@@ -2636,6 +2638,10 @@ function initQuoteAssistant(formContainer = document) {
             return;
           } catch (checkoutErr) {
             console.error("Square checkout error:", checkoutErr);
+            // The booking is saved even though checkout didn't open; don't offer to book it again.
+            if (typeof window.clearQuoteSession === "function") {
+              window.clearQuoteSession();
+            }
             if (checkoutLoading) checkoutLoading.hidden = true;
             hideFormChrome();
             if (successState) {

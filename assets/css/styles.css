@@ -13867,3 +13867,82 @@ html {
     -webkit-backdrop-filter: none;
   }
 }
+
+/* ================================================================
+   RETURN LINKS: saved quote prompt, email resume, pay-booking page
+   ================================================================ */
+.is-resuming-quote #bookNoQuoteGate,
+.is-resuming-quote #bookFormWrap {
+  display: none !important;
+}
+
+.is-resuming-quote .quote-window::after {
+  content: "Loading your saved quote…";
+  display: block;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.quote-return-note {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 auto 18px;
+  max-width: 520px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--gold-light);
+  border: 1px solid rgba(184, 146, 46, 0.35);
+  color: var(--ink);
+  text-align: left;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.quote-resume-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+  margin: 0 0 18px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  z-index: 2;
+}
+
+.quote-resume-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--ink);
+}
+
+.quote-resume-copy span {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.quote-resume-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pay-booking-card {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.pay-booking-card .form-state {
+  margin: 0;
+}
