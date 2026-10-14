@@ -24,3 +24,9 @@ verify_jwt = false
 
 [functions.notify-lead]
 verify_jwt = false
+
+[functions.resume-quote]
+verify_jwt = false
+
+[functions.quote-reminders]
+verify_jwt = false

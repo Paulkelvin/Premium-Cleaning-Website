@@ -14,3 +14,4 @@ scripts/.mcp-*.json
 scripts/.secrets*
 *.local.ps1
 .env.local
+.wrangler/

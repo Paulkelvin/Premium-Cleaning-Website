@@ -67,10 +67,29 @@ export function buildEmailShell(options: {
 </html>`;
 }
 
-export function buildAdminDashboardUrl() {
-  const siteUrl = String(Deno.env.get("SITE_URL") || "https://www.rscleaningcollective.com").replace(/\/$/, "");
-  return `${siteUrl}/admin-dashboard`;
+export function buildSiteUrl() {
+  return String(Deno.env.get("SITE_URL") || "https://www.rscleaningcollective.com").replace(/\/$/, "");
 }
+
+export function buildAdminDashboardUrl() {
+  return `${buildSiteUrl()}/admin-dashboard`;
+}
+
+// Links that bring a customer back to where they left off. The record id is a
+// random UUID, so the link itself is the key (same model as the Square return link).
+export function buildContinueQuoteUrl(quoteId: unknown) {
+  return `${buildSiteUrl()}/book?quote=${encodeURIComponent(String(quoteId || ""))}`;
+}
+
+export function buildPayBookingUrl(bookingId: unknown) {
+  return `${buildSiteUrl()}/pay-booking?booking=${encodeURIComponent(String(bookingId || ""))}`;
+}
+
+function buttonHtml(href: string, label: string) {
+  return `<p style="margin:24px 0 0;"><a href="${escapeHtml(href)}" style="display:inline-block;background:#0F4FCF;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:999px;">${escapeHtml(label)}</a></p>`;
+}
+
+const QUOTE_LINK_DAYS = 30;
 
 export type LeadRecord = Record<string, unknown>;
 
@@ -182,15 +201,20 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
           ["Frequency", record.frequency],
           ["Add-ons", record.add_ons],
         ],
-        footerHtml: `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Ready to schedule? Continue to booking on our website or reply to this email.</p>`,
+        footerHtml: record.id
+          ? `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Your quote is saved. Use the button any time in the next ${QUOTE_LINK_DAYS} days to pick a date and book, on any device. Questions? Reply to this email or call us at 240-823-4466.</p>`
+          : `<p style="margin:24px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Ready to schedule? Continue to booking on our website or reply to this email.</p>`,
       }),
     };
   }
 
   const payOnline = record.payment_method === "pay_online";
-  const nextStep = payOnline
-    ? "If you chose pay online, complete checkout when prompted or watch for a payment link from our team."
-    : "We will contact you shortly to confirm your appointment time.";
+  const needsPayment = payOnline && record.id && String(record.payment_status || "") !== "paid";
+  const nextStep = needsPayment
+    ? "If you haven't finished paying yet, use the button below to complete your secure payment at any time."
+    : payOnline
+      ? "If you chose pay online, complete checkout when prompted or watch for a payment link from our team."
+      : "We will contact you shortly to confirm your appointment time.";
 
   return {
     subject: "Booking request received — RS Cleaning Collective",
@@ -206,6 +230,28 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
         ["Estimate", formatMoney(record.estimated_total)],
         ["Payment", payOnline ? "Pay online" : "Pay at service"],
       ],
+      footerHtml: needsPayment
+        ? `${buttonHtml(buildPayBookingUrl(record.id), "Complete your payment")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">Already paid? You can ignore the button. Questions? Reply to this email or call us at 240-823-4466.</p>`
+        : undefined,
+    }),
+  };
+}
+
+// One-time follow-up for a quote that hasn't been booked yet.
+export function buildQuoteReminderEmail(record: LeadRecord) {
+  const name = escapeHtml(String(record.full_name || "there"));
+  return {
+    subject: "Your cleaning quote is saved — RS Cleaning Collective",
+    html: buildEmailShell({
+      eyebrow: "RS Cleaning Collective",
+      title: "Still thinking it over?",
+      introHtml: `<p style="margin:0;line-height:1.5;">Hi ${name},</p><p style="margin:16px 0 0;line-height:1.5;">Your quote is saved and ready whenever you are. Pick a date and book in a couple of minutes, with no need to start over.</p>`,
+      rows: [
+        ["Service", record.service_type],
+        ["Estimate", formatMoney(record.estimated_total)],
+        ["Frequency", record.frequency],
+      ],
+      footerHtml: `${buttonHtml(buildContinueQuoteUrl(record.id), "Continue to booking")}<p style="margin:12px 0 0;font-size:13px;color:#64748b;line-height:1.5;">This is the only reminder we'll send about this quote. Questions? Reply to this email or call us at 240-823-4466.</p>`,
     }),
   };
 }
