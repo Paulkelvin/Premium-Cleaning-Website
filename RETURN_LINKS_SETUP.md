@@ -36,8 +36,8 @@ Each email is sent only if the quote:
 - is no older than 72 hours (older quotes are never mass-emailed),
 - has the consent box ticked and a valid email,
 - hasn't had that email already,
-- is the customer's latest quote,
-- has no booking linked to it, and nobody has booked with the same email since.
+- is the customer's latest quote (same email or phone),
+- has no booking linked to it, and nobody has booked with the same email or phone since.
 
 Quote form consent now reads: *"I agree to be contacted about my quote, including one follow-up email if I don't book."*
 
