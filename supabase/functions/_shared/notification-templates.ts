@@ -1,6 +1,5 @@
-// Phone number shown in customer emails. Kept as the number the live emails
-// already use until the owner confirms which number is correct.
-export const CONTACT_PHONE = "202-262-6379";
+// Phone number shown in customer emails (same number as the website).
+export const CONTACT_PHONE = "240-823-4466";
 
 // Customer-facing links always use the canonical site (not SITE_URL, which
 // may still point at the retired workers.dev address).

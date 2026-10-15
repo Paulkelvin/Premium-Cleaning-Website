@@ -15,7 +15,7 @@ Lets customers pick up where they left off:
 
 ## Phone number in emails
 
-Customer emails use `CONTACT_PHONE` in `supabase/functions/_shared/notification-templates.ts` (currently **202-262-6379**, the number the emails already used). The website uses 240-823-4466. Once the correct number is confirmed, change that one line and redeploy `notify-lead` and `quote-reminders`.
+Customer emails use `CONTACT_PHONE` in `supabase/functions/_shared/notification-templates.ts`: **240-823-4466**, the same number as the website (since 15 Oct 2026). To change it, edit that one line and redeploy `notify-lead` and `quote-reminders`.
 
 ## Redeploying later (if templates change)
 
