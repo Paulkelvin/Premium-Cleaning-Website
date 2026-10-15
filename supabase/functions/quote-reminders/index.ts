@@ -8,8 +8,9 @@
 // Nothing else is ever sent. A quote is only emailed when it:
 //   - has consent and a valid email, and that stage hasn't been sent yet,
 //   - is no older than 72 hours (old quotes are never mass-emailed),
-//   - has no booking linked to it, and the same email has not booked since,
-//   - is the customer's latest quote (re-estimating creates a new quote row),
+//   - has no booking linked to it, and the same email or phone has not booked since,
+//   - is the customer's latest quote (re-estimating creates a new quote row;
+//     matched by email or phone),
 //   and at most one email per address per stage per run.
 import {
   getWebhookSecret,
@@ -71,7 +72,7 @@ async function runStage(client: ReturnType<typeof serviceRoleClient>, stage: Sta
   const now = Date.now();
   let query = client
     .from("quote_requests")
-    .select("id, created_at, full_name, email, service_type, property_type, estimated_total, frequency, add_ons, consent")
+    .select("id, created_at, full_name, email, phone, service_type, property_type, estimated_total, frequency, add_ons, consent")
     .is(stage.column, null)
     .eq("consent", true)
     .lte("created_at", new Date(now - stage.minAgeHours * HOUR).toISOString())
@@ -98,12 +99,23 @@ async function runStage(client: ReturnType<typeof serviceRoleClient>, stage: Sta
       continue;
     }
 
-    const { count: newer } = await client
-      .from("quote_requests")
-      .select("id", { count: "exact", head: true })
-      .ilike("email", likeExact(email))
-      .gt("created_at", quote.created_at);
-    if ((newer || 0) > 0 || emailedThisRun.has(email)) {
+    // Same person = same email, or same phone (catches a mistyped email that
+    // was corrected by re-quoting, so the typo address is never emailed).
+    const phone = String(quote.phone || "").trim();
+    const countSince = async (table: "quote_requests" | "bookings", inclusive: boolean) => {
+      const since = (q: any) => inclusive ? q.gte("created_at", quote.created_at) : q.gt("created_at", quote.created_at);
+      const { count: byEmail } = await since(
+        client.from(table).select("id", { count: "exact", head: true }).ilike("email", likeExact(email)),
+      );
+      if ((byEmail || 0) > 0 || !phone) return byEmail || 0;
+      const { count: byPhone } = await since(
+        client.from(table).select("id", { count: "exact", head: true }).eq("phone", phone),
+      );
+      return byPhone || 0;
+    };
+
+    const newer = await countSince("quote_requests", false);
+    if (newer > 0 || emailedThisRun.has(email)) {
       await markDone();
       skipped.push({ id: quote.id, reason: "superseded" });
       continue;
@@ -113,12 +125,8 @@ async function runStage(client: ReturnType<typeof serviceRoleClient>, stage: Sta
       .from("bookings")
       .select("id", { count: "exact", head: true })
       .eq("quote_id", quote.id);
-    const { count: sameEmail } = await client
-      .from("bookings")
-      .select("id", { count: "exact", head: true })
-      .ilike("email", likeExact(email))
-      .gte("created_at", quote.created_at);
-    if ((linked || 0) > 0 || (sameEmail || 0) > 0) {
+    const bookedSince = (linked || 0) > 0 ? 0 : await countSince("bookings", true);
+    if ((linked || 0) > 0 || bookedSince > 0) {
       await markDone();
       skipped.push({ id: quote.id, reason: "already_booked" });
       continue;

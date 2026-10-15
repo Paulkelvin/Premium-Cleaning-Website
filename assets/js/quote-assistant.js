@@ -1219,6 +1219,14 @@ function initQuoteAssistant(formContainer = document) {
   let currentStepIndex = 0;
   let quoteDraft = null;
   let persistedQuoteId = null;
+  let leftPageForRedirect = false;
+
+  // Safari/iOS can restore this page from the back/forward cache with the
+  // submit button still showing "Sending..." after we sent the customer to
+  // booking or checkout. Reload so they get a fresh, working page.
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && leftPageForRedirect) window.location.reload();
+  });
 
   if (!isBooking && typeof window.loadQuoteSession === "function") {
     const bootSession = window.loadQuoteSession();
@@ -2613,6 +2621,7 @@ function initQuoteAssistant(formContainer = document) {
           stateEl.textContent = "Taking you to booking...";
         }
         redirectingToCheckout = true;
+        leftPageForRedirect = true;
         window.location.href = "/book?from=quote";
         return;
       } else {
@@ -2630,6 +2639,7 @@ function initQuoteAssistant(formContainer = document) {
               window.clearQuoteSession();
             }
             redirectingToCheckout = true;
+            leftPageForRedirect = true;
             window.location.assign(checkoutUrl);
             return;
           } catch (checkoutErr) {

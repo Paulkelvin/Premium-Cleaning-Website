@@ -22,3 +22,39 @@ begin
   perform cron.schedule('quote-reminders', '*/15 * * * *', 'select public.run_quote_reminders();');
 end;
 $$;
+
+-- 3. Give the email run up to 60s (pg_net defaults to 5s), so a busy run
+--    with several emails is never cut off mid-way.
+create or replace function public.run_quote_reminders()
+returns void
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  webhook_secret text;
+begin
+  select secret into webhook_secret
+  from public.internal_webhook_config
+  where id = 1;
+
+  if webhook_secret is null or length(trim(webhook_secret)) = 0 then
+    return;
+  end if;
+
+  perform net.http_post(
+    url := 'https://hbacogyhftngwoxenttv.supabase.co/functions/v1/quote-reminders',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'x-notify-secret', webhook_secret
+    ),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 60000
+  );
+exception
+  when others then
+    raise warning 'run_quote_reminders failed: %', sqlerrm;
+end;
+$$;
+
+revoke all on function public.run_quote_reminders() from public, anon, authenticated;
