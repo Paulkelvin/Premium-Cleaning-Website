@@ -197,11 +197,11 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
 
   if (table === "quote_requests") {
     return {
-      subject: "Your quote request — RS Cleaning Collective",
+      subject: "Your cleaning quote — RS Cleaning Collective",
       html: buildEmailShell({
         eyebrow: "RS Cleaning Collective",
-        title: "Quote request received",
-        introHtml: `<p style="margin:0;line-height:1.5;">Hi ${name},</p><p style="margin:16px 0 0;line-height:1.5;">Thanks for requesting an estimate. Here is a summary of what you submitted.</p>`,
+        title: "Your cleaning quote",
+        introHtml: `<p style="margin:0;line-height:1.5;">Hi ${name},</p><p style="margin:16px 0 0;line-height:1.5;">Thanks for getting a quote with RS Cleaning Collective. Here it is, saved and ready whenever you'd like to pick a date and book.</p>`,
         rows: [
           ["Service", record.service_type],
           ["Property", record.property_type],
@@ -249,7 +249,7 @@ export function buildCustomerLeadEmail(table: string, record: LeadRecord) {
 export function buildQuoteReminderEmail(record: LeadRecord) {
   const name = escapeHtml(String(record.full_name || "there"));
   return {
-    subject: "Your cleaning quote is saved — RS Cleaning Collective",
+    subject: "Still thinking it over? Your quote is saved — RS Cleaning Collective",
     html: buildEmailShell({
       eyebrow: "RS Cleaning Collective",
       title: "Still thinking it over?",
