@@ -1249,7 +1249,7 @@ function initQuoteAssistant(formContainer = document) {
       : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
-    "Share your contact details, review, and submit."
+    "Add your contact details to see your price, then book."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",
@@ -2532,7 +2532,7 @@ function initQuoteAssistant(formContainer = document) {
 
     const defaultSubmitLabel = isBooking
       ? (btnSubmit?.innerHTML || "Confirm booking")
-      : (quoteSubmitIdleLabel || `Submit quote <i data-lucide="arrow-right"></i>`);
+      : (quoteSubmitIdleLabel || `Book this cleaning <i data-lucide="calendar"></i>`);
 
     if (btnSubmit) {
       btnSubmit.disabled = true;
@@ -2606,19 +2606,15 @@ function initQuoteAssistant(formContainer = document) {
           window.saveQuoteSession(sessionData);
         }
 
-        form.style.display = "none";
-        const expand = formContainer.querySelector(".quote-window-expand");
-        if (expand) expand.style.display = "none";
-        const progress = formContainer.querySelector(".quote-progress");
-        if (progress) progress.style.display = "none";
-        if (windowHead) windowHead.style.display = "none";
-
-        const successState = formContainer.querySelector("#quoteSuccessState");
-        if (successState) {
-          const totalEl = successState.querySelector("[data-success-total]");
-          if (totalEl) totalEl.textContent = formatMoney(pricing.total);
-          showSuccessPanel(successState);
+        // The price is already on screen, so "Book this cleaning" goes straight
+        // to scheduling and payment; the saved quote carries over to /book.
+        if (stateEl) {
+          stateEl.className = "form-state loading";
+          stateEl.textContent = "Taking you to booking...";
         }
+        redirectingToCheckout = true;
+        window.location.href = "/book?from=quote";
+        return;
       } else {
         const payOnline = payload.payment_method === "pay_online";
         const squareEnabled = typeof window.isSquareCheckoutEnabled === "function" && window.isSquareCheckoutEnabled();
@@ -2753,7 +2749,7 @@ function updateAssistantBubble(formContainer, stepIndex, isBooking) {
       : "Pick your property type, then enter beds & baths or square footage.",
     "Choose a cleaning type and how often.",
     "Optional add-ons — tap any that apply, or skip.",
-    "Share your contact details, review, and submit."
+    "Add your contact details to see your price, then book."
   ];
   const bookMessages = [
     "Your quote is saved. Where should we come, and when works best?",

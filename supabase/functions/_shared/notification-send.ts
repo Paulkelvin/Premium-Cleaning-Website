@@ -92,7 +92,11 @@ export async function sendLeadNotifications(table: string, record: LeadRecord) {
   if (adminEmails.length) {
     sentTo.push(...await sendMany(adminEmails, adminEmail.subject, adminEmail.html));
   }
-  if (customerEmail && isValidRecipient(customerEmail)) {
+  // Customers are not emailed the moment a quote is created: if they book they
+  // only get the booking email; if not, quote-reminders sends the quote ~1 hour
+  // later. Admins are still alerted about every quote immediately.
+  const emailCustomerNow = table !== "quote_requests";
+  if (emailCustomerNow && customerEmail && isValidRecipient(customerEmail)) {
     try {
       await sendGmailEmail({
         to: customerEmail,

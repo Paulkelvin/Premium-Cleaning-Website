@@ -7,9 +7,11 @@ Lets customers pick up where they left off:
 | Saved quote survives closing the tab (14 days, same device) + "Welcome back" prompt on /quote | Website | No — live as soon as the site deploys |
 | **Complete your payment** button in the booking email (pay-online bookings) → `/pay-booking` → Square | Email + website | Yes (step 2) |
 | **Continue to booking** button in the quote email → `/book?quote=…` reloads the quote on any device (30 days) | Email + website | Yes (step 2) |
-| One reminder email ~24 hours after a quote that wasn't booked | Email | Yes (steps 2–3) |
+| Quote email ~1 hour after a quote that wasn't booked, then one reminder at ~24 hours | Email | Yes (steps 2–3) |
 
-**Status: fully live since 14 Oct 2026.** `resume-quote`, `quote-reminders` and `notify-lead` are deployed to project `hbacogyhftngwoxenttv`, and the hourly `quote-reminders` cron job is active. Quotes created before go-live were marked as already reminded, so only new quotes (under the new consent wording) get a reminder.
+**Status: fully live since 14 Oct 2026.** `resume-quote`, `quote-reminders` and `notify-lead` are deployed to project `hbacogyhftngwoxenttv`, and the `quote-reminders` cron job runs every 15 minutes.
+
+**Since 15 Oct 2026:** the quote page button is **Book this cleaning** and goes straight to `/book`. Customers are no longer emailed the moment they quote, so someone who books gets only the booking email. Admins still get every "New quote request" alert immediately. See `supabase/migrations/20261015_quote_email_stage.sql`.
 
 ## Phone number in emails
 
@@ -26,10 +28,15 @@ The SQL in `supabase/migrations/20261014_quote_return_links.sql` is already appl
 
 ## How the reminder decides who to email
 
-A quote gets **one** reminder only if it:
-- was created 24–72 hours ago (older quotes are never mass-emailed),
+Customers get at most two emails per quote, and only while it is unbooked:
+1. **Quote email** about 1 hour after quoting.
+2. **One reminder** about 24 hours after quoting, at least 12 hours after the quote email.
+
+Each email is sent only if the quote:
+- is no older than 72 hours (older quotes are never mass-emailed),
 - has the consent box ticked and a valid email,
-- hasn't been reminded already,
+- hasn't had that email already,
+- is the customer's latest quote,
 - has no booking linked to it, and nobody has booked with the same email since.
 
 Quote form consent now reads: *"I agree to be contacted about my quote, including one follow-up email if I don't book."*
