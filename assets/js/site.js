@@ -1339,10 +1339,31 @@ function ensureAppToastHost() {
   return toast;
 }
 
-function showAppToast(message, type = "error") {
+function showAppToast(message, type = "error", { title = "" } = {}) {
   const toast = ensureAppToastHost();
-  toast.textContent = message;
+  toast.textContent = "";
+  const icon = document.createElement("span");
+  icon.className = "app-toast-icon";
+  icon.setAttribute("aria-hidden", "true");
+  icon.textContent = type === "success" ? "✓" : "!";
+  const body = document.createElement("div");
+  body.className = "app-toast-body";
+  if (title) {
+    const heading = document.createElement("strong");
+    heading.className = "app-toast-title";
+    heading.textContent = title;
+    body.appendChild(heading);
+  }
+  const text = document.createElement("span");
+  text.className = "app-toast-text";
+  text.textContent = message;
+  body.appendChild(text);
+  toast.append(icon, body);
   toast.className = `app-toast is-${type}`;
+  if (!toast._tapToClose) {
+    toast._tapToClose = true;
+    toast.addEventListener("click", () => toast.classList.remove("is-visible"));
+  }
   requestAnimationFrame(() => toast.classList.add("is-visible"));
   if (toast._hideTimer) clearTimeout(toast._hideTimer);
   toast._hideTimer = setTimeout(() => toast.classList.remove("is-visible"), 5200);
