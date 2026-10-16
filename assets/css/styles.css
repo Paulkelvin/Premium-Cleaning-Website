@@ -6416,31 +6416,70 @@ html:not(.js) .fade-in-right {
 }
 
 .app-toast {
-  padding: 14px 16px;
-  border-radius: 12px;
-  font-size: 0.88rem;
-  font-weight: 600;
+  --toast-accent: #dc2626;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px 13px 14px;
+  border-radius: 14px;
+  font-size: 0.86rem;
+  font-weight: 500;
   line-height: 1.45;
-  color: var(--white);
-  background: rgba(17, 24, 39, 0.96);
-  box-shadow: 0 12px 40px rgba(11, 19, 36, 0.28);
+  color: #1f2937;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-left: 4px solid var(--toast-accent);
+  box-shadow: 0 14px 40px rgba(11, 19, 36, 0.18), 0 2px 6px rgba(11, 19, 36, 0.06);
   opacity: 0;
-  transform: translateY(12px);
+  transform: translateY(12px) scale(0.98);
   transition: opacity 0.3s ease, transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-  pointer-events: auto;
+  pointer-events: none;
+  cursor: pointer;
 }
 
 .app-toast.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 .app-toast.is-error {
-  background: linear-gradient(135deg, #991b1b, #b91c1c);
+  --toast-accent: #dc2626;
 }
 
 .app-toast.is-success {
-  background: linear-gradient(135deg, #065f46, #047857);
+  --toast-accent: #059669;
+}
+
+.app-toast-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--toast-accent);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.app-toast-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.app-toast-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.app-toast-text {
+  color: #374151;
 }
 
 .quote-nav-hint {
@@ -13039,6 +13078,12 @@ html {
   margin-top: 2px;
   width: 100%;
   justify-content: center;
+}
+
+/* Details still missing: looks dimmed but stays tappable, so a tap can
+   explain exactly what's needed. */
+.quote-get-estimate[aria-disabled="true"] {
+  opacity: 0.6;
 }
 
 .quote-contact-entry .quote-consent {

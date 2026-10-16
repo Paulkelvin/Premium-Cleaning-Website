@@ -1474,6 +1474,29 @@ function initQuoteAssistant(formContainer = document) {
     return Boolean(name && phoneDigits.length >= 10 && validateEmailAddress(email) && preferred);
   }
 
+  function getMissingEstimateDetails() {
+    const field = (name) => form.querySelector(`input[name="${name}"]`);
+    const missing = [];
+    if (!String(field("full_name")?.value || "").trim()) {
+      missing.push({ label: "your name", input: field("full_name") });
+    }
+    const phoneDigits = String(field("phone")?.value || "").replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      missing.push({ label: phoneDigits ? "a full 10-digit phone number" : "your phone number", input: field("phone") });
+    }
+    const email = String(field("email")?.value || "").trim();
+    if (!validateEmailAddress(email)) {
+      missing.push({ label: email ? "a valid email address" : "your email address", input: field("email") });
+    }
+    if (!form.querySelector('input[name="preferred_contact"]:checked')) {
+      missing.push({ label: "how you'd like us to contact you (Email, Phone or Text)", input: field("preferred_contact") });
+    }
+    if (!isFinalConsentGiven()) {
+      missing.push({ label: "a tick in the box agreeing to be contacted about your quote", input: consentInput });
+    }
+    return missing;
+  }
+
   function isFinalConsentGiven() {
     return Boolean(consentInput?.checked);
   }
@@ -1511,7 +1534,10 @@ function initQuoteAssistant(formContainer = document) {
 
   function setGetEstimateEnabled(enabled) {
     if (!btnGetEstimate || isBooking || !isQuoteConsole) return;
-    btnGetEstimate.disabled = !enabled;
+    if (btnGetEstimate.getAttribute("aria-busy") === "true") return;
+    // Stays tappable while details are missing (just dimmed), so a tap can
+    // tell the customer exactly what's still needed instead of doing nothing.
+    btnGetEstimate.disabled = false;
     btnGetEstimate.setAttribute("aria-disabled", enabled ? "false" : "true");
   }
 
@@ -1547,21 +1573,22 @@ function initQuoteAssistant(formContainer = document) {
       setQuoteSubmitPreparing(false);
       setSubmitEnabledForFinalStep(false);
       hideQuoteEstimateDisplay();
-      showStudioToast(root, "Complete your name, phone, email, and contact preference first.", "error");
-      const firstMissing = !String(form.querySelector('input[name="full_name"]')?.value || "").trim()
-        ? form.querySelector('input[name="full_name"]')
-        : String(form.querySelector('input[name="phone"]')?.value || "").replace(/\D/g, "").length < 10
-          ? form.querySelector('input[name="phone"]')
-          : !validateEmailAddress(form.querySelector('input[name="email"]')?.value)
-            ? form.querySelector('input[name="email"]')
-            : form.querySelector('input[name="preferred_contact"]');
-      if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(firstMissing);
-      if (typeof window.scrollFieldIntoView === "function") window.scrollFieldIntoView(firstMissing);
-      return;
     }
-    if (!isFinalConsentGiven()) {
-      showStudioToast(root, "Please agree to be contacted before getting your estimate.", "error");
-      consentInput?.focus?.({ preventScroll: true });
+    // Tell the customer exactly what's still missing, and highlight it.
+    const missing = getMissingEstimateDetails();
+    if (missing.length) {
+      const labels = missing.map((item) => item.label);
+      const list = labels.length === 1
+        ? labels[0]
+        : `${labels.slice(0, -1).join(", ")} and ${labels[labels.length - 1]}`;
+      if (typeof window.showAppToast === "function") {
+        window.showAppToast(`Please add ${list}, then tap Get my estimate.`, "error", { title: "Almost there" });
+      }
+      missing.forEach((item) => {
+        if (typeof window.markFieldInvalid === "function") window.markFieldInvalid(item.input);
+      });
+      if (typeof window.scrollFieldIntoView === "function") window.scrollFieldIntoView(missing[0].input);
+      missing[0].input?.focus?.({ preventScroll: true });
       return;
     }
     if (btnGetEstimate) {
