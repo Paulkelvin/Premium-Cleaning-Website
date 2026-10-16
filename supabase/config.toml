@@ -30,3 +30,5 @@ verify_jwt = false
 
 [functions.quote-reminders]
 verify_jwt = false
+[functions.google-calendar]
+verify_jwt = false

@@ -741,12 +741,86 @@ function initBookDatePicker(form) {
 
   container.innerHTML = chips.join("");
 
+  // Taken or blocked slots, per date: { "2026-10-20": { morning: true, afternoon: false } }
+  // (true = free). Missing dates count as free; the server re-checks every booking.
+  let availability = {};
+
+  const slotKeyFor = (value) => (/^morning/i.test(value) ? "morning" : /^afternoon/i.test(value) ? "afternoon" : "");
+
+  const applySlotAvailability = () => {
+    const day = availability[hidden.value];
+    form.querySelectorAll('input[name="preferred_time"]').forEach((input) => {
+      const key = slotKeyFor(input.value);
+      const taken = Boolean(day && key && day[key] === false);
+      input.disabled = taken;
+      const option = input.closest(".book-time-option");
+      option?.classList.toggle("is-unavailable", taken);
+      let note = option?.querySelector(".book-time-taken");
+      if (taken && option && !note) {
+        note = document.createElement("span");
+        note.className = "book-time-taken";
+        note.textContent = "Booked";
+        option.appendChild(note);
+      } else if (!taken && note) {
+        note.remove();
+      }
+      if (taken && input.checked) {
+        input.checked = false;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+  };
+
+  const applyDayAvailability = () => {
+    container.querySelectorAll(".book-date-chip").forEach((chip) => {
+      const day = availability[chip.dataset.date];
+      const full = Boolean(day && day.morning === false && day.afternoon === false);
+      chip.disabled = full;
+      chip.classList.toggle("is-unavailable", full);
+      chip.setAttribute("aria-disabled", full ? "true" : "false");
+      if (full && chip.classList.contains("is-selected")) {
+        chip.classList.remove("is-selected");
+        hidden.value = "";
+        hidden.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    });
+    applySlotAvailability();
+  };
+
+  const loadAvailability = async () => {
+    const config = window.CLEANCO_CONFIG || {};
+    const apiKey = config.supabaseFunctionKey || config.supabaseAnonKey;
+    if (!config.supabaseUrl || !apiKey) return;
+    const headers = { apikey: apiKey, "Content-Type": "application/json" };
+    if (String(apiKey).startsWith("eyJ")) headers.Authorization = `Bearer ${apiKey}`;
+    try {
+      const res = await fetch(`${config.supabaseUrl}/rest/v1/rpc/get_booking_availability`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ p_days: 14 })
+      });
+      if (!res.ok) return;
+      const rows = await res.json();
+      availability = {};
+      (rows || []).forEach((row) => {
+        availability[row.day] = { morning: Boolean(row.morning), afternoon: Boolean(row.afternoon) };
+      });
+      applyDayAvailability();
+    } catch {
+      // Offline or blocked: leave every day open; the booking itself is still checked.
+    }
+  };
+
+  window.refreshBookAvailability = loadAvailability;
+  loadAvailability();
+
   container.addEventListener("click", (event) => {
     const chip = event.target.closest(".book-date-chip");
-    if (!chip) return;
+    if (!chip || chip.disabled) return;
     container.querySelectorAll(".book-date-chip").forEach((el) => el.classList.remove("is-selected"));
     chip.classList.add("is-selected");
     hidden.value = chip.dataset.date || "";
+    applySlotAvailability();
     hidden.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
@@ -2893,6 +2967,12 @@ function initQuoteAssistant(formContainer = document) {
       }
     } catch (err) {
       console.error("Submission error:", err);
+      if (isBooking && String(err?.message || "").includes("slot_taken")) {
+        // Someone else booked this slot a moment ago: refresh what's free and
+        // send the customer back to pick a new date/time.
+        if (typeof window.refreshBookAvailability === "function") window.refreshBookAvailability();
+        if (currentStepIndex > 0) transitionToStep(0, -1);
+      }
       if (stateEl) {
         stateEl.className = "form-state error";
         stateEl.textContent = typeof window.mapSubmissionError === "function"

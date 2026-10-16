@@ -42,6 +42,9 @@ function sanitizePayload(table, payload) {
 
 function mapSubmissionError(error) {
   const raw = String(error?.message || error || "");
+  if (raw.includes("slot_taken")) {
+    return "Sorry, that time was just booked by someone else. Please pick another date or time.";
+  }
   if (raw.toLowerCase().includes("service area")) {
     return "Please confirm your service area before checkout. If unsure, continue and we'll apply the outside-area review fee.";
   }
