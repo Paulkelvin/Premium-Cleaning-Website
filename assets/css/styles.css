@@ -9547,6 +9547,27 @@ body[data-sanity-page="home"] .grid.four.steps .step:nth-child(4) .step-icon-wra
   max-width: none;
 }
 
+/* Home hero: fill the screen, but never clip its content. On short windows
+   (small laptops, zoomed browsers, phones held sideways) the hero grows to fit
+   with breathing room, instead of cutting off the heading at the top and the
+   cards at the bottom. */
+.hero--backdrop:not(.hero--overlay) {
+  height: auto;
+  max-height: none;
+}
+
+.hero--backdrop:not(.hero--overlay) .hero-content-wrap {
+  padding: clamp(28px, 6vh, 56px) 0;
+}
+
+/* Short windows: scale the heading with the window height so the whole hero
+   still fits on one screen where it can. */
+@media (min-width: 641px) and (max-height: 760px) {
+  .hero--backdrop:not(.hero--overlay) h1 {
+    font-size: clamp(2.2rem, 10vh, 4.8rem);
+  }
+}
+
 /* --- Inner-page hero: text on image (no frosted panel) --- */
 .hero--overlay {
   min-height: 52vh;
