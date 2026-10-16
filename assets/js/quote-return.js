@@ -170,7 +170,8 @@
     card.parentNode.insertBefore(banner, card);
     banner.querySelector("[data-quote-resume-dismiss]").addEventListener("click", () => {
       if (typeof window.clearQuoteSession === "function") window.clearQuoteSession();
-      banner.remove();
+      // The form below is showing the saved answers; reload for a blank quote.
+      window.location.replace("/quote");
     });
   }
 
