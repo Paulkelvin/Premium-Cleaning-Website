@@ -1,4 +1,4 @@
-// Follow-up emails for quotes that were not booked. Called every 15 minutes by
+// Follow-up emails for quotes that were not booked. Called every 5 minutes by
 // pg_cron (see supabase/migrations) with the same x-notify-secret as notify-lead.
 //
 // Customers are not emailed when a quote is created (see notification-send.ts).

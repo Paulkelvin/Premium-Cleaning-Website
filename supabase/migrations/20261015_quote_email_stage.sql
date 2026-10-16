@@ -58,3 +58,14 @@ end;
 $$;
 
 revoke all on function public.run_quote_reminders() from public, anon, authenticated;
+
+-- 4. (2026-10-16) Check every 5 minutes, so the quote email lands within
+--    about 5 minutes of the 1-hour mark.
+do $$
+begin
+  if exists (select 1 from cron.job where jobname = 'quote-reminders') then
+    perform cron.unschedule('quote-reminders');
+  end if;
+  perform cron.schedule('quote-reminders', '*/5 * * * *', 'select public.run_quote_reminders();');
+end;
+$$;

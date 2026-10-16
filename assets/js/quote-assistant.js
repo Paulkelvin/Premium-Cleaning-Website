@@ -943,6 +943,16 @@ function writeQuoteFormFields(form, fields) {
   if (consent) consent.checked = Boolean(fields.consent);
 }
 
+// Same home size as the saved quote (beds/baths, or square feet in sqft mode).
+function sameSpace(fields, session) {
+  const num = (v) => String(parseInt(String(v || "").replace(/,/g, ""), 10) || "");
+  const mode = fields.size_input_mode === "sqft" ? "sqft" : "beds_baths";
+  const sessionMode = session.size_input_mode || inferSizeInputModeFromSession(session);
+  if (mode !== sessionMode) return false;
+  if (mode === "sqft") return num(fields.square_feet) === num(session.square_feet);
+  return num(fields.bedrooms) === num(session.bedrooms) && num(fields.bathrooms) === num(session.bathrooms);
+}
+
 // A link that asks for a specific service/property/step starts from that link,
 // not from earlier answers.
 function hasExplicitQuoteLinkParams() {
@@ -1908,7 +1918,7 @@ function initQuoteAssistant(formContainer = document) {
       const norm = (v) => String(v || "").split(",").map((s) => s.trim()).filter(Boolean).sort().join(",");
       const sameAnswers = sessionPriced && ["property_type", "service_type", "frequency"].every(
         (key) => normalizeServiceType(String(draft.fields[key] || "")) === normalizeServiceType(String(session[key] || ""))
-      ) && norm(draft.fields.add_ons) === norm(session.add_ons);
+      ) && norm(draft.fields.add_ons) === norm(session.add_ons) && sameSpace(draft.fields, session);
       const sameQuote = sameAnswers && draft.captured && (draft.quote_id || null) === (session.quote_id || null);
       restoredQuote = { captured: sameQuote, quote_id: sameQuote ? session.quote_id || null : null, step: Number(draft.step) || 0 };
     } else if (sessionPriced) {

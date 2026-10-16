@@ -7796,6 +7796,15 @@ html:not(.js) .fade-in-right {
   color: var(--navy);
 }
 
+.book-quote-chip-edit {
+  margin-left: 4px;
+  font-weight: 700;
+  color: var(--blue);
+  white-space: nowrap;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .book-quote-chip svg {
   width: 16px;
   height: 16px;
