@@ -873,6 +873,83 @@ function setAddonValues(form, addOnsValue) {
   });
 }
 
+// Answers typed into the quote form are kept for this browser tab, so going
+// Back from booking, refreshing or tapping "Update your quote" never wipes them.
+// Cleared together with the saved quote (see clearQuoteSession in forms.js).
+const QUOTE_DRAFT_KEY = "rs_cleaning_quote_draft";
+
+function loadQuoteDraft() {
+  try {
+    const raw = sessionStorage.getItem(QUOTE_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveQuoteDraft(draft) {
+  try {
+    sessionStorage.setItem(QUOTE_DRAFT_KEY, JSON.stringify(draft));
+  } catch {}
+}
+
+function readQuoteFormFields(form) {
+  const data = new FormData(form);
+  return {
+    property_type: data.get("property_type") || "",
+    size_input_mode: getSizeInputMode(form),
+    bedrooms: form.querySelector("#quoteBedrooms")?.value || "",
+    bathrooms: form.querySelector("#quoteBathrooms")?.value || "",
+    square_feet: form.querySelector("#quoteSqft")?.value || "",
+    service_type: data.get("service_type") || "",
+    frequency: data.get("frequency") || "",
+    add_ons: data.getAll("add_ons[]").join(", "),
+    full_name: data.get("full_name") || "",
+    phone: data.get("phone") || "",
+    email: data.get("email") || "",
+    preferred_contact: data.get("preferred_contact") || "",
+    consent: Boolean(form.querySelector('input[name="consent"]')?.checked)
+  };
+}
+
+function hasQuoteAnswers(fields) {
+  return Boolean(fields && (
+    fields.property_type || fields.service_type || fields.frequency || fields.add_ons ||
+    fields.bedrooms || fields.bathrooms || fields.square_feet ||
+    fields.full_name || fields.phone || fields.email
+  ));
+}
+
+function writeQuoteFormFields(form, fields) {
+  if (!form || !fields) return;
+  setFormValue(form, "property_type", fields.property_type);
+  const mode = fields.size_input_mode === "sqft" ? "sqft" : "beds_baths";
+  applySizeInputMode(form, mode);
+  if (mode === "sqft") {
+    const sqft = form.querySelector("#quoteSqft");
+    if (sqft && fields.square_feet) sqft.value = fields.square_feet;
+  } else {
+    const beds = form.querySelector("#quoteBedrooms");
+    const baths = form.querySelector("#quoteBathrooms");
+    if (beds && fields.bedrooms) beds.value = fields.bedrooms;
+    if (baths && fields.bathrooms) baths.value = fields.bathrooms;
+  }
+  setFormValue(form, "service_type", normalizeServiceType(fields.service_type));
+  setFormValue(form, "frequency", fields.frequency);
+  form.querySelectorAll('input[name="add_ons[]"]').forEach((input) => { input.checked = false; });
+  setAddonValues(form, fields.add_ons);
+  ["full_name", "phone", "email", "preferred_contact"].forEach((name) => setFormValue(form, name, fields[name]));
+  const consent = form.querySelector('input[name="consent"]');
+  if (consent) consent.checked = Boolean(fields.consent);
+}
+
+// A link that asks for a specific service/property/step starts from that link,
+// not from earlier answers.
+function hasExplicitQuoteLinkParams() {
+  const params = new URLSearchParams(window.location.search);
+  return ["service", "property", "addon", "addons", "frequency", "step"].some((key) => params.has(key));
+}
+
 function initQuotePrefill() {
   const form = document.querySelector("#quoteAssistantForm");
   if (!form || form.getAttribute("data-table") !== "bookings") return;
@@ -1185,6 +1262,8 @@ function initQuoteAssistant(formContainer = document) {
   const reviewSchedule = formContainer.querySelector("#reviewSchedule");
   const root = form.closest("#quoteAssistantCard, #bookAssistantCard, .quote-window") || formContainer;
   const liveTotalDisplay = root.querySelector("#liveCalculatedTotal");
+  const reviewPriceAmount = root.querySelector("#reviewPriceAmount");
+  const reviewPriceNote = root.querySelector("#reviewPriceNote");
   const totalPanel = root.querySelector(".quote-console-total-panel");
   const assistantBubble = root.querySelector("#assistantBubble");
   const windowTitle = root.querySelector("#quoteWindowTitle");
@@ -1410,6 +1489,7 @@ function initQuoteAssistant(formContainer = document) {
   function hideQuoteEstimateDisplay() {
     if (!isQuoteConsole) return;
     if (liveTotalDisplay) liveTotalDisplay.textContent = "—";
+    if (reviewPriceAmount) reviewPriceAmount.textContent = "—";
     if (totalPanel) totalPanel.classList.remove("is-calculating");
     const travelNote = root.querySelector("#reviewTravelNote");
     if (travelNote) {
@@ -1449,6 +1529,7 @@ function initQuoteAssistant(formContainer = document) {
     }
     setFinalReviewFocus(false);
     hideQuoteEstimateDisplay();
+    saveDraftNow();
   }
 
   async function maybeStartFinalReview() {
@@ -1545,6 +1626,7 @@ function initQuoteAssistant(formContainer = document) {
         if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
       }
     }
+    saveDraftNow();
     showCalculatingReview();
   }
 
@@ -1783,9 +1865,75 @@ function initQuoteAssistant(formContainer = document) {
 
   if (!isBooking) {
     currentStepIndex = resolveQuoteStartStep(quoteContext);
+  }
+
+  // Bring back what the customer already entered (Back from booking, "Update
+  // your quote", refresh) instead of starting the quote over. A quote that
+  // already has a price reopens on the last step with that price showing.
+  let restoredQuote = null;
+  if (!isBooking && !hasExplicitQuoteLinkParams()) {
+    const draft = loadQuoteDraft();
+    const session = typeof window.loadQuoteSession === "function" ? window.loadQuoteSession() : null;
+    const sessionPriced = Boolean(session && Number(session.estimated_total) > 0);
+    if (draft && hasQuoteAnswers(draft.fields)) {
+      writeQuoteFormFields(form, draft.fields);
+      // Only reuse the saved price if the answers still match that quote.
+      const norm = (v) => String(v || "").split(",").map((s) => s.trim()).filter(Boolean).sort().join(",");
+      const sameAnswers = sessionPriced && ["property_type", "service_type", "frequency"].every(
+        (key) => normalizeServiceType(String(draft.fields[key] || "")) === normalizeServiceType(String(session[key] || ""))
+      ) && norm(draft.fields.add_ons) === norm(session.add_ons);
+      const sameQuote = sameAnswers && draft.captured && (draft.quote_id || null) === (session.quote_id || null);
+      restoredQuote = { captured: sameQuote, quote_id: sameQuote ? session.quote_id || null : null, step: Number(draft.step) || 0 };
+    } else if (sessionPriced) {
+      writeQuoteFormFields(form, { ...session, size_input_mode: session.size_input_mode || inferSizeInputModeFromSession(session) });
+      restoredQuote = { captured: true, quote_id: session.quote_id || null, step: steps.length - 1 };
+    }
+    if (restoredQuote) {
+      const firstIncomplete = getFirstIncompleteStepIndex();
+      if (restoredQuote.captured && (firstIncomplete >= 0 || !isFinalReadyForEstimate())) {
+        restoredQuote.captured = false;
+      }
+      const lastStep = steps.length - 1;
+      const wanted = restoredQuote.captured ? lastStep : Math.max(0, Math.min(lastStep, restoredQuote.step));
+      currentStepIndex = firstIncomplete >= 0 ? Math.min(wanted, firstIncomplete) : wanted;
+    }
+  }
+
+  if (!isBooking) {
     steps.forEach((step, index) => {
       step.classList.toggle("active", index === currentStepIndex);
     });
+  }
+
+  function saveDraftNow() {
+    if (isBooking) return;
+    const fields = readQuoteFormFields(form);
+    if (!hasQuoteAnswers(fields)) return;
+    saveQuoteDraft({
+      fields,
+      step: currentStepIndex,
+      captured: Boolean(quoteDraft?.captured),
+      quote_id: quoteDraft?.quote_id || null
+    });
+  }
+
+  // Show the restored price exactly as if "Get my estimate" had just finished.
+  function showRestoredEstimate() {
+    if (!restoredQuote?.captured || !isQuoteConsole) return;
+    quoteDraft = { captured: true, pricing: calculateQuoteTotal(form), quote_id: restoredQuote.quote_id };
+    persistedQuoteId = restoredQuote.quote_id;
+    reviewAnimationStep = currentStepIndex;
+    if (calculatingState) calculatingState.hidden = true;
+    populateReview(true);
+    if (reviewReveal) {
+      reviewReveal.hidden = false;
+      reviewReveal.classList.add("is-revealed");
+    }
+    if (liveEstimate) liveEstimate.textContent = "Confirmed before we arrive";
+    setFinalReviewFocus(true);
+    setGetEstimateEnabled(true);
+    setSubmitEnabledForFinalStep(true);
+    saveDraftNow();
   }
 
   function updatePrefillChip() {
@@ -2076,6 +2224,9 @@ function initQuoteAssistant(formContainer = document) {
     if (liveTotalDisplay) {
       liveTotalDisplay.textContent = shouldShowTotal ? formatMoney(totalValue) : "—";
     }
+    if (reviewPriceAmount) {
+      reviewPriceAmount.textContent = shouldShowTotal ? formatMoney(totalValue) : "—";
+    }
     if (travelNote) {
       if (shouldShowTotal && pricing.travelFee > 0) {
         travelNote.hidden = false;
@@ -2087,6 +2238,9 @@ function initQuoteAssistant(formContainer = document) {
         travelNote.hidden = true;
         travelNote.textContent = "";
       }
+    }
+    if (reviewPriceNote) {
+      reviewPriceNote.textContent = travelNote?.textContent || "Confirmed before we arrive";
     }
 
     updatePaymentUI();
@@ -2117,6 +2271,7 @@ function initQuoteAssistant(formContainer = document) {
 
       if (!hasValidSpaceMetrics(form)) {
         if (totalEl) totalEl.textContent = "—";
+        if (reviewPriceAmount) reviewPriceAmount.textContent = "—";
         reviewReveal.hidden = false;
         setSubmitEnabledForFinalStep(true);
         scrollQuoteEstimateIntoView();
@@ -2125,6 +2280,7 @@ function initQuoteAssistant(formContainer = document) {
 
       if (totalEl) totalEl.textContent = formatMoney(0);
       animateCountUp(totalEl, pricing.total, 1300);
+      animateCountUp(reviewPriceAmount, pricing.total, 1300);
       reviewReveal.hidden = false;
       setSubmitEnabledForFinalStep(true);
       scrollQuoteEstimateIntoView();
@@ -2376,6 +2532,7 @@ function initQuoteAssistant(formContainer = document) {
         hideQuoteEstimateDisplay();
       }
     }
+    saveDraftNow();
   }
 
   if (!isQuoteStudio) {
@@ -2414,6 +2571,7 @@ function initQuoteAssistant(formContainer = document) {
     }
   });
   syncQuoteServicePricingUi(form);
+  showRestoredEstimate();
   if (!isBooking || (typeof window.loadQuoteSession === "function" && window.loadQuoteSession())) {
     playAssistantMessage(currentStepIndex);
     initPhoneFormatting(form);
@@ -2501,6 +2659,7 @@ function initQuoteAssistant(formContainer = document) {
         invalidateQuoteDraft();
       }
     }
+    saveDraftNow();
   });
 
   form.addEventListener("input", (event) => {
@@ -2518,6 +2677,7 @@ function initQuoteAssistant(formContainer = document) {
         invalidateQuoteDraft();
       }
     }
+    saveDraftNow();
   });
 
   form.addEventListener("submit", async (e) => {
@@ -2718,6 +2878,7 @@ function initQuoteAssistant(formContainer = document) {
   if (btnRestart) {
     btnRestart.addEventListener("click", () => {
       clearQuoteContextStorage();
+      try { sessionStorage.removeItem(QUOTE_DRAFT_KEY); } catch {}
       if (window.history.replaceState) {
         window.history.replaceState({}, "", "/quote");
       }

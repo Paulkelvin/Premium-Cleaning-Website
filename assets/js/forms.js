@@ -216,6 +216,8 @@ function clearQuoteSession() {
   } catch {}
   try {
     sessionStorage.removeItem(QUOTE_SESSION_KEY);
+    // Answers kept while filling in the quote form (see quote-assistant.js).
+    sessionStorage.removeItem("rs_cleaning_quote_draft");
   } catch {}
 }
 
