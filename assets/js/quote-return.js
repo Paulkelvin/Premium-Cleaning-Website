@@ -79,6 +79,9 @@
         if (response.ok && data.status === "ok" && data.quote) {
           const quote = data.quote;
           const sizeMode = quote.bedrooms ? "beds_baths" : quote.square_feet ? "sqft" : "beds_baths";
+          // Answers left in this tab from another quote must not replace the
+          // emailed quote when the customer taps "Edit quote".
+          try { sessionStorage.removeItem("rs_cleaning_quote_draft"); } catch {}
           window.saveQuoteSession({
             full_name: quote.full_name || "",
             email: quote.email || "",

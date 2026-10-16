@@ -9,7 +9,7 @@ Lets customers pick up where they left off:
 | **Continue to booking** button in the quote email → `/book?quote=…` reloads the quote on any device (30 days) | Email + website | Yes (step 2) |
 | Quote email ~1 hour after a quote that wasn't booked, then one reminder at ~24 hours | Email | Yes (steps 2–3) |
 
-**Status: fully live since 14 Oct 2026.** `resume-quote`, `quote-reminders` and `notify-lead` are deployed to project `hbacogyhftngwoxenttv`, and the `quote-reminders` cron job runs every 15 minutes.
+**Status: fully live since 14 Oct 2026.** `resume-quote`, `quote-reminders` and `notify-lead` are deployed to project `hbacogyhftngwoxenttv`, and the `quote-reminders` cron job runs every 5 minutes.
 
 **Since 15 Oct 2026:** the quote page button is **Book this cleaning** and goes straight to `/book`. Customers are no longer emailed the moment they quote, so someone who books gets only the booking email. Admins still get every "New quote request" alert immediately. See `supabase/migrations/20261015_quote_email_stage.sql`.
 
