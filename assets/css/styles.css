@@ -7875,6 +7875,32 @@ html:not(.js) .fade-in-right {
   transform: translateY(-1px);
 }
 
+/* Fully booked or blocked by the owner's calendar. */
+.book-date-chip.is-unavailable,
+.book-date-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  background: #f3f4f6;
+  transform: none;
+  text-decoration: line-through;
+}
+
+.book-time-option.is-unavailable {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.book-time-taken {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
 .book-date-chip.is-selected {
   background: var(--mint-light);
   border-color: var(--mint);

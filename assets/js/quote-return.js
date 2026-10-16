@@ -205,6 +205,24 @@
       }
       button.disabled = true;
       setStatus("loading", "Opening secure checkout…");
+      // An unpaid booking only holds its time for 30 minutes; make sure nobody
+      // else took it since, before taking payment.
+      try {
+        const apiKey = config.supabaseFunctionKey || config.supabaseAnonKey;
+        const check = await fetch(`${config.supabaseUrl}/rest/v1/rpc/booking_payment_check`, {
+          method: "POST",
+          headers: { ...functionHeaders(), apikey: apiKey },
+          body: JSON.stringify({ p_booking: bookingId })
+        });
+        if (check.ok && (await check.json()) === "slot_taken") {
+          button.disabled = false;
+          button.hidden = true;
+          setStatus("error", `Sorry, the time you picked has since been booked by someone else, so this booking can't be paid. Please book a new time, or call us at ${PHONE} and we'll help.`);
+          return;
+        }
+      } catch {
+        // If the check can't run, carry on to checkout as before.
+      }
       try {
         const url = await window.createSquareCheckout(bookingId);
         if (typeof window.rsTrack === "function") window.rsTrack("payment_link_opened", {});

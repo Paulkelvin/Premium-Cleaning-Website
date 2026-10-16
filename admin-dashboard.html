@@ -409,6 +409,18 @@
             <p class="admin-settings-copy">You have standard admin access. Contact a super admin if you need another team member added.</p>
           </article>
 
+          <article class="admin-settings-card" data-calendar-card>
+            <h3><i data-lucide="calendar-days"></i> Google Calendar</h3>
+            <p class="admin-settings-copy" data-calendar-status>Checking connection…</p>
+            <p class="admin-settings-copy admin-settings-copy--muted">Website bookings are added to a calendar called <strong>RS Cleaning Bookings</strong>. To block a day or time for customers, add an event to that calendar; delete it to open the time again. Changes show on the website within about 5 minutes.</p>
+            <div class="admin-settings-actions">
+              <button class="admin-btn admin-btn--primary" type="button" data-calendar-connect hidden><i data-lucide="link"></i> Connect Google Calendar</button>
+              <button class="admin-btn admin-btn--ghost" type="button" data-calendar-sync hidden><i data-lucide="refresh-cw"></i> Sync now</button>
+              <button class="admin-btn admin-btn--ghost" type="button" data-calendar-disconnect hidden><i data-lucide="unlink"></i> Disconnect</button>
+            </div>
+            <div class="form-state admin-settings-state" data-calendar-state role="status"></div>
+          </article>
+
           <article class="admin-settings-card">
             <h3><i data-lucide="database"></i> Data tools</h3>
             <p class="admin-settings-copy">Export contacts, quotes, and bookings for a date range (by submission date).</p>
@@ -458,6 +470,7 @@
   <script src="assets/js/site.js"></script>
   <script src="assets/js/admin.js"></script>
   <script src="assets/js/admin-invoices.js"></script>
+  <script src="assets/js/admin-calendar.js"></script>
   <script>if(typeof lucide !== 'undefined') lucide.createIcons();</script>
 </body>
 </html>
