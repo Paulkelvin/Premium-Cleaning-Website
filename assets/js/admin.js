@@ -342,7 +342,10 @@ function getRowSummary(table, row) {
     row.preferred_date,
     row.preferred_time,
     row.estimated_total ? `$${Number(row.estimated_total).toFixed(2)}` : "",
-    row.payment_method?.replace(/_/g, " ")
+    row.payment_method?.replace(/_/g, " "),
+    /^cancel/i.test(String(row.status || "")) ? "Cancelled" : "",
+    // The owner deleted this booking's Google Calendar event, so its time is open again.
+    row.calendar_released_at ? "Time released (removed from calendar)" : ""
   ].filter(Boolean).join(" · ");
 }
 

@@ -41,3 +41,13 @@ After connecting, the card shows "Connected" and the **RS Cleaning Bookings** ca
 - **redirect_uri_mismatch** on Google's page: the redirect URI in step 3 doesn't exactly match.
 - **Last sync failed / access expired**: click **Reconnect**. If it keeps happening weekly, check step 2.
 - **Turn it off**: admin card → **Disconnect** (bookings still can't double-book).
+
+## Built-in safeguards
+
+- Same-day bookings are refused (Maryland date), whatever the visitor's time zone.
+- One email/phone can hold at most 3 upcoming website bookings.
+- Cancelling or deleting a booking in the admin removes its calendar event on the next sync.
+- Restoring a deleted booking event (Google Calendar trash) makes it hold its time again.
+- If the "RS Cleaning Bookings" calendar itself is deleted, a new one is created and bookings are re-added.
+- If syncing starts failing (e.g. access removed), admins get one email with how to reconnect.
+- A paid booking that overlaps another booking or block is added with a red "⚠️ DOUBLE-BOOKED" title.

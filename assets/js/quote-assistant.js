@@ -722,20 +722,18 @@ function initBookDatePicker(form) {
   if (!container || !hidden || container.dataset.ready === "true") return;
   container.dataset.ready = "true";
 
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
+  // Days are Maryland days (where the cleaning happens), whatever time zone
+  // the visitor is in, so "tomorrow" never shows Maryland's today.
+  const marylandToday = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
+  const start = new Date(`${marylandToday}T12:00:00Z`);
   const chips = [];
 
   for (let offset = 1; offset <= 14; offset += 1) {
     const day = new Date(start);
-    day.setDate(start.getDate() + offset);
-    const iso = [
-      day.getFullYear(),
-      String(day.getMonth() + 1).padStart(2, "0"),
-      String(day.getDate()).padStart(2, "0")
-    ].join("-");
-    const weekday = day.toLocaleDateString("en-US", { weekday: "short" });
-    const label = day.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    day.setUTCDate(start.getUTCDate() + offset);
+    const iso = day.toISOString().slice(0, 10);
+    const weekday = day.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
+    const label = day.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
     chips.push(`<button type="button" class="book-date-chip" data-date="${iso}" aria-label="${weekday}, ${label}"><em>${weekday}</em><strong>${label}</strong></button>`);
   }
 
@@ -813,6 +811,10 @@ function initBookDatePicker(form) {
 
   window.refreshBookAvailability = loadAvailability;
   loadAvailability();
+  // A customer who left the page open and comes back sees what's free now.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") loadAvailability();
+  });
 
   container.addEventListener("click", (event) => {
     const chip = event.target.closest(".book-date-chip");
@@ -2967,7 +2969,7 @@ function initQuoteAssistant(formContainer = document) {
       }
     } catch (err) {
       console.error("Submission error:", err);
-      if (isBooking && String(err?.message || "").includes("slot_taken")) {
+      if (isBooking && /slot_taken|date_unavailable/.test(String(err?.message || ""))) {
         // Someone else booked this slot a moment ago: refresh what's free and
         // send the customer back to pick a new date/time.
         if (typeof window.refreshBookAvailability === "function") window.refreshBookAvailability();

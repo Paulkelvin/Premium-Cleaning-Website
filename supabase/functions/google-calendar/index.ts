@@ -14,6 +14,7 @@
 // the owner's other calendars are never read.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdmin } from "../_shared/admin-auth.ts";
+import { isGmailConfigured, sendGmailEmail } from "../_shared/gmail.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/google-calendar`;
@@ -217,27 +218,71 @@ function bookingEvent(b: Record<string, unknown>) {
   };
 }
 
+// Tell the admins once when syncing starts failing (e.g. Google access removed),
+// so bookings don't quietly stop reaching the calendar.
+async function alertSyncFailure(client: ReturnType<typeof db>, message: string) {
+  try {
+    if (!(await isGmailConfigured())) return;
+    const { data } = await client.from("admin_users").select("email");
+    const to = [...new Set((data || []).map((r) => String(r.email || "").trim().toLowerCase()).filter((e) => e.includes("@")))];
+    const safe = message.replace(/[<>&]/g, "");
+    for (const email of to) {
+      await sendGmailEmail({
+        to: email,
+        subject: "Google Calendar sync stopped — RS Cleaning Collective",
+        html: `<p>The website couldn't sync bookings with Google Calendar.</p><p><strong>Reason:</strong> ${safe}</p><p>Bookings still can't be double-booked, but new bookings won't appear in the calendar and time blocked in the calendar may be out of date.</p><p>To fix it: <a href="${ADMIN_URL}">Admin dashboard</a> → Settings → Google Calendar → <strong>Reconnect</strong>.</p>`,
+      }).catch(() => {});
+    }
+  } catch { /* best effort */ }
+}
+
+const SLOT_SELECT = "id, full_name, email, phone, service_type, frequency, add_ons, estimated_total, payment_method, payment_status, preferred_date, preferred_time, address, message, status, google_event_id, calendar_released_at";
+
+async function listEvents(token: string, calendarId: string) {
+  const timeMin = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const timeMax = new Date(Date.now() + SYNC_DAYS_AHEAD * 24 * 3600 * 1000).toISOString();
+  const events: Record<string, any>[] = [];
+  let pageToken = "";
+  do {
+    const params = new URLSearchParams({ timeMin, timeMax, singleEvents: "true", showDeleted: "true", maxResults: "2500" });
+    if (pageToken) params.set("pageToken", pageToken);
+    const page = await gcal(token, `/calendars/${encodeURIComponent(calendarId)}/events?${params}`);
+    events.push(...(page.items || []));
+    pageToken = page.nextPageToken || "";
+  } while (pageToken);
+  return events;
+}
+
 // ---------- sync ----------
 async function sync(client: ReturnType<typeof db>) {
   const config = await loadConfig(client);
   if (!config.refresh_token || !config.calendar_id) return { skipped: "not_connected" };
-  const summary = { busy: 0, added: 0, released: 0, errors: 0 };
+  const summary = { busy: 0, added: 0, released: 0, restored: 0, removed: 0, errors: 0 };
   try {
     const token = await accessToken(config);
-    const calendarId = encodeURIComponent(config.calendar_id);
 
-    // 1. Read the calendar.
-    const timeMin = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const timeMax = new Date(Date.now() + SYNC_DAYS_AHEAD * 24 * 3600 * 1000).toISOString();
-    const events: Record<string, any>[] = [];
-    let pageToken = "";
-    do {
-      const params = new URLSearchParams({ timeMin, timeMax, singleEvents: "true", showDeleted: "true", maxResults: "2500" });
-      if (pageToken) params.set("pageToken", pageToken);
-      const page = await gcal(token, `/calendars/${calendarId}/events?${params}`);
-      events.push(...(page.items || []));
-      pageToken = page.nextPageToken || "";
-    } while (pageToken);
+    // 1. Read the calendar. If the owner deleted the whole calendar, make a
+    //    new one and put the bookings back in it.
+    let calendarIdRaw = config.calendar_id;
+    let events: Record<string, any>[];
+    try {
+      events = await listEvents(token, calendarIdRaw);
+    } catch (err) {
+      if ((err as { status?: number }).status !== 404) throw err;
+      calendarIdRaw = await ensureCalendar(token, { ...config, calendar_id: null });
+      await saveConfig(client, { calendar_id: calendarIdRaw });
+      await client.from("bookings").update({ google_event_id: null }).not("google_event_id", "is", null);
+      events = [];
+    }
+    const calendarId = encodeURIComponent(calendarIdRaw);
+
+    // Bookings referenced by events, to spot cancelled/deleted ones.
+    const linkedIds = [...new Set(events.map((ev) => ev.extendedProperties?.private?.rs_booking_id).filter(Boolean))];
+    const linked = new Map<string, Record<string, any>>();
+    if (linkedIds.length) {
+      const { data } = await client.from("bookings").select("id, status, calendar_released_at, google_event_id").in("id", linkedIds);
+      (data || []).forEach((b) => linked.set(String(b.id), b));
+    }
 
     const busy = [];
     const releasedIds: string[] = [];
@@ -246,6 +291,26 @@ async function sync(client: ReturnType<typeof db>) {
       if (ev.status === "cancelled") {
         if (bookingId) releasedIds.push(bookingId);
         continue;
+      }
+      if (bookingId) {
+        const booking = linked.get(bookingId);
+        const cancelled = !booking || ["cancelled", "canceled"].includes(String(booking.status || ""));
+        if (cancelled) {
+          // Booking was cancelled or deleted in the admin: take its event out
+          // of the calendar so the time isn't left blocked.
+          try {
+            await gcal(token, `/calendars/${calendarId}/events/${encodeURIComponent(ev.id)}`, { method: "DELETE" });
+            summary.removed += 1;
+          } catch (err) {
+            if (![404, 410].includes(Number((err as { status?: number }).status))) summary.errors += 1;
+          }
+          continue;
+        }
+        if (booking.calendar_released_at && booking.google_event_id === ev.id) {
+          // The owner restored an event she had deleted: the booking holds its time again.
+          await client.from("bookings").update({ calendar_released_at: null }).eq("id", bookingId);
+          summary.restored += 1;
+        }
       }
       if (ev.transparency === "transparent") continue; // marked "Free"
       if (ev.start?.dateTime && ev.end?.dateTime) {
@@ -270,7 +335,7 @@ async function sync(client: ReturnType<typeof db>) {
     // 3. Add confirmed website bookings that aren't in the calendar yet
     //    (pay at appointment, or paid online; unpaid online bookings wait).
     const { data: pending } = await client.from("bookings")
-      .select("id, full_name, email, phone, service_type, frequency, add_ons, estimated_total, payment_method, payment_status, preferred_date, preferred_time, address, message, status")
+      .select(SLOT_SELECT)
       .is("google_event_id", null).is("calendar_released_at", null)
       .gte("preferred_date", marylandToday())
       .or("payment_method.neq.pay_online,payment_status.eq.paid")
@@ -279,7 +344,18 @@ async function sync(client: ReturnType<typeof db>) {
       .limit(40);
     for (const b of pending || []) {
       try {
-        const created = await gcal(token, `/calendars/${calendarId}/events`, { method: "POST", body: JSON.stringify(bookingEvent(b)) });
+        const event = bookingEvent(b);
+        // Rare: an online booking paid after its 30-minute hold ran out, when
+        // someone else had taken the time. Make it impossible to miss.
+        const { data: clash } = await client.rpc("booking_slot_taken", {
+          p_date: b.preferred_date, p_slot: b.preferred_time || "", p_exclude: b.id,
+        });
+        if (clash === true) {
+          event.summary = `⚠️ DOUBLE-BOOKED — ${event.summary}`;
+          event.colorId = "11";
+          event.description = `This time overlaps another booking or a blocked time. Please contact one of the customers to reschedule.\n\n${event.description}`;
+        }
+        const created = await gcal(token, `/calendars/${calendarId}/events`, { method: "POST", body: JSON.stringify(event) });
         await client.from("bookings").update({ google_event_id: String(created.id) }).eq("id", b.id).is("google_event_id", null);
         summary.added += 1;
       } catch (err) {
@@ -293,6 +369,7 @@ async function sync(client: ReturnType<typeof db>) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Sync failed";
     await saveConfig(client, { last_sync_at: new Date().toISOString(), last_sync_error: message, last_sync_summary: summary });
+    if (!config.last_sync_error) await alertSyncFailure(client, message);
     throw err;
   }
 }
