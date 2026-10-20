@@ -249,3 +249,61 @@ begin
   perform cron.schedule('calendar-sync', '*/5 * * * *', 'select public.run_calendar_sync();');
 end;
 $$;
+
+-- 7. (2026-10-20) Edge cases --------------------------------------------------
+--  * a cancelled or deleted booking's leftover calendar event no longer blocks
+--  * no same-day (Maryland) bookings and nothing past 60 days, enforced here too
+--  * one person (email or phone) can hold at most 3 upcoming website bookings
+
+create or replace function public.booking_slot_taken(p_date date, p_slot text, p_exclude uuid default null)
+returns boolean language sql volatile security definer set search_path = public as $$
+  select exists (
+      select 1 from public.bookings b
+      where (p_exclude is null or b.id <> p_exclude)
+        and public.booking_holds_slot(b)
+        and public.booking_slot_range(b.preferred_date, b.preferred_time)
+            && public.booking_slot_range(p_date, p_slot)
+    )
+    or exists (
+      select 1 from public.calendar_busy c
+      where (p_exclude is null or c.booking_id is null or c.booking_id <> p_exclude)
+        and (c.booking_id is null or exists (
+              select 1 from public.bookings x
+              where x.id = c.booking_id and coalesce(x.status, '') not in ('cancelled', 'canceled')))
+        and tstzrange(c.starts_at, c.ends_at) && public.booking_slot_range(p_date, p_slot)
+    );
+$$;
+revoke all on function public.booking_slot_taken(date, text, uuid) from public, anon, authenticated;
+
+create or replace function public.enforce_booking_slot()
+returns trigger language plpgsql volatile security definer set search_path = public as $$
+declare
+  v_taken boolean;
+  v_today date := (now() at time zone 'America/New_York')::date;
+  v_active integer;
+begin
+  if new.preferred_date is null or coalesce(new.source, 'website') <> 'website' then
+    return new;
+  end if;
+  if new.preferred_date <= v_today or new.preferred_date > v_today + 60 then
+    raise exception 'date_unavailable' using errcode = 'P0001',
+      hint = 'Please pick a date from tomorrow onwards.';
+  end if;
+  select count(*) into v_active from public.bookings b
+  where b.preferred_date >= v_today
+    and public.booking_holds_slot(b)
+    and (lower(b.email) = lower(coalesce(new.email, ''))
+         or (coalesce(new.phone, '') <> '' and b.phone = new.phone));
+  if v_active >= 3 then
+    raise exception 'too_many_bookings' using errcode = 'P0001',
+      hint = 'You already have 3 upcoming bookings. Please call us to add more.';
+  end if;
+  perform pg_advisory_xact_lock(hashtext('booking-day:' || new.preferred_date::text));
+  select public.booking_slot_taken(new.preferred_date, new.preferred_time, new.id) into v_taken;
+  if v_taken then
+    raise exception 'slot_taken' using errcode = 'P0001',
+      hint = 'That time was just booked. Please pick another time.';
+  end if;
+  return new;
+end;
+$$;
