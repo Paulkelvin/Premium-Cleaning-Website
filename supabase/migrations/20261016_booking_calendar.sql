@@ -89,14 +89,17 @@ set search_path = public
 as $$
   select exists (
       select 1 from public.bookings b
-      where b.id is distinct from p_exclude
+      where (p_exclude is null or b.id <> p_exclude)
         and public.booking_holds_slot(b)
         and public.booking_slot_range(b.preferred_date, b.preferred_time)
             && public.booking_slot_range(p_date, p_slot)
     )
     or exists (
       select 1 from public.calendar_busy c
-      where c.booking_id is distinct from p_exclude
+      -- Owner's own events have no booking_id and always count. (A plain
+      -- "is distinct from p_exclude" skipped them when p_exclude was null,
+      -- so the booking page showed blocked days as free.)
+      where (p_exclude is null or c.booking_id is null or c.booking_id <> p_exclude)
         and tstzrange(c.starts_at, c.ends_at) && public.booking_slot_range(p_date, p_slot)
     );
 $$;
