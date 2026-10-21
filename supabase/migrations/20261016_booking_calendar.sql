@@ -24,6 +24,10 @@ create table if not exists public.calendar_busy (
 );
 alter table public.calendar_busy enable row level security;
 revoke all on public.calendar_busy from anon, authenticated;
+-- Server-only table. Explicit grant so a rebuilt database (new project,
+-- branch, db reset) works under Supabase's "new tables need grants" rule.
+grant select, insert, update, delete on public.calendar_busy to service_role;
+grant usage, select on sequence public.calendar_busy_id_seq to service_role;
 
 -- Google connection (service role only; never readable from the website).
 create table if not exists public.internal_google_calendar_config (
@@ -40,6 +44,7 @@ create table if not exists public.internal_google_calendar_config (
 );
 alter table public.internal_google_calendar_config enable row level security;
 revoke all on public.internal_google_calendar_config from anon, authenticated;
+grant select, insert, update, delete on public.internal_google_calendar_config to service_role;
 insert into public.internal_google_calendar_config (id) values (1) on conflict (id) do nothing;
 
 -- 2. Slot helpers -------------------------------------------------------------
