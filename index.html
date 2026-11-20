@@ -723,5 +723,41 @@
   <script src="assets/js/forms.js"></script>
   <script src="assets/js/payments.js"></script>
   <script src="assets/js/pay-open.js"></script>
+  <!-- TEMP-BREAK-TEST: deliberate fake bug for a client test. Delete this whole block to restore. -->
+  <script>
+  (function () {
+    var css = document.createElement("style");
+    css.textContent =
+      "#tempBugPanel{background:#1a0b0b;color:#ffb4b4;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;padding:14px 18px;border-bottom:4px solid #e11d48;position:relative;z-index:9999}" +
+      "#tempBugPanel b{color:#fff;font-size:14px}#tempBugPanel .dim{color:#fca5a5;opacity:.8}" +
+      "#tempBugPanel pre{margin:8px 0 0;white-space:pre-wrap;word-break:break-word;color:#fecaca}" +
+      ".temp-bug-dead{pointer-events:none!important;opacity:.45!important;filter:grayscale(1);cursor:not-allowed!important}";
+    document.head.appendChild(css);
+
+    var panel = document.createElement("div");
+    panel.id = "tempBugPanel";
+    panel.setAttribute("role", "alert");
+    panel.innerHTML =
+      "<b>⚠ Uncaught TypeError: Cannot read properties of undefined (reading 'quote')</b>" +
+      '<pre>    at initHero (app.bundle.js:2841:19)\n    at renderEstimate (pricing.js:517:33)\n    at HTMLDocument.&lt;anonymous&gt; (main.js:96:7)\n[Error 500] GET /api/pricing/estimate → Internal Server Error\n[Warn]  payments.createCheckout() returned null</pre>' +
+      '<div class="dim" style="margin-top:6px">Some features are temporarily unavailable.</div>';
+    document.body.insertBefore(panel, document.body.firstChild);
+
+    function breakThings() {
+      document.querySelectorAll(".hero-actions a, .hero-actions button").forEach(function (el) {
+        el.classList.add("temp-bug-dead");
+        el.setAttribute("aria-disabled", "true");
+        el.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); }, true);
+      });
+      var strong = document.querySelector(".hero-strip div:first-child strong");
+      if (strong) strong.textContent = "NaN/5";
+      var label = document.querySelector(".hero-strip div:first-child span");
+      if (label) label.textContent = "undefined";
+    }
+    breakThings();
+    setTimeout(breakThings, 800);
+    setTimeout(breakThings, 2500);
+  })();
+  </script>
 </body>
 </html>
