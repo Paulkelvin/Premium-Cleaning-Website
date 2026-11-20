@@ -23,6 +23,8 @@
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
+      // TEMP-BREAK-TEST: deliberate test. "Pay now" does nothing. Remove this line to restore.
+      return;
       setState("");
 
       const data = new FormData(form);
