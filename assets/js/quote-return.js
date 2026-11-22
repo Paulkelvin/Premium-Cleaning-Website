@@ -5,7 +5,7 @@
 (function () {
   const config = window.CLEANCO_CONFIG || {};
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const PHONE = "240-823-4466";
+  const PHONE = "240-8723-4466";
 
   function functionHeaders() {
     const apiKey = config.supabaseFunctionKey || config.supabaseAnonKey;
