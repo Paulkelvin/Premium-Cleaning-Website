@@ -54,7 +54,7 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
+  padding-top: var(--header-height);
 }
 
 /* "hidden" turns the page body into its own scroll area, which makes iPhone
@@ -120,13 +120,15 @@ h3 {
   width: 100%;
   z-index: 1000;
   overflow: visible;
-  /* Solid so it matches the browser's own top bar on iPhone (no lighter strip). */
+  /* Solid white, matching the page's theme-color (the iPhone top bar). The page
+     no longer extends under the status bar (no viewport-fit=cover), so no
+     safe-area padding is needed; that changing value made the header drift
+     when Safari's toolbar collapsed and expanded. */
   background: #ffffff;
   border-bottom: 1px solid rgba(226, 232, 240, 0.6);
-  height: calc(var(--header-height) + env(safe-area-inset-top, 0));
+  height: var(--header-height);
   display: flex;
   align-items: center;
-  padding-top: env(safe-area-inset-top, 0);
 }
 
 .nav-wrap,
