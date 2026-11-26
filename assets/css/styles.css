@@ -57,6 +57,15 @@ body {
   padding-top: calc(var(--header-height) + env(safe-area-inset-top, 0px));
 }
 
+/* "hidden" turns the page body into its own scroll area, which makes iPhone
+   Safari nudge the fixed header up past the screen edge when its toolbar
+   collapses. "clip" cuts off sideways overflow without that side effect. */
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
+}
+
 img {
   max-width: 100%;
   display: block;
