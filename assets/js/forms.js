@@ -49,7 +49,7 @@ function mapSubmissionError(error) {
     return "That date can't be booked online. Please pick a date from tomorrow onwards.";
   }
   if (raw.includes("too_many_bookings")) {
-    return "You already have 3 upcoming bookings with us. Please call 240-8723-4466 and we'll add more for you.";
+    return "You already have 3 upcoming bookings with us. Please call 240-823-4466 and we'll add more for you.";
   }
   if (raw.toLowerCase().includes("service area")) {
     return "Please confirm your service area before checkout. If unsure, continue and we'll apply the outside-area review fee.";

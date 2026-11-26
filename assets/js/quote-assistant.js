@@ -1683,8 +1683,6 @@ function initQuoteAssistant(formContainer = document) {
       btnGetEstimate.innerHTML = `Preparing estimate... <i data-lucide="loader-circle"></i>`;
       if (typeof lucide !== "undefined") lucide.createIcons({ root: btnGetEstimate.parentElement });
     }
-    // TEMP-BREAK-TEST: deliberate test. Estimate never finishes. Remove this line to restore.
-    await new Promise(() => {});
     try {
       const persisted = await persistQuoteRequest();
       quoteDraft = {
